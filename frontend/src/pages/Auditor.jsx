@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { api } from '../api.js';
 import AuditResult from '../components/AuditResult.jsx';
 import { BannerArt } from '../components/Graphics.jsx';
@@ -22,7 +23,7 @@ const RULE_PACKS = [
   { id: 'Pharmaceuticals', label: 'NMC · Pharmaceuticals' },
 ];
 
-const MAX_TEXT = 10000;
+const MAX_TEXT = 60000;
 const MAX_MB = 100;
 const STEPS = ['Reading content', 'Checking NMC rules', 'Writing fixes'];
 
@@ -41,6 +42,19 @@ export default function Auditor() {
   const [result, setResult] = useState(null);
   const fileInput = useRef(null);
   const resultRef = useRef(null);
+  const location = useLocation();
+
+  // "Audit this text again" from a report opens here with the text filled in
+  useEffect(() => {
+    const prefill = location.state?.prefill;
+    if (!prefill) return;
+    setFormat('text');
+    setFile(null);
+    setResult(null);
+    setError('');
+    setText(String(prefill).slice(0, MAX_TEXT));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [location.state?.nonce]);
 
   const fmt = FORMATS.find((f) => f.id === format);
   const isFile = Boolean(fmt.accept);

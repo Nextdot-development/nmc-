@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { PrintIcon, SparkIcon } from './Icons.jsx';
 import { StatusPill, statusTone } from '../pages/History.jsx';
 
@@ -31,7 +32,7 @@ const Violation = ({ v, index }) => {
   const translation = v.englishTranslation && v.englishTranslation.trim() !== (v.problematicContent || '').trim()
     ? v.englishTranslation : '';
   return (
-    <article className={`violation violation--${sev.toLowerCase()}`}>
+    <article id={`issue-${index + 1}`} className={`violation violation--${sev.toLowerCase()}`}>
       <header className="violation__head">
         <span className="violation__num">{String(index + 1).padStart(2, '0')}</span>
         <span className={`sev sev--${sev.toLowerCase()}`}>{sev}</span>
@@ -73,8 +74,54 @@ const SOURCE_LABEL = {
   text: 'AUDITED TEXT',
 };
 
-const SourceText = ({ data }) => {
+const SEV_RANK = { critical: 0, high: 1, medium: 2, low: 3 };
+const escapeRegex = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+// Locate each flagged phrase in the source text. AI quotes may skip parts with "..."
+// and join lines with spaces, so match whitespace loosely.
+const findRanges = (text, violations) => {
+  const ranges = [];
+  violations.forEach((v, i) => {
+    String(v.problematicContent || '')
+      .split(/\.{3}|…/)
+      .map((part) => part.trim().replace(/^["'“”]+|["'“”]+$/g, '').trim())
+      .filter((part) => part.length >= 6)
+      .forEach((part) => {
+        const re = new RegExp(escapeRegex(part).replace(/\s+/g, '\\s+'), 'i');
+        const m = re.exec(text);
+        if (m) ranges.push({ start: m.index, end: m.index + m[0].length, num: i + 1, sev: (v.severity || 'Medium').toLowerCase() });
+      });
+  });
+  // A quote covering most of the text says nothing specific; drop it if narrower ones exist
+  const specific = ranges.filter((r) => r.end - r.start <= text.length * 0.6);
+  return specific.length ? specific : ranges;
+};
+
+// Split text at range boundaries; each piece lists the issues covering it
+const HighlightedText = ({ text, violations }) => {
+  const ranges = findRanges(text, violations);
+  const cuts = [...new Set([0, text.length, ...ranges.flatMap((r) => [r.start, r.end])])].sort((a, b) => a - b);
+  const out = [];
+  for (let k = 0; k < cuts.length - 1; k += 1) {
+    const [a, b] = [cuts[k], cuts[k + 1]];
+    const piece = text.slice(a, b);
+    const covering = ranges.filter((r) => r.start <= a && r.end >= b);
+    if (!covering.length) { out.push(piece); continue; }
+    const sev = covering.map((r) => r.sev).sort((x, y) => (SEV_RANK[x] ?? 2) - (SEV_RANK[y] ?? 2))[0];
+    const nums = [...new Set(covering.map((r) => r.num))].sort((x, y) => x - y);
+    const ending = [...new Set(covering.filter((r) => r.end === b).map((r) => r.num))].sort((x, y) => x - y);
+    out.push(
+      <a key={k} href={`#issue-${nums[0]}`} className={`hl hl--${sev}`} title={`Issue ${nums.join(', ')}`}>
+        {piece}{ending.length > 0 && <sup>{ending.join(',')}</sup>}
+      </a>
+    );
+  }
+  return { nodes: out, count: ranges.length };
+};
+
+const SourceText = ({ data, violations = [] }) => {
   const [copied, setCopied] = useState(false);
+  const navigate = useNavigate();
   const label = SOURCE_LABEL[data.type] || 'AUDITED TEXT';
   if (!data.available) {
     return (
@@ -101,6 +148,7 @@ const SourceText = ({ data }) => {
     a.click();
     URL.revokeObjectURL(url);
   };
+  const highlighted = HighlightedText({ text: data.text, violations });
   return (
     <div className="panel transcript-box">
       <div className="transcript-box__head">
@@ -109,9 +157,14 @@ const SourceText = ({ data }) => {
         <div className="transcript-box__actions no-print">
           <button type="button" className="ghost-btn ghost-btn--sm" onClick={copy}>{copied ? 'Copied ✓' : 'Copy'}</button>
           <button type="button" className="ghost-btn ghost-btn--sm" onClick={download}>Download .txt</button>
+          <button type="button" className="ghost-btn ghost-btn--sm ghost-btn--primary"
+            onClick={() => navigate('/', { state: { prefill: data.text, nonce: Date.now() } })}>Audit this text again</button>
         </div>
       </div>
-      <div className="transcript-box__text">{data.text}</div>
+      {highlighted.count > 0 && (
+        <p className="muted small transcript-box__legend">Highlighted lines were flagged in this audit — click one to jump to its issue.</p>
+      )}
+      <div className="transcript-box__text">{highlighted.nodes}</div>
     </div>
   );
 };
@@ -153,8 +206,6 @@ export default function AuditResult({ result, onReset, meta }) {
         </div>
       </div>
 
-      {source && <SourceText data={source} />}
-
       <div className="result__grid">
         <div className="panel stat">
           <h3 className="kicker">PENALTY RISK</h3>
@@ -176,6 +227,8 @@ export default function AuditResult({ result, onReset, meta }) {
       <div className="violations">
         {violations.map((v, i) => <Violation key={i} v={v} index={i} />)}
       </div>
+
+      {source && <SourceText data={source} violations={violations} />}
 
       {!source && result?.transcription && (
         <div className="panel transcript">
