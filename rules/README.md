@@ -20,7 +20,7 @@ Built from a full review of all 1014 notices at https://nmc.org.in/whats-new
 | `nmc_registration_licensing.json` | 17 | Registration & Licence Regulations 2023, temporary registration 2024, EMRB case book, unpermitted courses |
 
 `india/_reference/` holds notice-specific lists (de-registered doctors, forged registration numbers,
-abeyance notice, student/teacher guidelines). They are kept for reference and are **not** sent to Gemini.
+abeyance notice, student/teacher guidelines). They are kept for reference and are **not** sent to the AI.
 
 Notes:
 - NMC RMP (Professional Conduct) Regulations 2023 are held in abeyance (notification 23 Aug 2023); not used.
