@@ -517,3 +517,12 @@ input:focus, textarea:focus { border-color: var(--green); box-shadow: 0 0 0 3px 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+
+/* v9: active format pill in dark blue, readable on hover */
+.pill-btn--active, .pill-btn--active:hover {
+  color: #fff; border-color: var(--navy);
+  background: linear-gradient(135deg, #2c55c9, var(--navy));
+  box-shadow: 0 8px 18px -10px rgba(26, 58, 143, 0.8);
+}
+.pill-btn--active svg { color: #fff; }
+.pill-btn:hover:not(.pill-btn--active) { border-color: var(--navy); color: var(--navy); }
