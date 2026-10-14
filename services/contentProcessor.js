@@ -15,8 +15,18 @@ import { extractTextFromImage } from './ocrService.js';
 import { buildAuditInput } from './auditInputBuilder.ts';
 
 const MAX_TEXT_LENGTH = 100000;
-const MAX_CONTENT_FOR_AI = 12000;
-const MAX_BLOG_CONTENT = 12000;
+const MAX_CONTENT_FOR_AI = Number(process.env.MAX_CONTENT_FOR_AI) || 60000;
+
+// Drop navigation noise from scraped pages: lines that are only links or images,
+// and the URLs inside markdown links, so the AI reads the page's actual copy.
+const stripPageNoise = (text = '') => text
+  .split('\n')
+  .filter((line) => !/^\s*[*\-+]?\s*((!?\[[^\]]*\]\([^)]*\))\s*)+$/.test(line))
+  .join('\n')
+  .replace(/!\[[^\]]*\]\([^)]*\)/g, '')
+  .replace(/\]\([^)]*\)/g, ']')
+  .replace(/\n{3,}/g, '\n\n')
+  .trim();
 const MAX_MEDIA_SIZE = 100 * 1024 * 1024;
 const REQUEST_TIMEOUT = 60000;
 const USER_AGENTS = [
@@ -556,7 +566,8 @@ const processUrl = async ({ url, category, analysisMode, country, region, rules 
         continue;
       }
 
-      const truncatedAuditText = truncateForAI(auditInputResult.auditInput.textContent);
+      const pageText = stripPageNoise(auditInputResult.auditInput.textContent);
+      const truncatedAuditText = truncateForAI(pageText);
 
       const auditResult = await analyzeCompliance({
         content: truncatedAuditText,
@@ -566,10 +577,16 @@ const processUrl = async ({ url, category, analysisMode, country, region, rules 
         country,
         region,
         rules,
-        contentContext: 'Input is a written healthcare article, not a speech transcript.'
+        contentContext: 'Input is the text of a single healthcare web page (navigation links removed), not a speech transcript.'
       });
 
       auditResult.metadata = auditInputResult.auditInput.metadata;
+      auditResult.coverage = {
+        scope: 'single_page',
+        pageChars: pageText.length,
+        auditedChars: truncatedAuditText.length,
+        percent: pageText.length ? Math.round((truncatedAuditText.length / pageText.length) * 100) : 100
+      };
 
       return {
         contentType: 'webpage',

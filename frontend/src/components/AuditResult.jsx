@@ -80,6 +80,12 @@ export default function AuditResult({ result, onReset, meta }) {
           <StatusPill status={result?.status} />
           {meta && <p className="result__meta">{meta}</p>}
           <p className="result__summary">{result?.summary}</p>
+          {result?.coverage && (
+            <p className="coverage">
+              Checked <b>{result.coverage.percent}%</b> of this page's text ({Number(result.coverage.auditedChars).toLocaleString('en-IN')} characters, menus removed).
+              Only this one page was audited — other pages of the website are not included.
+            </p>
+          )}
           <div className="result__counts">
             {counts.map(([s, n]) => (
               <span key={s} className={`sev sev--${s.toLowerCase()} ${n ? '' : 'sev--zero'}`}>{n} {s}</span>

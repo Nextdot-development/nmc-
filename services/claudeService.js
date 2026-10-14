@@ -7,7 +7,7 @@ import { buildCompliancePrompt } from '../geminiService.js';
 // Read at call time: server.js loads the env file after module imports run
 const getModelName = () => process.env.AUDIT_CLAUDE_MODEL || 'claude-opus-5-5';
 const getEffort = () => process.env.AUDIT_CLAUDE_EFFORT || 'high';
-const MAX_CONTENT_LENGTH = 12000;
+const MAX_CONTENT_LENGTH = Number(process.env.MAX_CONTENT_FOR_AI) || 60000;
 // Server-side retry on another Claude model if this one declines the request
 const FALLBACK_BETA = 'server-side-fallback-2026-07-01';
 

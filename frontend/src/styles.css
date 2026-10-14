@@ -526,3 +526,4 @@ input:focus, textarea:focus { border-color: var(--green); box-shadow: 0 0 0 3px 
 }
 .pill-btn--active svg { color: #fff; }
 .pill-btn:hover:not(.pill-btn--active) { border-color: var(--navy); color: var(--navy); }
+.coverage { margin: 0; padding: 8px 12px; border-radius: 10px; background: #eef2ff; color: var(--navy); font-size: 13px; }

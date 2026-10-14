@@ -4,7 +4,7 @@ import { VertexAI } from "@google-cloud/vertexai";
    CONFIG
 ================================ */
 const MODEL_NAME = "gemini-2.5-flash";
-const MAX_CONTENT_LENGTH = 12000;
+const MAX_CONTENT_LENGTH = Number(process.env.MAX_CONTENT_FOR_AI) || 60000;
 const GEMINI_TIMEOUT_MS = 60000;
 
 let vertexAIClient = null;
