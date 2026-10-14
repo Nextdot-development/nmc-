@@ -62,6 +62,10 @@ if (missingEnv.length > 0) {
   process.exit(1);
 }
 
+if (!process.env.ANTHROPIC_API_KEY) {
+  console.warn('[Server] ANTHROPIC_API_KEY not set - audits will run on Gemini only');
+}
+
 const app = express();
 const PORT = process.env.PORT || 3001;
 

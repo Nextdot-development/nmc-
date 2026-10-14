@@ -26,3 +26,16 @@ Notes:
 - NMC RMP (Professional Conduct) Regulations 2023 are held in abeyance (notification 23 Aug 2023); not used.
 - Drafts open for comments (38 notices) are not turned into rules.
 - Index verdicts: 946 not-applicable (admissions, exams, seats, faculty, admin), 38 draft, 23 rule, 5 unreadable, 1 already covered, 1 superseded.
+
+## AI providers
+
+| Task | Provider |
+|---|---|
+| Compliance audit + claim extraction | Claude (`services/claudeService.js`), falls back to Gemini on any error (`services/aiProvider.js`) |
+| Audio/video transcription, URL summary | OpenAI (unchanged) |
+| Image OCR | Google Vision (unchanged) |
+| Audio summary (TTS) | Gemini (unchanged) |
+
+Env vars: `ANTHROPIC_API_KEY` (unset = Gemini only), `AUDIT_CLAUDE_MODEL` (default `claude-opus-5-5`),
+`AUDIT_CLAUDE_EFFORT` (default `high`), `AUDIT_CLAUDE_TIMEOUT_MS` (default 120000), plus the existing
+`VERTEX_PROJECT_ID`, `VERTEX_LOCATION`, `GOOGLE_APPLICATION_CREDENTIALS_JSON`, `OPENAI_API_KEY`, `MONGODB_URI`, `JWT_SECRET`.

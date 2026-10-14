@@ -140,7 +140,7 @@ const buildRulesBlock = (rules = []) => {
   return lines.join('\n');
 };
 
-const buildCompliancePrompt = ({ inputType, category, analysisMode, country, region, rules, contentContext }) => {
+export const buildCompliancePrompt = ({ inputType, category, analysisMode, country, region, rules, contentContext }) => {
   const jurisdiction = country ? country : 'India';
   const regionLabel = region ? ` (${region})` : '';
   const rulesBlock = buildRulesBlock(rules);

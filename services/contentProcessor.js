@@ -6,7 +6,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { YoutubeTranscript } from 'youtube-transcript';
 import OpenAI from 'openai';
-import { analyzeWithGemini, extractClaimsWithGemini } from '../geminiService.js';
+import { analyzeCompliance, extractClaims } from './aiProvider.js';
 import { extractTextFromDocument } from './documentService.js';
 import { getYoutubeTranscript } from './youtubeTranscriptService.js';
 import { getRulesForSelection } from './rulesService.js';
@@ -362,7 +362,7 @@ const processText = async ({ text, category, analysisMode, country, region, rule
   validateInputSize(text, 'text');
   const truncatedText = truncateForAI(text);
 
-  const auditResult = await analyzeWithGemini({
+  const auditResult = await analyzeCompliance({
     content: truncatedText,
     inputType: 'text',
     category,
@@ -386,7 +386,7 @@ const processMediaBuffer = async ({ buffer, mimetype, inputType, originalInput, 
   const transcriptText = transcriptionResult.transcript;
   const truncatedTranscript = truncateForAI(transcriptText);
 
-  const auditResult = await analyzeWithGemini({
+  const auditResult = await analyzeCompliance({
     content: truncatedTranscript,
     inputType,
     category,
@@ -414,7 +414,7 @@ const processImageBuffer = async ({ buffer, originalInput, category, analysisMod
 
   const truncatedText = truncateForAI(extractedText);
 
-  const auditResult = await analyzeWithGemini({
+  const auditResult = await analyzeCompliance({
     content: truncatedText,
     inputType: 'image',
     category,
@@ -448,7 +448,7 @@ const processUrl = async ({ url, category, analysisMode, country, region, rules 
 
     const truncatedTranscript = truncateForAI(transcriptText);
 
-    const auditResult = await analyzeWithGemini({
+    const auditResult = await analyzeCompliance({
       content: truncatedTranscript,
       inputType: 'video',
       category,
@@ -496,7 +496,7 @@ const processUrl = async ({ url, category, analysisMode, country, region, rules 
 
       const truncatedText = truncateForAI(extractedText);
 
-      const auditResult = await analyzeWithGemini({
+      const auditResult = await analyzeCompliance({
         content: truncatedText,
         inputType: 'url',
         category,
@@ -558,7 +558,7 @@ const processUrl = async ({ url, category, analysisMode, country, region, rules 
 
       const truncatedAuditText = truncateForAI(auditInputResult.auditInput.textContent);
 
-      const auditResult = await analyzeWithGemini({
+      const auditResult = await analyzeCompliance({
         content: truncatedAuditText,
         inputType: 'article',
         category,
@@ -588,7 +588,7 @@ const processUrl = async ({ url, category, analysisMode, country, region, rules 
     const metadataText = await extractMetadataFromUrl(url);
     if (metadataText) {
       const truncatedText = truncateForAI(metadataText);
-      const auditResult = await analyzeWithGemini({
+      const auditResult = await analyzeCompliance({
         content: truncatedText,
         inputType: 'article',
         category,
@@ -620,7 +620,7 @@ const processDocumentBuffer = async ({ buffer, mimetype, originalInput, category
   let scannedText = await scanDocumentWithOpenAI(extractedText);
   if (!scannedText) {
     try {
-      scannedText = await extractClaimsWithGemini(extractedText);
+      scannedText = await extractClaims(extractedText);
       console.log('[Document Scan] Gemini claim extraction succeeded.');
     } catch (error) {
       console.warn('[Document Scan] Gemini claim extraction failed:', error.message);
@@ -635,7 +635,7 @@ const processDocumentBuffer = async ({ buffer, mimetype, originalInput, category
   const auditText = scannedText || extractedText;
   const truncatedText = truncateForAI(auditText);
 
-  const auditResult = await analyzeWithGemini({
+  const auditResult = await analyzeCompliance({
     content: truncatedText,
     inputType: 'document',
     category,
