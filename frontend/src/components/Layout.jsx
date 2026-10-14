@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
-import { SidebarWaves, StackGraphic } from './Graphics.jsx';
+import { ShieldLogo, SidebarArt } from './Graphics.jsx';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../App.jsx';
 import {
-  ArrowRightIcon, BellIcon, LayersIcon, ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon, ClockIcon, CogIcon,
-  HomeIcon, LogoMark, LogoutIcon, MenuIcon, SearchIcon,
+  BellIcon, LayersIcon, ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon, ClockIcon, CogIcon,
+  HomeIcon, LogoutIcon, MenuIcon, SearchIcon,
 } from './Icons.jsx';
 
 const NAV = [
@@ -112,7 +112,7 @@ export default function Layout() {
     <div className={`app ${collapsed ? 'app--collapsed' : ''} ${drawer ? 'app--drawer' : ''}`}>
       <aside className="sidebar">
         <div className="sidebar__top">
-          <NavLink to="/" className="sidebar__logo" aria-label="NextComply AI home"><LogoMark /></NavLink>
+          <NavLink to="/" className="sidebar__logo" aria-label="NextComply AI home"><ShieldLogo /><span>NextComply <b>AI</b></span></NavLink>
           <button type="button" className="square-btn sidebar__collapse" onClick={() => setCollapsed(!collapsed)}
             aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}>
             {collapsed ? <ChevronRightIcon /> : <ChevronLeftIcon />}
@@ -127,13 +127,13 @@ export default function Layout() {
           ))}
         </nav>
 
-        <div className="sidebar__glow"><SidebarWaves /></div>
+        <div className="sidebar__spacer" />
 
-        <NavLink to="/rules" className="promo">
-          <StackGraphic />
-          <strong>Stay compliant<br />grow with<br /><em>confidence</em></strong>
-          <span className="promo__arrow"><ArrowRightIcon width={18} height={18} /></span>
-        </NavLink>
+        <div className="promo">
+          <SidebarArt />
+          <strong>Built for a Safer,<br />Healthier <em>India</em></strong>
+          <i className="promo__flagline" />
+        </div>
 
         <div className="sidebar__user">
           {user ? (

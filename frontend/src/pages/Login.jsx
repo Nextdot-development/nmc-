@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { api } from '../api.js';
 import { useAuth } from '../App.jsx';
-import { BoltIcon, ChartIcon, LogoMark, ShieldCheckIcon, SparkIcon } from '../components/Icons.jsx';
+import { BoltIcon, ChartIcon, ShieldCheckIcon, SparkIcon } from '../components/Icons.jsx';
+import { IndiaGate, ShieldLogo, TricolorWave } from '../components/Graphics.jsx';
 
 const highlights = [
   [ShieldCheckIcon, '160 NMC & IMC rules', 'checked on every audit'],
@@ -41,7 +42,9 @@ export default function Login() {
   return (
     <div className="auth">
       <section className="auth__story">
-        <div className="auth__brand"><LogoMark /> <span>NextComply <b className="lime">AI</b></span></div>
+        <div className="auth__brand"><ShieldLogo /> <span>NextComply <b className="lime">AI</b></span></div>
+        <TricolorWave className="auth__wave" />
+        <IndiaGate className="auth__gate" />
         <div>
           <span className="badge-live"><i /> NMC EDITION</span>
           <h1>

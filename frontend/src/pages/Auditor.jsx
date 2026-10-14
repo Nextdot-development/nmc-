@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { api } from '../api.js';
 import AuditResult from '../components/AuditResult.jsx';
+import { BannerArt } from '../components/Graphics.jsx';
 import {
   ArrowRightIcon, CheckCircleIcon, ChevronDownIcon, DocIcon, GlobeIcon, ImageIcon, LayersIcon, LinkIcon, MicIcon,
   ShieldCheckIcon, SparkIcon, TextIcon, UploadIcon, VideoIcon,
@@ -106,8 +107,15 @@ export default function Auditor() {
 
   return (
     <div className="auditor auditor--simple">
-      <form className="panel panel--glow simple" onSubmit={submit}>
-        <h1 className="simple__title"><span className="simple__titleicon"><ShieldCheckIcon width={22} height={22} /></span> Compliance Auditor</h1>
+      <section className="banner">
+        <div className="banner__copy">
+          <h1><span className="simple__titleicon"><ShieldCheckIcon width={22} height={22} /></span> Compliance <b>Auditor</b></h1>
+          <p>NMC rules · India</p>
+        </div>
+        <BannerArt />
+      </section>
+
+      <form className="panel simple" onSubmit={submit}>
 
         <div className="simple__row">
           <section>
@@ -151,7 +159,7 @@ export default function Auditor() {
 
         {format === 'text' && (
           <div className="inputbox">
-            <textarea value={text} onChange={(e) => setText(e.target.value.slice(0, MAX_TEXT))} rows={5}
+            <textarea value={text} onChange={(e) => setText(e.target.value.slice(0, MAX_TEXT))} rows={3}
               placeholder="Paste marketing copy or script here..." aria-label="Content to audit" />
             <div className="inputbox__bar"><span className="counter">{text.length} / {MAX_TEXT}</span></div>
           </div>
