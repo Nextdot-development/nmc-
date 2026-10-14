@@ -63,14 +63,26 @@ const Violation = ({ v, index }) => {
   );
 };
 
-const VideoTranscript = ({ data }) => {
+const SOURCE_LABEL = {
+  video: 'VIDEO TRANSCRIPT',
+  audio: 'AUDIO TRANSCRIPT',
+  image: 'TEXT FOUND IN IMAGE',
+  document: 'DOCUMENT TEXT',
+  webpage: 'PAGE TEXT',
+  url: 'PAGE TEXT',
+  text: 'AUDITED TEXT',
+};
+
+const SourceText = ({ data }) => {
   const [copied, setCopied] = useState(false);
+  const label = SOURCE_LABEL[data.type] || 'AUDITED TEXT';
   if (!data.available) {
     return (
       <div className="panel transcript-box transcript-box--missing">
-        <h3 className="kicker">VIDEO TRANSCRIPT</h3>
-        <p>No captions were available for this video, so only its title and description were audited.
-          Upload the video file (Video option) to audit what is actually said.</p>
+        <h3 className="kicker">{label}</h3>
+        <p>{data.type === 'video'
+          ? 'No transcript could be obtained for this video, so only its title and description were audited. Upload the video file (Video option) to audit what is actually said.'
+          : 'No readable text could be extracted from this content.'}</p>
       </div>
     );
   }
@@ -85,14 +97,14 @@ const VideoTranscript = ({ data }) => {
     const url = URL.createObjectURL(new Blob([data.text], { type: 'text/plain;charset=utf-8' }));
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'video-transcript.txt';
+    a.download = `${label.toLowerCase().replace(/\s+/g, '-')}.txt`;
     a.click();
     URL.revokeObjectURL(url);
   };
   return (
     <div className="panel transcript-box">
       <div className="transcript-box__head">
-        <h3 className="kicker">VIDEO TRANSCRIPT</h3>
+        <h3 className="kicker">{label}</h3>
         <span className="muted small">{Number(data.chars).toLocaleString('en-IN')} characters</span>
         <div className="transcript-box__actions no-print">
           <button type="button" className="ghost-btn ghost-btn--sm" onClick={copy}>{copied ? 'Copied ✓' : 'Copy'}</button>
@@ -111,6 +123,8 @@ export default function AuditResult({ result, onReset, meta }) {
   );
   const counts = SEVERITY_ORDER.map((s) => [s, violations.filter((v) => v.severity === s).length]);
   const risk = result?.financialPenalty?.riskLevel;
+  // Older audits only carry the YouTube transcript
+  const source = result?.sourceText || (result?.videoTranscript ? { type: 'video', ...result.videoTranscript } : null);
 
   return (
     <section className="result" aria-live="polite">
@@ -139,7 +153,7 @@ export default function AuditResult({ result, onReset, meta }) {
         </div>
       </div>
 
-      {result?.videoTranscript && <VideoTranscript data={result.videoTranscript} />}
+      {source && <SourceText data={source} />}
 
       <div className="result__grid">
         <div className="panel stat">
@@ -163,7 +177,7 @@ export default function AuditResult({ result, onReset, meta }) {
         {violations.map((v, i) => <Violation key={i} v={v} index={i} />)}
       </div>
 
-      {result?.transcription && !result?.videoTranscript?.available && (
+      {!source && result?.transcription && (
         <div className="panel transcript">
           <button type="button" className="link-btn" onClick={() => setShowText(!showText)} aria-expanded={showText}>
             {showText ? 'Hide' : 'Show'} the text we audited

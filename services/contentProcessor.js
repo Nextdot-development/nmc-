@@ -745,6 +745,18 @@ export const processContent = async (input, options = {}) => {
     throw new Error('Unsupported input type');
   }
 
+  // Full text the audit was based on (transcript, OCR, document or page text), shown in the report
+  const fullText = processingResult.transcript || processingResult.extractedText || '';
+  const youtube = processingResult.auditResult?.videoTranscript;
+  if (processingResult.auditResult && typeof processingResult.auditResult === 'object') {
+    processingResult.auditResult.sourceText = {
+      type: processingResult.contentType,
+      available: youtube ? youtube.available : Boolean(fullText.trim()),
+      text: youtube ? youtube.text : fullText,
+      chars: youtube ? youtube.chars : fullText.length
+    };
+  }
+
   await saveAuditRecord({
     userId,
     contentType: processingResult.contentType,
