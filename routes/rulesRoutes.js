@@ -1,0 +1,18 @@
+import express from 'express';
+import { getRulesMetadata } from '../services/rulesService.js';
+
+const router = express.Router();
+
+// GET /rules/metadata
+router.get('/rules/metadata', (req, res) => {
+  try {
+    const metadata = getRulesMetadata();
+    console.log('[Rules] Metadata countries count:', Array.isArray(metadata.countries) ? metadata.countries.length : 0);
+    return res.json({ ok: true, data: metadata });
+  } catch (error) {
+    console.error('[Rules] Metadata error:', error);
+    return res.status(500).json({ ok: false, error: error.message || 'Failed to load rules metadata' });
+  }
+});
+
+export default router;

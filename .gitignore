@@ -1,0 +1,17 @@
+node_modules/
+.env
+.env.*
+*.log
+uploads/
+*.json
+!package.json
+!package-lock.json
+!tsconfig.json
+!rules/**/*.json
+
+# Secrets - any .env filename, not just ".env"
+*.env
+service-account.json
+
+# Scraper junk
+*player-script.js
