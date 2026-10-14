@@ -318,12 +318,10 @@ const normalizeGeminiResult = (result) => {
     throw new Error('Gemini returned invalid JSON');
   }
 
+  // Scores are already on 0-100 (aiProvider normalises 0-1 outputs), so 1 means 1
   const normalizeScore = (value) => {
     if (typeof value !== 'number' || Number.isNaN(value)) {
       return 0;
-    }
-    if (value <= 1) {
-      return Math.round(value * 100);
     }
     return Math.max(0, Math.min(100, Math.round(value)));
   };
@@ -341,7 +339,12 @@ const normalizeGeminiResult = (result) => {
       score: normalizeScore(result?.ethicalMarketing?.score),
       assessment: 'Ethical marketing assessment unavailable.'
     },
-    violations: Array.isArray(result.violations) ? result.violations : []
+    violations: Array.isArray(result.violations) ? result.violations : [],
+    // Report extras added by the pipeline
+    ...(result.sourceText ? { sourceText: result.sourceText } : {}),
+    ...(result.coverage ? { coverage: result.coverage } : {}),
+    ...(result.videoTranscript ? { videoTranscript: result.videoTranscript } : {}),
+    ...(result.metadata ? { metadata: result.metadata } : {})
   };
 };
 
