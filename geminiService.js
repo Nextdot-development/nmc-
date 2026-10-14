@@ -180,6 +180,15 @@ FORMAT RULES:
 - Max 3 points per field
 - If only 1 point exists, return ONLY "1."
 
+SCORING (MANDATORY):
+- score: integer 0-100 compliance score. 100 = fully compliant, 0 = severely non-compliant. Higher is better.
+- status must match score: "Compliant" = 80-100 with no Critical or High violations; "Needs Review" = 50-79; "Non-Compliant" = 0-49. Any Critical violation means "Non-Compliant".
+- ethicalMarketing.score: integer 0-100, higher = more ethical.
+
+ACCURACY RULES:
+- Do NOT flag content that a rule expressly permits (e.g. factual name, address, departments, facilities, accreditation, timings or a factual fee disclosure).
+- Report each problematic phrase once, under the single most specific rule. Do not repeat the same content under several rules.
+
 JSON SCHEMA:
 {
   "score": number,
