@@ -611,7 +611,10 @@ const processUrl = async ({ url, category, analysisMode, country, region, rules 
     lastError = error;
   }
 
-  throw new Error(`Blog content extraction failed: ${lastError?.message || 'Unknown error'}`);
+  const blocked = /\b(401|403|429)\b/.test(lastError?.message || '');
+  throw new Error(blocked
+    ? 'This website blocks automated reading. Copy the page text and audit it with the Text option instead.'
+    : `Could not read this page: ${lastError?.message || 'Unknown error'}`);
 };
 
 const processDocumentBuffer = async ({ buffer, mimetype, originalInput, category, analysisMode, country, region, rules }) => {

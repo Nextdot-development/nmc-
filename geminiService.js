@@ -34,10 +34,26 @@ const truncateContent = (content) => {
 const withTimeout = (promise, ms, errorMsg) => {
   return Promise.race([
     promise,
-    new Promise((_, reject) => 
+    new Promise((_, reject) =>
       setTimeout(() => reject(new Error(errorMsg)), ms)
     )
   ]);
+};
+
+// Retry Vertex rate-limit (429 / RESOURCE_EXHAUSTED) responses with backoff
+const RETRY_DELAYS_MS = [2000, 5000, 10000];
+const isRateLimited = (error) => /429|Too Many Requests|RESOURCE_EXHAUSTED|Resource exhausted/i.test(error?.message || '');
+
+const withRateLimitRetry = async (fn) => {
+  for (let attempt = 0; ; attempt += 1) {
+    try {
+      return await fn();
+    } catch (error) {
+      if (!isRateLimited(error) || attempt >= RETRY_DELAYS_MS.length) throw error;
+      console.warn(`[Gemini] Rate limited, retrying in ${RETRY_DELAYS_MS[attempt]}ms`);
+      await new Promise((resolve) => setTimeout(resolve, RETRY_DELAYS_MS[attempt]));
+    }
+  }
 };
 
 if (process.env.VERTEX_PROJECT_ID && process.env.VERTEX_LOCATION) {
@@ -266,11 +282,11 @@ export const analyzeWithGemini = async ({
     { text: prompt },
   ];
 
-  const result = await withTimeout(
+  const result = await withRateLimitRetry(() => withTimeout(
     model.generateContent({ contents: [{ role: "user", parts }] }),
     GEMINI_TIMEOUT_MS,
     'Gemini API call timed out'
-  );
+  ));
 
   let rawText =
     result?.response?.candidates?.[0]?.content?.parts?.[0]?.text || "";
@@ -342,13 +358,13 @@ export const extractClaimsWithGemini = async (text) => {
 
   const truncatedText = cleaned.substring(0, MAX_CONTENT_LENGTH);
   
-  const result = await withTimeout(
+  const result = await withRateLimitRetry(() => withTimeout(
     model.generateContent({
       contents: [{ role: 'user', parts: [{ text: `${prompt}\n\n${truncatedText}` }] }]
     }),
     GEMINI_TIMEOUT_MS,
     'Gemini claim extraction timed out'
-  );
+  ));
 
   const output = result?.response?.candidates?.[0]?.content?.parts?.[0]?.text || '';
   const extracted = output.trim();
