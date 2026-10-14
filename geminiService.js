@@ -185,11 +185,11 @@ CRITICAL OUTPUT RULES:
 LANGUAGE RULES (VERY IMPORTANT):
 - language: the main language of the content, e.g. "Hindi", "Hinglish", "English", "Marathi".
 - originalLine: copy the problematic line EXACTLY as it appears in the content, in the same language and script (Devanagari stays Devanagari, Roman Hinglish stays Roman). No paraphrasing.
-- compliantLine: a ready-to-publish replacement for originalLine in the SAME language and script, keeping the intent but removing the violation. Never leave it empty. If the line has to go entirely, write "[Remove this line]".
+- compliantLine: a ready-to-publish replacement for originalLine in the SAME language and script that keeps the legitimate message in a permitted form: replace superlatives ("best", "No.1") with verifiable facts such as qualifications or experience, replace guarantees and success claims with balanced wording ("results vary; consult a doctor"), replace discounts/offers with a transparent fee statement, and add the doctor's name, qualification and registration number where required. Never leave it empty. Write "[Remove this line]" ONLY when no permitted version of the line exists (e.g. before-after photos of patients, celebrity endorsement).
 - englishTranslation: English meaning of originalLine (repeat it if already English).
 - problematicContent: same text as originalLine.
 - description, suggestion, solution, summary and assessments: in English.
-- compliantVersion: if the content is shorter than 3000 characters, the full content rewritten with every violation fixed, in its original language and script; otherwise "".
+- compliantVersion: REQUIRED (never empty) when the content is shorter than 3000 characters: the full content rewritten with every violation fixed, in its original language and script, ready to publish. For longer content return "".
 
 FORMAT RULES:
 - suggestion: what to change and why, numbered points (1., 2.), max 3.

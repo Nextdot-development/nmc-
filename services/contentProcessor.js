@@ -702,7 +702,7 @@ const processDocumentBuffer = async ({ buffer, mimetype, originalInput, category
 };
 
 // Bump when the prompt or output shape changes so old cached results are not reused
-const PROMPT_VERSION = 'p3';
+const PROMPT_VERSION = 'p4';
 const URL_CACHE_DAYS = 7;
 
 // Same content + same rule pack + same prompt => same fingerprint
@@ -801,6 +801,21 @@ export const processContent = async (input, options = {}) => {
       text: youtube ? youtube.text : fullText,
       chars: youtube ? youtube.chars : fullText.length
     };
+  }
+
+  // Build a ready-to-use corrected version from the line fixes when the model did not return one
+  const audit = processingResult.auditResult;
+  if (audit && !audit.compliantVersion && fullText && fullText.length < 3000 && audit.violations?.length) {
+    let fixed = fullText;
+    for (const v of audit.violations) {
+      const original = (v.originalLine || '').trim();
+      if (original.length < 4) continue;
+      const replacement = /^\[?remove this line\]?$/i.test((v.compliantLine || '').trim()) ? '' : (v.compliantLine || '');
+      const escaped = original.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\s+/g, '\\s+');
+      fixed = fixed.replace(new RegExp(escaped, 'i'), replacement);
+    }
+    fixed = fixed.replace(/[ \t]{2,}/g, ' ').replace(/\n{3,}/g, '\n\n').trim();
+    if (fixed && fixed !== fullText.trim()) audit.compliantVersion = fixed;
   }
 
   await saveAuditRecord({
