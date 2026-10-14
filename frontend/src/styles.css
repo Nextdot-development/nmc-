@@ -473,3 +473,47 @@ kbd { padding: 2px 7px; border-radius: 6px; border: 1px solid var(--line-2); bac
 .empty-art { width: 150px; height: auto; }
 @media (max-width: 860px) { .page-head.banner p { max-width: none; } }
 .page-head.banner p { margin: 0; font-weight: 500; color: var(--text-2); }
+
+/* v8: green primary, dark-blue accents, almost no orange, gentle motion */
+:root {
+  --saffron: #16a34a; --saffron-2: #15803d; --saffron-soft: #e9f7ee;
+  --green: #15803d; --green-soft: #e9f7ee; --ok: #15803d; --ok-bg: #e9f7ee;
+}
+.run-btn { background: linear-gradient(100deg, #15803d 0%, #16a34a 40%, #22c55e 50%, #16a34a 60%, #15803d 100%); background-size: 220% 100%; box-shadow: 0 12px 30px -12px rgba(21, 128, 61, 0.65); animation: shimmer 4s ease-in-out infinite; }
+.pill-btn--active { background: linear-gradient(90deg, #16a34a, #15803d); border-color: #15803d; box-shadow: 0 8px 18px -10px rgba(21, 128, 61, 0.8); }
+.sidenav__link.active { color: var(--green); background: #e9f7ee; box-shadow: inset 3px 0 0 var(--green); }
+.sidenav__link.active svg { color: var(--green); }
+.sidenav__link:hover { color: var(--green); background: rgba(22, 163, 74, 0.06); }
+.info-card h4 svg, .dropzone > svg, .label svg { color: var(--navy); }
+.info-card::before { background: linear-gradient(180deg, var(--navy), #2c55c9); }
+.selectbox__icon { background: #eef2ff; color: var(--navy); }
+.rule__section, .violation__num { color: var(--navy); }
+.ring-dot--violet { background: var(--navy); }
+.simple__titleicon { background: linear-gradient(135deg, #2c55c9, var(--navy)); }
+.dropzone { border-color: #c9d4f2; background: #f7f9ff; }
+.dropzone:hover, .dropzone--active { border-color: var(--navy); background: #eef2ff; }
+.banner { background: linear-gradient(100deg, #ffffff 0%, #f6f8fd 60%, #eef2fb 100%); }
+.input, .inputbox:focus-within { border-color: var(--green); box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.12); }
+input:focus, textarea:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.12); }
+.ghost-btn:hover, .chip-btn:hover, .pill-btn:hover, .square-btn:hover, .chip:hover { border-color: var(--green); color: var(--green); }
+.result__hero { border-top-color: var(--navy); }
+.quote { background: #fdf3f2; }
+
+/* motion */
+@keyframes shimmer { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+@keyframes floatA { 0%, 100% { transform: translate(0, 0) scale(1); } 50% { transform: translate(-18px, 8px) scale(1.08); } }
+@keyframes floatB { 0%, 100% { transform: translate(0, 0) scale(1); } 50% { transform: translate(16px, -10px) scale(1.06); } }
+@keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+@keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes ping { 0% { box-shadow: 0 0 0 0 rgba(26, 58, 143, 0.45); } 100% { box-shadow: 0 0 0 10px rgba(26, 58, 143, 0); } }
+.blob { transform-box: fill-box; transform-origin: center; }
+.blob--a { animation: floatA 9s ease-in-out infinite; }
+.blob--b { animation: floatB 11s ease-in-out infinite; }
+.banner-art__gate { animation: bob 6s ease-in-out infinite; }
+.simple__titleicon { animation: ping 2.8s ease-out infinite; }
+.banner, .simple, .panel, .info-card { animation: rise 0.5s ease both; }
+.simple { animation-delay: 0.08s; }
+.info-card:nth-child(2) { animation-delay: 0.12s; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
