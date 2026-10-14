@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { api } from '../api.js';
+import { BannerArt, EmptyArt } from '../components/Graphics.jsx';
 import { ExternalIcon, LayersIcon, SearchIcon } from '../components/Icons.jsx';
 import { PACKS, packMeta } from '../packs.js';
 
@@ -65,10 +66,11 @@ export default function RulePack() {
 
   return (
     <div className="page">
-      <header className="page-head">
+      <header className="page-head banner">
         <span className="badge-live"><i /> RULE PACKS · INDIA</span>
         <h1>The <b className="lime">{total || 160}</b> <b className="grad">NMC rules</b></h1>
         <p>Built from a review of all 1,014 notices on nmc.org.in/whats-new plus the operative IMC Code of Ethics. The NMC RMP Conduct Regulations 2023 are held in abeyance and are not used.</p>
+        <BannerArt />
       </header>
 
       {error && <p className="alert">{error}</p>}

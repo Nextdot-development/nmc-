@@ -77,3 +77,18 @@ export const SidebarArt = () => (
     <Landmark className="sidebar-art__gate" />
   </div>
 );
+
+// Empty-state illustration: report sheet with a magnifier
+export const EmptyArt = () => (
+  <svg className="empty-art" viewBox="0 0 160 120" aria-hidden="true">
+    <ellipse cx="80" cy="110" rx="56" ry="6" fill="#efe6da" />
+    <rect x="44" y="14" width="64" height="86" rx="8" fill="#ffffff" stroke="#d8dff2" strokeWidth="2" />
+    <rect x="56" y="28" width="30" height="6" rx="3" fill={NAVY} opacity="0.85" />
+    <rect x="56" y="44" width="40" height="5" rx="2.5" fill="#d8dff2" />
+    <rect x="56" y="56" width="34" height="5" rx="2.5" fill="#d8dff2" />
+    <rect x="56" y="68" width="38" height="5" rx="2.5" fill="#d8dff2" />
+    <circle cx="104" cy="74" r="16" fill="#fff1e7" stroke={ORANGE} strokeWidth="3" />
+    <path d="M115 86 L128 99" stroke={ORANGE} strokeWidth="5" strokeLinecap="round" />
+    <path d="M97 74 l5 5 9-10" fill="none" stroke={NAVY} strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);

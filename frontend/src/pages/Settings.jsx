@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../api.js';
+import { BannerArt, EmptyArt } from '../components/Graphics.jsx';
 import { useAuth } from '../App.jsx';
 import { Avatar } from '../components/Layout.jsx';
 import { LogoutIcon } from '../components/Icons.jsx';
@@ -16,9 +17,10 @@ export default function Settings() {
 
   return (
     <div className="page">
-      <header className="page-head">
+      <header className="page-head banner">
         <span className="badge-live"><i /> SETTINGS</span>
         <h1>Account &amp; <b className="grad">workspace</b></h1>
+        <BannerArt />
       </header>
 
       <div className="settings-grid">

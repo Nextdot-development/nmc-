@@ -458,3 +458,18 @@ kbd { padding: 2px 7px; border-radius: 6px; border: 1px solid var(--line-2); bac
   .sidebar-art { height: 110px; }
   .sidebar-art__gate { width: 110px; }
 }
+
+/* v7: one heading colour (dark blue) + banners on every page */
+.lime, .grad, .banner h1 b, .sidebar__logo b, .promo strong em, .auth__story h1, .auth__form h2, .auth__brand .lime { color: var(--text); }
+.page-head h1, .banner h1, .section-head h3, .rule-group__head h2, .simple__title { color: var(--text); }
+.page-head.banner { display: block; padding: 22px 28px; min-height: 0; margin-bottom: 20px; }
+.page-head.banner > *:not(.banner-art) { position: relative; z-index: 1; }
+.page-head.banner h1 { margin: 12px 0 6px; font-size: clamp(26px, 2.6vw, 36px); }
+.page-head.banner p { max-width: 62%; font-size: 14.5px; }
+.page-head .badge-live { background: #eef2ff; color: var(--navy); }
+.page-head .badge-live i { background: var(--navy); }
+.empty { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.empty p { margin: 0; }
+.empty-art { width: 150px; height: auto; }
+@media (max-width: 860px) { .page-head.banner p { max-width: none; } }
+.page-head.banner p { margin: 0; font-weight: 500; color: var(--text-2); }

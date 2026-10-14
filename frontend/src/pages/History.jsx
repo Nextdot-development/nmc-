@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../api.js';
+import { BannerArt, EmptyArt } from '../components/Graphics.jsx';
 import { AlertIcon, CheckCircleIcon, ChevronRightIcon, DocIcon, ImageIcon, LinkIcon, MicIcon, VideoIcon, XCircleIcon } from '../components/Icons.jsx';
 
 export const TYPE_LABEL = { text: 'Text', url: 'URL', webpage: 'URL', image: 'Image', video: 'Video', audio: 'Audio', document: 'Document' };
@@ -38,16 +39,17 @@ export default function History() {
 
   return (
     <div className="page">
-      <header className="page-head">
+      <header className="page-head banner">
         <span className="badge-live"><i /> AUDIT HISTORY</span>
         <h1>Your past <b className="grad">audits</b></h1>
         <p>Every audit you run is saved here with its score, status and full report.</p>
+        <BannerArt />
       </header>
 
       {error && <p className="alert">{error}</p>}
       {!items && !error && <div className="panel skeleton">Loading…</div>}
       {items && items.length === 0 && (
-        <div className="panel empty">No audits yet. <Link to="/">Run your first audit →</Link></div>
+        <div className="panel empty"><EmptyArt /><p>No audits yet. <Link to="/">Run your first audit →</Link></p></div>
       )}
 
       {items && items.length > 0 && (
