@@ -202,6 +202,9 @@ export default function Auditor() {
           <div className="progress" aria-live="polite">
             <div className="progress__bar"><span /></div>
             <ol>{STEPS.map((s, i) => <li key={s} className={i < step ? 'done' : i === step ? 'active' : ''}>{s}</li>)}</ol>
+            {(format === 'video' || format === 'audio' || /youtu\.?be/i.test(url)) && (
+              <p className="muted small">Videos take 2–4 minutes — we transcribe the full video first.</p>
+            )}
           </div>
         )}
         {error && <p className="alert" role="alert">{error}</p>}
