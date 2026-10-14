@@ -3,7 +3,8 @@ import { createCanvas } from '@napi-rs/canvas';
 import { createWorker } from 'tesseract.js';
 import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf.mjs';
 
-const MIN_TEXT_LENGTH = 500;
+// Below this, the text layer is treated as missing and the PDF is OCR'd (short ad flyers are often ~200 chars)
+const MIN_TEXT_LENGTH = 120;
 const MAX_PAGES = 25;
 const OCR_SCALE = 2;
 
@@ -65,11 +66,34 @@ const ocrPdfWithTesseract = async (pdfBuffer: Buffer, language: string) => {
   }
 };
 
+// pdf.js text layer; handles modern PDFs (xref streams) that pdf-parse 1.x rejects
+const extractWithPdfjs = async (pdfBuffer: Buffer) => {
+  const doc = await pdfjsLib.getDocument({ data: new Uint8Array(pdfBuffer) }).promise;
+  const pages = Math.min(doc.numPages, MAX_PAGES);
+  const chunks: string[] = [];
+  for (let i = 1; i <= pages; i += 1) {
+    const page = await doc.getPage(i);
+    const content = await page.getTextContent();
+    chunks.push(content.items.map((item: any) => item.str || '').join(' '));
+  }
+  return chunks.join('\n');
+};
+
 export const extractTextFromPdfPipeline = async (pdfBuffer: Buffer) => {
   logPdf('parse_start', { size: pdfBuffer.length });
 
-  const parsed = await pdfParse(pdfBuffer);
-  const parsedText = cleanText(parsed?.text || '');
+  let rawText = '';
+  try {
+    const parsed = await pdfParse(pdfBuffer);
+    rawText = parsed?.text || '';
+  } catch (error: any) {
+    logPdf('parse_failed', { error: error?.message });
+    rawText = await extractWithPdfjs(pdfBuffer).catch((err: any) => {
+      logPdf('pdfjs_failed', { error: err?.message });
+      return '';
+    });
+  }
+  const parsedText = cleanText(rawText);
 
   logPdf('parse_done', { length: parsedText.length });
 
