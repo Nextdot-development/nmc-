@@ -1,0 +1,488 @@
+[
+  {
+    "id": "REMOTEAUTH-B",
+    "regulation": "NMC Advisory on Remote Authentication of Medical Records 2026",
+    "section": "Advisory para B",
+    "title": "Authenticate remote reports only after reviewing clinical information",
+    "description": "Remote authentication of lab, pathology, radiology reports, discharge summaries and other electronic clinical documents by an RMP via digital/electronic signature is permitted only after the RMP has reviewed the relevant clinical information and exercised independent professional judgment; where information is inadequate the RMP must refrain from authenticating.",
+    "source": "https://nmc.org.in/whats-new/download/1878",
+    "notice_date": "13 Oct 2026"
+  },
+  {
+    "id": "REMOTEAUTH-C",
+    "regulation": "NMC Advisory on Remote Authentication of Medical Records 2026",
+    "section": "Advisory para C",
+    "title": "Do not use e-signatures to bypass professional review",
+    "description": "A digital/electronic signature is only a mode of authentication and does not diminish the RMP's or the organisation's professional, ethical and legal responsibility; it must not be used to bypass any required examination, verification or professional review, or substitute the RMP's independent judgment (e.g., claims of auto-signed or unreviewed reports).",
+    "source": "https://nmc.org.in/whats-new/download/1878",
+    "notice_date": "13 Oct 2026"
+  },
+  {
+    "id": "REMOTEAUTH-D",
+    "regulation": "NMC Advisory on Remote Authentication of Medical Records 2026",
+    "section": "Advisory para D",
+    "title": "Secure electronically authenticated records with audit trails and privacy safeguards",
+    "description": "Healthcare establishments must maintain electronically authenticated medical records with security measures, audit trails, authentication logs and date/time stamps, retain them for the legally prescribed period, and comply with data protection, privacy and cybersecurity requirements for personal health information.",
+    "source": "https://nmc.org.in/whats-new/download/1878",
+    "notice_date": "13 Oct 2026"
+  },
+  {
+    "id": "REMOTEAUTH-E",
+    "regulation": "NMC Advisory on Remote Authentication of Medical Records 2026",
+    "section": "Advisory para E, G",
+    "title": "Limit remote authentication to RMPs lawfully associated with the establishment",
+    "description": "Only an RMP authorised to practise under the NMC Act, 2019 who is appointed, empanelled, contracted or otherwise professionally associated with the healthcare establishment and has lawful access to the records may remotely authenticate its reports; the advisory confers no independent right to practise and does not permit practice in India by persons not authorised under the NMC Act.",
+    "source": "https://nmc.org.in/whats-new/download/1878",
+    "notice_date": "13 Oct 2026"
+  },
+  {
+    "id": "REMOTEAUTH-F",
+    "regulation": "NMC Advisory on Remote Authentication of Medical Records 2026",
+    "section": "Advisory para F, G",
+    "title": "Do not present foreign expert opinions as Indian certification",
+    "description": "A remote consultation or second opinion by a foreign medical expert may be considered by the Indian treating team, with the expert's identity, qualifications, registration/licensure, date and opinion documented in the record; it does not constitute authorisation/certification of an Indian medical record, confers no right to practise medicine in India, and foreign registration is not recognised for that purpose.",
+    "source": "https://nmc.org.in/whats-new/download/1878",
+    "notice_date": "13 Oct 2026"
+  },
+  {
+    "id": "REMOTEAUTH-J",
+    "regulation": "NMC Advisory on Remote Authentication of Medical Records 2026",
+    "section": "Advisory para J",
+    "title": "Never share or delegate digital signature credentials",
+    "description": "Digital/electronic signatures, signature creation data, credentials and access tokens used to authenticate medical records must remain under the concerned RMP's control and must not be shared, delegated or transferred to any other person; suspected compromise must be promptly reported.",
+    "source": "https://nmc.org.in/whats-new/download/1878",
+    "notice_date": "13 Oct 2026"
+  },
+  {
+    "id": "STEMCELL-ICMR-2",
+    "regulation": "ICMR/NMC Stem Cell Therapy Compliance Advisory 2026",
+    "section": "D.O. para 2, 6 and Annexure",
+    "title": "Offer routine stem cell therapy only for MoHFW-approved indications",
+    "description": "Stem cell therapy in routine practice is permitted only for disease conditions on the MoHFW-approved standard-care list: hematopoietic stem cell transplantation for listed indications (e.g., AML, ALL, CML, myelodysplastic syndromes, lymphomas, multiple myeloma, severe aplastic anemia, germ cell tumours, multiple sclerosis, systemic sclerosis in adults; thalassemia/SCD, primary immunodeficiency, mucopolysaccharidoses, neuroblastoma etc. in children). Mesenchymal stem cell transplantation is not recommended for any disease condition.",
+    "source": "https://nmc.org.in/whats-new/download/965",
+    "notice_date": "25 Mar 2026"
+  },
+  {
+    "id": "STEMCELL-ICMR-3",
+    "regulation": "ICMR/NMC Stem Cell Therapy Compliance Advisory 2026",
+    "section": "D.O. para 3-4",
+    "title": "Offer unapproved stem cell uses only within approved clinical trials",
+    "description": "Beyond approved indications, stem cell use is permissible only as research within an approved clinical trial (CDSCO approval if more than minimally manipulated; DHR/National Stem Cell Research Regulation Committee and DHR-registered IEC approval otherwise), complying with ICMR ethical guidelines including written informed consent, no cost to the patient and compensation for injury or death.",
+    "source": "https://nmc.org.in/whats-new/download/965",
+    "notice_date": "25 Mar 2026"
+  },
+  {
+    "id": "STEMCELL-ICMR-5",
+    "regulation": "ICMR/NMC Stem Cell Therapy Compliance Advisory 2026",
+    "section": "D.O. para 5, 7",
+    "title": "Treat unapproved stem cell treatments as illegal",
+    "description": "Any stem cell treatment not on the standard-care indications list, or not approved by CDSCO or DHR, is deemed illegal and liable to regulatory and legal action.",
+    "source": "https://nmc.org.in/whats-new/download/965",
+    "notice_date": "25 Mar 2026"
+  },
+  {
+    "id": "STEMCELL-ASD-1",
+    "regulation": "NMC EMRB Advisory on Stem Cell Therapy for ASD 2026",
+    "section": "Para 1-2",
+    "title": "Do not offer stem cell therapy for autism as routine treatment",
+    "description": "Per the Supreme Court order of 30.01.2026 (Yash Charitable Trust v. UoI), stem cell therapy for Autism Spectrum Disorder cannot be offered as routine commercial medical treatment outside the regulatory framework of clinical trials.",
+    "source": "https://nmc.org.in/whats-new/download/1023",
+    "notice_date": "05 Sep 2026"
+  },
+  {
+    "id": "STEMCELL-ASD-3",
+    "regulation": "NMC EMRB Advisory on Stem Cell Therapy for ASD 2026",
+    "section": "Para 3 (concluding advice)",
+    "title": "Do not advertise or promote stem cell therapy beyond approved indications",
+    "description": "Stem cell therapy may be offered as standard clinical care only for approved indications listed in ICMR/DHR/MoHFW guidelines; any unauthorized administration, prescription, promotion or advertisement of stem cell therapy beyond such indications constitutes professional misconduct.",
+    "source": "https://nmc.org.in/whats-new/download/1023",
+    "notice_date": "05 Sep 2026"
+  },
+  {
+    "id": "RX-GENERIC-4",
+    "regulation": "NMC PGMEB Notice on Prescription Monitoring and Legible Prescriptions 2025",
+    "section": "Para 4 (and para 2)",
+    "title": "Prescribe drugs by generic names, legibly, preferably in capitals",
+    "description": "Every physician should prescribe drugs with generic names, legibly and preferably in capital letters, and ensure rational prescription and use of drugs; compliance is mandatory.",
+    "source": "https://nmc.org.in/whats-new/download/488",
+    "notice_date": "15 Dec 2025"
+  },
+  {
+    "id": "LIVESURG-SP-PROMO",
+    "regulation": "NMC Guidelines to Regulate the Conduct and Broadcast of Live Surgeries 2025",
+    "section": "Who can organise (Sponsor/Supervisor)",
+    "title": "Do not use live surgery broadcasts to promote surgeons, hospitals or brands",
+    "description": "Live broadcasts of surgeries/procedures should not be used for promotion of the operating surgeon, the hospital or any product brand.",
+    "source": "https://nmc.org.in/whats-new/download/57",
+    "notice_date": "27 Jul 2025"
+  },
+  {
+    "id": "LIVESURG-SP-COI",
+    "regulation": "NMC Guidelines to Regulate the Conduct and Broadcast of Live Surgeries 2025",
+    "section": "Who can organise (Sponsor/Supervisor)",
+    "title": "Surgeon must not have commercial interest in equipment used",
+    "description": "Surgeons performing a live surgery should not have a financial or commercial interest in the equipment or devices used during the surgery/procedure.",
+    "source": "https://nmc.org.in/whats-new/download/57",
+    "notice_date": "27 Jul 2025"
+  },
+  {
+    "id": "LIVESURG-SP-FMP",
+    "regulation": "NMC Guidelines to Regulate the Conduct and Broadcast of Live Surgeries 2025",
+    "section": "Who can organise; A. Who can perform",
+    "title": "Obtain EMRB and State Medical Council permission for foreign surgeons",
+    "description": "A Foreign Medical Practitioner performing live surgery requires temporary permission from the Ethics & Medical Registration Board, NMC (with an NMC-nominated Specialty Expert team), and the sponsor must obtain prior permission from the concerned State Medical Council before inviting the FMP.",
+    "source": "https://nmc.org.in/whats-new/download/57",
+    "notice_date": "27 Jul 2025"
+  },
+  {
+    "id": "LIVESURG-SP-INS",
+    "regulation": "NMC Guidelines to Regulate the Conduct and Broadcast of Live Surgeries 2025",
+    "section": "Who can organise (Sponsor/Supervisor)",
+    "title": "Ensure sponsor indemnity cover and same-specialty supervisor present",
+    "description": "The sponsor/supervisor should be under indemnity insurance coverage, and the supervisor (or person authorised by them) must be of the same specialty and present beside the operating surgeon as part of the operating team.",
+    "source": "https://nmc.org.in/whats-new/download/57",
+    "notice_date": "27 Jul 2025"
+  },
+  {
+    "id": "LIVESURG-A",
+    "regulation": "NMC Guidelines to Regulate the Conduct and Broadcast of Live Surgeries 2025",
+    "section": "A. Who can perform",
+    "title": "Only qualified experienced RMPs may perform live surgery",
+    "description": "Live surgery/procedures may be performed only by Registered Medical Practitioners (or permitted Foreign Medical Practitioners) of modern medicine with expertise in the procedure and a minimum of 5 years of experience after specialty certification.",
+    "source": "https://nmc.org.in/whats-new/download/57",
+    "notice_date": "27 Jul 2025"
+  },
+  {
+    "id": "LIVESURG-B",
+    "regulation": "NMC Guidelines to Regulate the Conduct and Broadcast of Live Surgeries 2025",
+    "section": "B. Where it can be done",
+    "title": "Conduct live surgery only in accredited, fully equipped hospitals",
+    "description": "The hospital must be accredited by a recognised body, with OT, anaesthesia, ICU, lab and radiology facilities, essential instruments, and a contingency plan with standby staff; the setup must be approved by the Head of Institution/Sponsor/Association/SMC, and if inadequate only a recorded video may be used.",
+    "source": "https://nmc.org.in/whats-new/download/57",
+    "notice_date": "27 Jul 2025"
+  },
+  {
+    "id": "LIVESURG-C-SEL",
+    "regulation": "NMC Guidelines to Regulate the Conduct and Broadcast of Live Surgeries 2025",
+    "section": "C. Patient Selection; Conduct during Surgery",
+    "title": "Exclude high-risk patients and avoid live broadcast of high-risk procedures",
+    "description": "Patients with high-risk procedures, incomplete investigations or unusual anatomy should not be included; high-risk procedures should be avoided for live broadcast in favour of edited recordings, and live broadcast is meant for new procedures while recordings are preferred for established ones.",
+    "source": "https://nmc.org.in/whats-new/download/57",
+    "notice_date": "27 Jul 2025"
+  },
+  {
+    "id": "LIVESURG-C-FIN",
+    "regulation": "NMC Guidelines to Regulate the Conduct and Broadcast of Live Surgeries 2025",
+    "section": "C. Patient Selection; Ethical Considerations",
+    "title": "Do not pay or charge patients featured in live surgery",
+    "description": "Financial incentives for patient participation are not permitted; patients must not incur any charges for the surgery including implants, medications, disposables and procedures, and any procedure-related complications must be managed free of cost (insurance may be offered with its limitations explained).",
+    "source": "https://nmc.org.in/whats-new/download/57",
+    "notice_date": "27 Jul 2025"
+  },
+  {
+    "id": "LIVESURG-C-CONSENT",
+    "regulation": "NMC Guidelines to Regulate the Conduct and Broadcast of Live Surgeries 2025",
+    "section": "C. Informed Consent; D. Organizer Responsibility",
+    "title": "Obtain explicit written informed consent before broadcasting surgery",
+    "description": "Organisers must obtain explicit, informed, written consent from patients before featuring their surgery in a live broadcast; consent, taken by the operating surgeon/team, must explain the educational purpose, risks and benefits, anonymity and confidentiality measures, and the right to withdraw at any time.",
+    "source": "https://nmc.org.in/whats-new/download/57",
+    "notice_date": "27 Jul 2025"
+  },
+  {
+    "id": "LIVESURG-C-CONF",
+    "regulation": "NMC Guidelines to Regulate the Conduct and Broadcast of Live Surgeries 2025",
+    "section": "C. Ethical Considerations; D. Organizer Responsibility",
+    "title": "Keep patient identity confidential in surgery broadcasts",
+    "description": "Patient identity must remain confidential during live surgery broadcasts, and the organiser must ensure confidentiality and adherence to ethical guidelines and data privacy regulations.",
+    "source": "https://nmc.org.in/whats-new/download/57",
+    "notice_date": "27 Jul 2025"
+  },
+  {
+    "id": "LIVESURG-C-CONDUCT",
+    "regulation": "NMC Guidelines to Regulate the Conduct and Broadcast of Live Surgeries 2025",
+    "section": "C. Conduct during Surgery",
+    "title": "Operating surgeon must not interact with audience during surgery",
+    "description": "The operating doctor should not interact with the audience during the procedure; only relevant step-wise commentary without two-way communication is allowed in special situations, and a designated moderator may provide separate commentary.",
+    "source": "https://nmc.org.in/whats-new/download/57",
+    "notice_date": "27 Jul 2025"
+  },
+  {
+    "id": "LIVESURG-E",
+    "regulation": "NMC Guidelines to Regulate the Conduct and Broadcast of Live Surgeries 2025",
+    "section": "E. Prior permission of Regulatory Body",
+    "title": "Obtain prior regulatory permission for live surgical demonstrations",
+    "description": "Prior permission from the relevant regulatory body/association/institution is mandatory for live surgical demonstrations, with approval from the Dean for government hospitals or the State Medical Council for private hospitals.",
+    "source": "https://nmc.org.in/whats-new/download/57",
+    "notice_date": "27 Jul 2025"
+  },
+  {
+    "id": "LIVESURG-F-EDU",
+    "regulation": "NMC Guidelines to Regulate the Conduct and Broadcast of Live Surgeries 2025",
+    "section": "F. Additional Recommendations; E. Oversight and Compliance",
+    "title": "Keep live surgery broadcasts educational, non-commercial, without glorification",
+    "description": "Live broadcasts should strictly serve educational purposes and not commercial gain or promotion; surgeons should avoid glorification and focus on surgical technique and patient care, and professional associations should prevent promotional or commercial activities during live demonstrations.",
+    "source": "https://nmc.org.in/whats-new/download/57",
+    "notice_date": "27 Jul 2025"
+  },
+  {
+    "id": "LIVESURG-F-REC",
+    "regulation": "NMC Guidelines to Regulate the Conduct and Broadcast of Live Surgeries 2025",
+    "section": "F. Additional Recommendations",
+    "title": "Restrict surgery recordings to closed educational groups; preserve two years",
+    "description": "Recordings of procedures should be used for educational purposes in closed groups, and unedited recordings of the procedure should be preserved for at least two years.",
+    "source": "https://nmc.org.in/whats-new/download/57",
+    "notice_date": "27 Jul 2025"
+  },
+  {
+    "id": "ECIG-2023-1",
+    "regulation": "NMC Public Notice on Ban on e-cigarettes and HTPs 2023",
+    "section": "Para 1",
+    "title": "Do not promote or engage with e-cigarettes or heated tobacco products",
+    "description": "E-cigarettes, heated tobacco products (HTPs) and like devices are banned in India under the Prohibition of Electronic Cigarettes Act 2019 (which also bans their advertisement). Healthcare professionals affiliated with NMC must not initiate or participate in any research related to e-cigarettes/HTPs without prior approval of Dte.GHS and MoHFW.",
+    "source": "https://nmc.org.in/whats-new/download/393",
+    "notice_date": "15 Dec 2023"
+  },
+  {
+    "id": "AESHT-1",
+    "regulation": "NMC-EMRB Guideline on Aesthetic Surgery and Hair Transplant Procedures 2022",
+    "section": "Hair transplantation",
+    "title": "Restrict hair transplant surgery to trained, licensed RMPs",
+    "description": "Any procedure involving a skin incision to remove tissue from, or prepare, the scalp or body for grafts (FUE graft incision, donor strip excision, recipient site creation), by any means including robotics, is a surgical procedure and must be performed by a properly trained and licensed Registered Medical Practitioner of modern medicine with education, training and current competency in hair restoration surgery.",
+    "source": "https://nmc.org.in/whats-new/download/698",
+    "notice_date": "27 Sep 2022"
+  },
+  {
+    "id": "AESHT-2",
+    "regulation": "NMC-EMRB Guideline on Aesthetic Surgery and Hair Transplant Procedures 2022",
+    "section": "Hair transplantation",
+    "title": "Prefer surgically trained specialists for hair transplant",
+    "description": "Hair transplant should preferably be undertaken only by those with formal surgical grooming such as MCh/DNB Plastic Surgery or MD/DNB Dermatology with adequate training in dermatological surgical procedures.",
+    "source": "https://nmc.org.in/whats-new/download/698",
+    "notice_date": "27 Sep 2022"
+  },
+  {
+    "id": "AESHT-3",
+    "regulation": "NMC-EMRB Guideline on Aesthetic Surgery and Hair Transplant Procedures 2022",
+    "section": "Hair transplantation",
+    "title": "Do not let non-RMPs perform core hair restoration steps",
+    "description": "Preoperative diagnostic evaluation, surgery planning, surgery execution (donor hair harvesting, hairline design, recipient site creation, management of medical issues and adverse reactions) and post-operative care must be performed only by an RMP.",
+    "source": "https://nmc.org.in/whats-new/download/698",
+    "notice_date": "27 Sep 2022"
+  },
+  {
+    "id": "AESHT-4",
+    "regulation": "NMC-EMRB Guideline on Aesthetic Surgery and Hair Transplant Procedures 2022",
+    "section": "Hair transplantation",
+    "title": "Do not train unlicensed persons to perform or assist surgery",
+    "description": "It is unethical for an RMP to train an individual who is not an accredited, licensed health professional to perform or assist in surgery.",
+    "source": "https://nmc.org.in/whats-new/download/698",
+    "notice_date": "27 Sep 2022"
+  },
+  {
+    "id": "AESHT-5",
+    "regulation": "NMC-EMRB Guideline on Aesthetic Surgery and Hair Transplant Procedures 2022",
+    "section": "Minimum requirements in a hospital/clinic performing hair transplant",
+    "title": "Equip day care theatre for emergencies",
+    "description": "The day care theatre must have facilities for monitoring and handling emergencies, including emergency drugs, Boyles machine, intubation sets and ambu bag, with an emergency plan known to nursing staff; a standby anaesthetist is ideal.",
+    "source": "https://nmc.org.in/whats-new/download/698",
+    "notice_date": "27 Sep 2022"
+  },
+  {
+    "id": "AESHT-6",
+    "regulation": "NMC-EMRB Guideline on Aesthetic Surgery and Hair Transplant Procedures 2022",
+    "section": "Aesthetic Procedures",
+    "title": "Perform aesthetic procedures only within trained specialty curriculum",
+    "description": "Aesthetic procedures should be undertaken only by RMPs who have adequate training to do them as per their curriculum; the curriculum of each specialty is the guiding principle for undertaking aesthetic and hair transplant procedures.",
+    "source": "https://nmc.org.in/whats-new/download/698",
+    "notice_date": "27 Sep 2022"
+  },
+  {
+    "id": "AESHT-7",
+    "regulation": "NMC-EMRB Guideline on Aesthetic Surgery and Hair Transplant Procedures 2022",
+    "section": "Aesthetic Procedures including Hair Transplant, I",
+    "title": "Do not treat workshops or YouTube as adequate training",
+    "description": "Aesthetic procedures including hair transplant are not emergency surgery, so untrained persons may not perform them under the pretext of 'exceptional circumstances'; watching workshops or YouTube or similar platforms is not adequate training to start aesthetic surgery.",
+    "source": "https://nmc.org.in/whats-new/download/698",
+    "notice_date": "27 Sep 2022"
+  },
+  {
+    "id": "AESHT-8",
+    "regulation": "NMC-EMRB Guideline on Aesthetic Surgery and Hair Transplant Procedures 2022",
+    "section": "Aesthetic Procedures including Hair Transplant, II-III",
+    "title": "Use trained medical-background assistants under RMP supervision",
+    "description": "Assistants or OT technicians must be from a medical background (nurses, lab technicians, pharmacists) and receive structured training, the responsibility for which lies with the RMP, and must perform tasks only under the supervision of an RMP.",
+    "source": "https://nmc.org.in/whats-new/download/698",
+    "notice_date": "27 Sep 2022"
+  },
+  {
+    "id": "AESHT-9",
+    "regulation": "NMC-EMRB Guideline on Aesthetic Surgery and Hair Transplant Procedures 2022",
+    "section": "Aesthetic Procedures including Hair Transplant",
+    "title": "Ensure anaesthesia backup, pre-op clearance and recovery facilities",
+    "description": "The RMP must have anaesthesia backup with the anaesthetist present in the operation room area and resuscitative equipment and drugs in place, ensure adequate preoperative clearances from medical specialists and the anaesthetist, and have a well-equipped postoperative recovery room with vitals monitoring and adequate record keeping.",
+    "source": "https://nmc.org.in/whats-new/download/698",
+    "notice_date": "27 Sep 2022"
+  },
+  {
+    "id": "AESHT-10",
+    "regulation": "NMC-EMRB Guideline on Aesthetic Surgery and Hair Transplant Procedures 2022",
+    "section": "Manpower and Infrastructure",
+    "title": "Staff and equip centres to hospital OT standards",
+    "description": "Centres must have trained OT personnel (staff nurses, technicians, OT masters), be a hospital with indoor facilities, run a properly set up OT with strict asepsis, fumigation, biomedical waste management and sterilisation protocols, and have an anaesthetist and crash cart available, as it is an invasive OT procedure.",
+    "source": "https://nmc.org.in/whats-new/download/698",
+    "notice_date": "27 Sep 2022"
+  },
+  {
+    "id": "AESHT-11",
+    "regulation": "NMC-EMRB Guideline on Aesthetic Surgery and Hair Transplant Procedures 2022",
+    "section": "Manpower and Infrastructure, 4",
+    "title": "Link day-care clinics to an ICU hospital; display emergency number",
+    "description": "A clinic doing only day care surgeries must be well connected with a nearby hospital with proper ICU and critical care facilities for emergencies and must display a 24-hour emergency number for help.",
+    "source": "https://nmc.org.in/whats-new/download/698",
+    "notice_date": "27 Sep 2022"
+  },
+  {
+    "id": "AESHT-12",
+    "regulation": "NMC-EMRB Guideline on Aesthetic Surgery and Hair Transplant Procedures 2022",
+    "section": "Manpower and Infrastructure, 5",
+    "title": "Maintain records with pre- and post-operative photographs",
+    "description": "Proper records of operated patients, including pre- and post-operative photographs and records of any complication, must be maintained.",
+    "source": "https://nmc.org.in/whats-new/download/698",
+    "notice_date": "27 Sep 2022"
+  },
+  {
+    "id": "UNQADV-1",
+    "regulation": "NMC-EMRB Advisory on Harms of Treatment from Unqualified People 2022",
+    "section": "Para 1-3",
+    "title": "Let patients know the operating doctor's qualifications and experience",
+    "description": "Patients should meet the doctor who will perform hair transplant or aesthetic surgery and know his qualifications and experience, know where the procedure will be performed and whether OT facilities and protocols exist, and be well informed about the procedure, needed investigations, complications and any need for repeat procedures.",
+    "source": "https://nmc.org.in/whats-new/download/699",
+    "notice_date": "27 Sep 2022"
+  },
+  {
+    "id": "UNQADV-2",
+    "regulation": "NMC-EMRB Advisory on Harms of Treatment from Unqualified People 2022",
+    "section": "Para 5-6",
+    "title": "Do not allow untrained persons to perform aesthetic procedures",
+    "description": "Aesthetic procedures including hair transplant require skills and training and cannot be performed by anyone, anywhere; no untrained person may perform them under the pretext of 'exceptional circumstances', and watching workshops or YouTube or similar platforms is not adequate training.",
+    "source": "https://nmc.org.in/whats-new/download/699",
+    "notice_date": "27 Sep 2022"
+  },
+  {
+    "id": "UNQADV-3",
+    "regulation": "NMC-EMRB Advisory on Harms of Treatment from Unqualified People 2022",
+    "section": "Para 7",
+    "title": "Have assistants work under direct supervision of treating physician",
+    "description": "Assistants or technicians should be from a medical background (nurses, OT technicians, pharmacists), be given structured training in aesthetic surgery, disinfection, sterilisation and patient communication, and work only under the direct supervision of the treating physician.",
+    "source": "https://nmc.org.in/whats-new/download/699",
+    "notice_date": "27 Sep 2022"
+  },
+  {
+    "id": "UNQADV-4",
+    "regulation": "NMC-EMRB Advisory on Harms of Treatment from Unqualified People 2022",
+    "section": "Para 8-9",
+    "title": "Register aesthetic centres as day care centre or hospital",
+    "description": "Aesthetic procedures including hair transplant should be performed only with anaesthesia backup, resuscitative equipment and drugs, and preoperative clearances; the centre should be registered as a Day Care Centre or Hospital with Local/State authorities and have a recovery room with monitoring of blood pressure, ECG and oxygen saturation.",
+    "source": "https://nmc.org.in/whats-new/download/699",
+    "notice_date": "27 Sep 2022"
+  },
+  {
+    "id": "UNQADV-5",
+    "regulation": "NMC-EMRB Advisory on Harms of Treatment from Unqualified People 2022",
+    "section": "Para 10",
+    "title": "Do not practise ghost surgery",
+    "description": "Ghost surgery, i.e. substitution of surgeons without the patient's knowledge and permission, constitutes malpractice.",
+    "source": "https://nmc.org.in/whats-new/download/699",
+    "notice_date": "27 Sep 2022"
+  },
+  {
+    "id": "UNQADV-6",
+    "regulation": "NMC-EMRB Advisory on Harms of Treatment from Unqualified People 2022",
+    "section": "Para 11",
+    "title": "Do not advertise with false or exaggerated claims",
+    "description": "Unethical practices such as fee cutting and advertising with false or exaggerated claims must not be indulged in for aesthetic surgery and hair transplant.",
+    "source": "https://nmc.org.in/whats-new/download/699",
+    "notice_date": "27 Sep 2022"
+  },
+  {
+    "id": "UNQADV-7",
+    "regulation": "NMC-EMRB Advisory on Harms of Treatment from Unqualified People 2022",
+    "section": "Para 12-13",
+    "title": "Keep records for all aesthetic surgeries",
+    "description": "Record keeping for all aesthetic surgeries including hair transplant is mandatory, and any violation of the advisory will be treated as misconduct/offence under existing law.",
+    "source": "https://nmc.org.in/whats-new/download/699",
+    "notice_date": "27 Sep 2022"
+  },
+  {
+    "id": "SEXBOUND-10",
+    "regulation": "Guidelines for Doctors on Sexual Boundaries 2019 (IPS)",
+    "section": "Point 10",
+    "title": "Use social media responsibly to keep professional boundaries",
+    "description": "Doctors must use social media responsibly, as it can inadvertently blur professional boundaries with patients.",
+    "source": "https://nmc.org.in/whats-new/download/1864",
+    "notice_date": "04 Apr 2019"
+  },
+  {
+    "id": "LABSIGN-5",
+    "regulation": "MCI Decision on Signing of Laboratory Reports 2019",
+    "section": "Para 5",
+    "title": "Lab reports signed only by qualified registered specialists",
+    "description": "Only a Registered Medical Practitioner with a postgraduate qualification in Pathology, Microbiology or Biochemistry may sign/countersign laboratory reports, and only in their own specialty (pathologist for pathology reports, microbiologist for microbiology, biochemist for biochemistry); persons with inadequate qualification must not independently conduct or sign lab reports.",
+    "source": "https://nmc.org.in/whats-new/download/1867",
+    "notice_date": "03 Apr 2019"
+  },
+  {
+    "id": "LABSIGN-7",
+    "regulation": "MCI Decision on Signing of Laboratory Reports 2019",
+    "section": "Paras 7-9",
+    "title": "Authorised signatory must meet Clinical Establishment Rules qualifications",
+    "description": "The authorised signatory of a lab test report must conform to Rule 8A of the Clinical Establishment Rules, 2012: an MBBS RMP for basic composite labs; for medium and advanced labs, MD/DNB in Pathology, Biochemistry, Microbiology or Laboratory Medicine, Diploma in Clinical Pathology, or MBBS with PhD in those subjects.",
+    "source": "https://nmc.org.in/whats-new/download/1867",
+    "notice_date": "03 Apr 2019"
+  },
+  {
+    "id": "PCPNDT-ADV",
+    "regulation": "PCPNDT Act 1994 (SC Order 14.03.2018, Union of India v IRIA)",
+    "section": "Statement of Objects (ii)",
+    "title": "Do not advertise prenatal diagnostics for sex determination",
+    "description": "The PCPNDT Act prohibits advertisement of pre-natal diagnostic techniques for detection or determination of the sex of the foetus.",
+    "source": "https://nmc.org.in/whats-new/download/1860",
+    "notice_date": "01 Feb 2019"
+  },
+  {
+    "id": "PCPNDT-S5-6",
+    "regulation": "PCPNDT Act 1994 (SC Order 14.03.2018, Union of India v IRIA)",
+    "section": "Sections 4(5), 5(2), 6",
+    "title": "Never disclose or determine foetal sex or offer sex selection",
+    "description": "Disclosure of the sex of the foetus to the pregnant woman or relatives is prohibited, as is determination of sex and sex selection; no person shall seek or encourage sex-selection techniques (Section 4(5)).",
+    "source": "https://nmc.org.in/whats-new/download/1860",
+    "notice_date": "01 Feb 2019"
+  },
+  {
+    "id": "PCPNDT-S3",
+    "regulation": "PCPNDT Act 1994 (SC Order 14.03.2018, Union of India v IRIA)",
+    "section": "Section 3",
+    "title": "Conduct prenatal diagnostics only at PCPNDT-registered places",
+    "description": "No Genetic Counselling Centre, Genetic Laboratory or Genetic Clinic may conduct pre-natal diagnostic techniques unless registered under the Act, may not employ unqualified persons, and no doctor may conduct such techniques (including ultrasonography) at an unregistered place.",
+    "source": "https://nmc.org.in/whats-new/download/1860",
+    "notice_date": "01 Feb 2019"
+  },
+  {
+    "id": "PCPNDT-S4",
+    "regulation": "PCPNDT Act 1994 (SC Order 14.03.2018, Union of India v IRIA)",
+    "section": "Section 4(2)-(3)",
+    "title": "Limit prenatal diagnostics to permitted indications only",
+    "description": "Pre-natal diagnostic techniques may be conducted only to detect chromosomal abnormalities, genetic metabolic diseases, haemoglobinopathies, sex-linked genetic diseases, congenital anomalies or other CSB-specified conditions, and only where specified conditions (e.g. maternal age above 35, two or more spontaneous abortions, teratogen exposure, family history) are met; complete ultrasonography records must be kept.",
+    "source": "https://nmc.org.in/whats-new/download/1860",
+    "notice_date": "01 Feb 2019"
+  },
+  {
+    "id": "PCPNDT-R3.3",
+    "regulation": "PCPNDT Act 1994 (SC Order 14.03.2018, Union of India v IRIA)",
+    "section": "PNDT Rules 3.3(1)(b); SC paras 9-12",
+    "title": "Ultrasound centres need qualified sonologists or six-month trained RMPs",
+    "description": "Genetic/ultrasound clinics and imaging centres must employ a sonologist, imaging specialist, radiologist or RMP with a PG degree/diploma or the six-month training under the PCPNDT (Six Months Training) Rules, 2014; the Supreme Court stayed the Delhi HC judgment striking this down.",
+    "source": "https://nmc.org.in/whats-new/download/1860",
+    "notice_date": "01 Feb 2019"
+  }
+]

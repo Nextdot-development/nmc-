@@ -126,7 +126,7 @@ const buildRulesBlock = (rules = []) => {
     return 'No rule pack provided. Use best-effort compliance reasoning based on jurisdiction.';
   }
 
-  const maxRules = 50;
+  const maxRules = Number(process.env.MAX_PROMPT_RULES) || 200;
   const lines = rules.slice(0, maxRules).map((rule, index) => {
     const section = rule.section ? ` (Section: ${rule.section})` : '';
     const description = rule.description ? `: ${rule.description}` : '';

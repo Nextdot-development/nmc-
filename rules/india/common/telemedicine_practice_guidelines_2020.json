@@ -1,0 +1,203 @@
+[
+  {
+    "id": "TPG-1.3",
+    "regulation": "Telemedicine Practice Guidelines 2020",
+    "section": "1.1.3; 1.3.1-1.3.3",
+    "title": "Offer telemedicine only through registered medical practitioners",
+    "description": "Only a Registered Medical Practitioner enrolled in the State Medical Register or Indian Medical Register under the IMC Act 1956 may provide telemedicine consultations, and may do so for patients from any part of India. All RMPs intending to consult online must complete a mandatory online course within 3 years of its notification; thereafter qualifying it is essential before practising telemedicine.",
+    "source": "https://esanjeevani.mohfw.gov.in/assets/guidelines/Telemedicine_Practice_Guidelines.pdf"
+  },
+  {
+    "id": "TPG-1.2",
+    "regulation": "Telemedicine Practice Guidelines 2020",
+    "section": "1.2 (Exclusions)",
+    "title": "Do not offer remote surgery or cross-border teleconsultation",
+    "description": "The guidelines explicitly exclude use of digital technology to conduct surgical or invasive procedures remotely and do not provide for consultations outside the jurisdiction of India.",
+    "source": "https://esanjeevani.mohfw.gov.in/assets/guidelines/Telemedicine_Practice_Guidelines.pdf"
+  },
+  {
+    "id": "TPG-3.1",
+    "regulation": "Telemedicine Practice Guidelines 2020",
+    "section": "1.3.2; 2; 3.1",
+    "title": "Do not claim telemedicine fully replaces in-person care",
+    "description": "RMPs using telemedicine must uphold the same professional and ethical norms as in-person care within the intrinsic limitations of telemedicine and use professional judgement on whether an in-person consultation is needed. Telemedicine cannot replace physical examination that requires palpation, percussion or auscultation.",
+    "source": "https://esanjeevani.mohfw.gov.in/assets/guidelines/Telemedicine_Practice_Guidelines.pdf"
+  },
+  {
+    "id": "TPG-4.5",
+    "regulation": "Telemedicine Practice Guidelines 2020",
+    "section": "1.4.2.3; 4.5",
+    "title": "Limit emergency teleconsultation to first aid and referral",
+    "description": "Telemedicine should be avoided for emergency care when in-person care is available, and emergency teleconsultation should be limited to first aid, life-saving measures, counselling and advice on referral. In all emergencies the patient must be advised to have an in-person interaction with an RMP at the earliest.",
+    "source": "https://esanjeevani.mohfw.gov.in/assets/guidelines/Telemedicine_Practice_Guidelines.pdf"
+  },
+  {
+    "id": "TPG-3.2.1",
+    "regulation": "Telemedicine Practice Guidelines 2020",
+    "section": "3.2.1; 3.2.4",
+    "title": "Do not offer anonymous teleconsultations",
+    "description": "Telemedicine consultation should not be anonymous: both patient and RMP need to know each other's identity, and the RMP should begin the consultation by informing the patient of his/her name and qualifications.",
+    "source": "https://esanjeevani.mohfw.gov.in/assets/guidelines/Telemedicine_Practice_Guidelines.pdf"
+  },
+  {
+    "id": "TPG-3.2.2",
+    "regulation": "Telemedicine Practice Guidelines 2020",
+    "section": "3.2.2",
+    "title": "Provide a way for patients to verify RMP credentials",
+    "description": "The RMP should ensure that there is a mechanism for a patient to verify the credentials and contact details of the RMP, and should verify the patient's identity (name, age, address, email ID, phone number, registered ID etc.).",
+    "source": "https://esanjeevani.mohfw.gov.in/assets/guidelines/Telemedicine_Practice_Guidelines.pdf"
+  },
+  {
+    "id": "TPG-3.2.3",
+    "regulation": "Telemedicine Practice Guidelines 2020",
+    "section": "3.2.3",
+    "title": "Verify age; teleconsult minors only with an identified adult",
+    "description": "For issuing a prescription the RMP must explicitly ask the patient's age and seek age proof if in doubt. A minor may be teleconsulted only along with an adult whose identity is ascertained.",
+    "source": "https://esanjeevani.mohfw.gov.in/assets/guidelines/Telemedicine_Practice_Guidelines.pdf"
+  },
+  {
+    "id": "TPG-3.2.5",
+    "regulation": "Telemedicine Practice Guidelines 2020",
+    "section": "3.2.5",
+    "title": "Display RMP registration number on website and e-communications",
+    "description": "Every RMP shall display the registration number accorded by the State Medical Council/MCI on prescriptions, website, electronic communication (WhatsApp/email etc.) and receipts given to patients.",
+    "source": "https://esanjeevani.mohfw.gov.in/assets/guidelines/Telemedicine_Practice_Guidelines.pdf"
+  },
+  {
+    "id": "TPG-3.4",
+    "regulation": "Telemedicine Practice Guidelines 2020",
+    "section": "3.4.1-3.4.3",
+    "title": "Obtain patient consent; explicit consent if provider-initiated",
+    "description": "Patient consent is necessary for any telemedicine consultation. Consent is implied if the patient initiates it; explicit consent (by email, text, audio/video message or stated on phone/video) is needed if a health worker, RMP or caregiver initiates the teleconsultation, and the RMP must record it in patient records.",
+    "source": "https://esanjeevani.mohfw.gov.in/assets/guidelines/Telemedicine_Practice_Guidelines.pdf"
+  },
+  {
+    "id": "TPG-3.5",
+    "regulation": "Telemedicine Practice Guidelines 2020",
+    "section": "3.5.1",
+    "title": "Do not promise remote diagnosis without adequate evaluation",
+    "description": "RMPs must gather sufficient medical information before any professional judgement; if physical examination is critical, the RMP should not proceed until it can be arranged in person, and should recommend video consultation, examination by another RMP/health worker, or in-person consultation as needed.",
+    "source": "https://esanjeevani.mohfw.gov.in/assets/guidelines/Telemedicine_Practice_Guidelines.pdf"
+  },
+  {
+    "id": "TPG-3.6",
+    "regulation": "Telemedicine Practice Guidelines 2020",
+    "section": "3.6.1; 3.6.2",
+    "title": "Apply first-consult versus follow-up definitions correctly",
+    "description": "A first consult is a first-time consultation, one after more than 6 months since the previous consultation, or one for a different condition. A follow-up is with the same RMP within 6 months of the previous in-person consultation for the same condition, and is not a follow-up if new symptoms outside that condition arise or the RMP does not recall the prior context.",
+    "source": "https://esanjeevani.mohfw.gov.in/assets/guidelines/Telemedicine_Practice_Guidelines.pdf"
+  },
+  {
+    "id": "TPG-3.7.4-A",
+    "regulation": "Telemedicine Practice Guidelines 2020",
+    "section": "3.7.4 (Prescribing Medicines)",
+    "title": "Prescribe online only after adequate information and diagnosis",
+    "description": "RMPs may prescribe via telemedicine only when satisfied they have adequate and relevant information and the medicines are in the patient's best interest; prescribing carries the same accountability as in-person care. Prescribing medicines without an appropriate diagnosis/provisional diagnosis amounts to professional misconduct.",
+    "source": "https://esanjeevani.mohfw.gov.in/assets/guidelines/Telemedicine_Practice_Guidelines.pdf"
+  },
+  {
+    "id": "TPG-3.7.4-B",
+    "regulation": "Telemedicine Practice Guidelines 2020",
+    "section": "3.7.4 (Specific Restrictions); drug-list matrix; Annexure 1",
+    "title": "Restrict tele-prescribing to List O, A and B by consult type",
+    "description": "List O (common OTC-type medicines such as paracetamol, ORS, cough lozenges, iron/folic acid, vitamin D, calcium, and Government-notified emergency medicines) may be prescribed in any mode; List A (e.g. clotrimazole/mupirocin ointments, ciprofloxacin eye drops, chronic disease refills such as metformin, enalapril) only on a first consult by video or as refills on follow-up; List B (add-on medicines to optimise an existing chronic condition, e.g. sitagliptin added to metformin) only on follow-up. Drug lists may be modified by the Board of Governors (6.1).",
+    "source": "https://esanjeevani.mohfw.gov.in/assets/guidelines/Telemedicine_Practice_Guidelines.pdf"
+  },
+  {
+    "id": "TPG-3.7.4-C",
+    "regulation": "Telemedicine Practice Guidelines 2020",
+    "section": "3.7.4 (Prohibited List); 3.7.1.4",
+    "title": "Never offer Schedule X or NDPS drugs via telemedicine",
+    "description": "An RMP providing telemedicine cannot prescribe Prohibited List medicines: those in Schedule X of the Drugs and Cosmetics Act and Rules or any narcotic/psychotropic substance under the NDPS Act 1985 (e.g. anti-cancer drugs; narcotics such as morphine, codeine). Using telemedicine to prescribe from the restricted list is explicitly not permissible.",
+    "source": "https://esanjeevani.mohfw.gov.in/assets/guidelines/Telemedicine_Practice_Guidelines.pdf"
+  },
+  {
+    "id": "TPG-3.6.4.2",
+    "regulation": "Telemedicine Practice Guidelines 2020",
+    "section": "3.6.4.2 (Issue a Prescription and Transmit)",
+    "title": "Let patients choose any pharmacy for tele-prescriptions",
+    "description": "Tele-prescriptions must comply with the IMC Regulations and the Drugs and Cosmetics Act and Rules, and a photo/scan/digital copy of a signed prescription or e-prescription is to be given to the patient. If transmitting directly to a pharmacy, the RMP must ensure explicit patient consent that entitles the patient to get medicines dispensed from any pharmacy of his/her choice.",
+    "source": "https://esanjeevani.mohfw.gov.in/assets/guidelines/Telemedicine_Practice_Guidelines.pdf"
+  },
+  {
+    "id": "TPG-3.7.1",
+    "regulation": "Telemedicine Practice Guidelines 2020",
+    "section": "3.7.1.1-3.7.1.3 and footnote 3",
+    "title": "Protect patient privacy and confidentiality on telemedicine",
+    "description": "RMPs must abide by the IMC Regulations 2002 and the IT Act, data protection and privacy laws for patient privacy, confidentiality and handling/transfer of personal information. Patients must not be added to virtual support or health-education groups without their consent.",
+    "source": "https://esanjeevani.mohfw.gov.in/assets/guidelines/Telemedicine_Practice_Guidelines.pdf"
+  },
+  {
+    "id": "TPG-3.7.1.4-A",
+    "regulation": "Telemedicine Practice Guidelines 2020",
+    "section": "3.7.1.4 (Misconduct); 3.7.1.5",
+    "title": "Do not solicit telemedicine patients through ads or inducements",
+    "description": "RMPs are not permitted to solicit patients for telemedicine through any advertisements or inducements. Penalties are as per the IMC Act, ethics regulations and other prevailing laws.",
+    "source": "https://esanjeevani.mohfw.gov.in/assets/guidelines/Telemedicine_Practice_Guidelines.pdf"
+  },
+  {
+    "id": "TPG-3.7.1.4-B",
+    "regulation": "Telemedicine Practice Guidelines 2020",
+    "section": "3.7.1.4 (Misconduct)",
+    "title": "Do not misuse or post patient images on social media",
+    "description": "Misusing patient images and data, especially private and sensitive ones (e.g. an RMP uploading an explicit picture of a patient on social media), is explicitly not permissible.",
+    "source": "https://esanjeevani.mohfw.gov.in/assets/guidelines/Telemedicine_Practice_Guidelines.pdf"
+  },
+  {
+    "id": "TPG-3.7.1.4-C",
+    "regulation": "Telemedicine Practice Guidelines 2020",
+    "section": "3.7.1.4 (Misconduct); 4 (Essential Principles)",
+    "title": "Do not insist on telemedicine when patient wants in-person care",
+    "description": "RMPs insisting on telemedicine when the patient is willing to travel to a facility and/or requests an in-person consultation is explicitly not permissible. At any stage the patient has the right to discontinue the teleconsultation.",
+    "source": "https://esanjeevani.mohfw.gov.in/assets/guidelines/Telemedicine_Practice_Guidelines.pdf"
+  },
+  {
+    "id": "TPG-3.7.3",
+    "regulation": "Telemedicine Practice Guidelines 2020",
+    "section": "3.7.3.1; 3.7.3.2",
+    "title": "Charge appropriate fees and issue receipts for teleconsultations",
+    "description": "Telemedicine consultations should be treated like in-person consultations from a fee perspective; the RMP may charge an appropriate fee and should give a receipt/invoice for the fee charged.",
+    "source": "https://esanjeevani.mohfw.gov.in/assets/guidelines/Telemedicine_Practice_Guidelines.pdf"
+  },
+  {
+    "id": "TPG-4.2",
+    "regulation": "Telemedicine Practice Guidelines 2020",
+    "section": "4.2.1; 4.2.2",
+    "title": "Allow caregiver consultations only with proper authorisation",
+    "description": "A caregiver (family member or person authorised by the patient) may consult without the patient present only if the patient is a minor (aged 16 or less) or incapacitated, or the caregiver has formal authorisation or a verified document establishing the relationship, or was verified by the patient in a previous in-person consult.",
+    "source": "https://esanjeevani.mohfw.gov.in/assets/guidelines/Telemedicine_Practice_Guidelines.pdf"
+  },
+  {
+    "id": "TPG-5.1",
+    "regulation": "Telemedicine Practice Guidelines 2020",
+    "section": "5.1; 5.2",
+    "title": "Platforms must list only verified RMPs with credentials displayed",
+    "description": "Technology platforms (mobile apps, websites etc.) providing telemedicine must ensure consumers consult only RMPs registered with the national or a state medical council, conduct due diligence before listing any RMP, and provide the name, qualification, registration number and contact details of every listed RMP.",
+    "source": "https://esanjeevani.mohfw.gov.in/assets/guidelines/Telemedicine_Practice_Guidelines.pdf"
+  },
+  {
+    "id": "TPG-5.4",
+    "regulation": "Telemedicine Practice Guidelines 2020",
+    "section": "5.4",
+    "title": "Do not let AI/ML tools counsel patients or prescribe",
+    "description": "Technology platforms based on Artificial Intelligence/Machine Learning are not allowed to counsel patients or prescribe any medicine. AI, IoT or decision-support tools may only assist the RMP; the final prescription or counselling must be delivered directly by the RMP.",
+    "source": "https://esanjeevani.mohfw.gov.in/assets/guidelines/Telemedicine_Practice_Guidelines.pdf"
+  },
+  {
+    "id": "TPG-5.6",
+    "regulation": "Telemedicine Practice Guidelines 2020",
+    "section": "5.3; 5.6; 5.7",
+    "title": "Platforms must provide grievance redressal and report non-compliance",
+    "description": "Technology platforms must have a proper mechanism to address end-customer queries and grievances and must report non-compliance to the Board of Governors (in supersession of MCI). A platform found in violation may be blacklisted, after which no RMP may use it to provide telemedicine.",
+    "source": "https://esanjeevani.mohfw.gov.in/assets/guidelines/Telemedicine_Practice_Guidelines.pdf"
+  },
+  {
+    "id": "TPG-MOD2020-1",
+    "regulation": "Modification in Medicine List, Telemedicine Practice Guidelines 2020",
+    "section": "Para 2 (Annexure-1 List A)",
+    "title": "Psychiatry drugs listed in List A for teleconsultation",
+    "description": "Drugs used in psychiatry practice such as Phenobarbitone, Clobazam and Clonazepam are added to List A of the Telemedicine Practice Guidelines medicine lists, prescribable on first consult as well as follow-up.",
+    "source": "https://nmc.org.in/whats-new/download/825",
+    "notice_date": "11 Apr 2020"
+  }
+]

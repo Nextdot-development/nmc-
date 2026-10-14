@@ -1,0 +1,155 @@
+[
+  {
+    "id": "TEMPREG-WEB-1",
+    "regulation": "NMC EMRB Advisory on Temporary Registration of Foreign Medical Practitioners 2024",
+    "section": "Advisory paras 1-4 (ref. Reg. 13.1.2, Registration of Medical Practitioners and Licence to Practice Medicine Regulations 2023)",
+    "title": "Publish fellowship program details on sponsor institution website",
+    "description": "Hospitals/medical colleges/institutes sponsoring temporary registration of foreign medical practitioners must have on their official website the details of their fellowship programs: course content, duration, training facilities, teaching, faculty details with active registration numbers, infrastructure facilities and fees charged; non-compliance may lead to rejection of the application.",
+    "source": "https://nmc.org.in/whats-new/download/405",
+    "notice_date": "02 Sep 2024"
+  },
+  {
+    "id": "RMPLR-2023-6",
+    "regulation": "Registration of Medical Practitioners and Licence to Practice Medicine Regulations 2023",
+    "section": "Clause 6(d), 9(iv)",
+    "title": "Show registration number in prescribed UID-plus-State-code format",
+    "description": "A licence to practise carries a registration number formed from the NMC Unique Identification (UID) number suffixed with the code of the State/UT; on transfer the unique number stays the same and only the State code changes.",
+    "source": "https://nmc.org.in/whats-new/download/396",
+    "notice_date": "08 Jun 2023"
+  },
+  {
+    "id": "RMPLR-2023-7",
+    "regulation": "Registration of Medical Practitioners and Licence to Practice Medicine Regulations 2023",
+    "section": "Clause 7(i), 7(iv)",
+    "title": "Claim specialty only for registered additional qualifications",
+    "description": "A registered practitioner obtaining an additional recognised qualification must apply to the State Medical Council to enter it in the State/National Register. Only a licensed practitioner with registered additional qualifications may practise in the field of specialisation/super-specialisation commensurate with that qualification.",
+    "source": "https://nmc.org.in/whats-new/download/396",
+    "notice_date": "08 Jun 2023"
+  },
+  {
+    "id": "RMPLR-2023-8",
+    "regulation": "Registration of Medical Practitioners and Licence to Practice Medicine Regulations 2023",
+    "section": "Clause 8",
+    "title": "Do not practise on an expired or inactive licence",
+    "description": "The licence to practise is valid for five years and must be renewed via the State Medical Council (application up to three months before expiry). If not renewed, the register entry is marked 'inactive' and the person is not entitled to practise medicine.",
+    "source": "https://nmc.org.in/whats-new/download/396",
+    "notice_date": "08 Jun 2023"
+  },
+  {
+    "id": "RMPLR-2023-10",
+    "regulation": "Registration of Medical Practitioners and Licence to Practice Medicine Regulations 2023",
+    "section": "Clause 10",
+    "title": "Reflect removal of name from register; no practice while removed",
+    "description": "Where a practitioner's name is removed (temporarily or permanently) from the State Register under NMC regulations, the State Medical Council enters this against the name and it is automatically reflected in the National Register; restoration is likewise entered.",
+    "source": "https://nmc.org.in/whats-new/download/396",
+    "notice_date": "08 Jun 2023"
+  },
+  {
+    "id": "RMPLR-2023-13",
+    "regulation": "Registration of Medical Practitioners and Licence to Practice Medicine Regulations 2023",
+    "section": "Clause 13 & footnotes",
+    "title": "Foreign doctors need NMC temporary registration limited to sponsor",
+    "description": "A foreign medical practitioner may practise in India only with EMRB temporary registration for a specified purpose (PG/super-specialty course, fellowship/clinical research/training/observership, expert visit, voluntary clinical service), limited to the sponsoring institution and period (generally max 12 months, ending earlier on visa expiry). The sponsor is responsible for the registrant's conduct; registration may be cancelled for breaches or activities outside the medical profession.",
+    "source": "https://nmc.org.in/whats-new/download/396",
+    "notice_date": "08 Jun 2023"
+  },
+  {
+    "id": "TRG-2024-1B",
+    "regulation": "NMC Guidelines on Temporary Registration 2024",
+    "section": "Section 1B(i)-(iv)",
+    "title": "Restrict foreign registrants to declared purpose under sponsor supervision",
+    "description": "Temporary registration confers privileges only for the purpose for which it is granted, commensurate with declared qualifications; the registrant must work only under supervision of the sponsor, who bears vicarious responsibility for ethical/professional complaints.",
+    "source": "https://nmc.org.in/whats-new/download/325",
+    "notice_date": "18 Jan 2024"
+  },
+  {
+    "id": "TRG-2024-1Bvi",
+    "regulation": "NMC Guidelines on Temporary Registration 2024",
+    "section": "Section 1B(vi), 5A(x), 5A(d)(xiv)",
+    "title": "Do not present temporary registrants as independent practitioners",
+    "description": "Temporary registration does not permit: signing medical/fitness certificates; medico-legal work or acting as expert witness; independent practice or practice outside the institution/approved programme; independent surgical/interventional procedures without supervision; holding teaching posts; or any paid/honorary professional position outside the institution. It gives no advantage toward provisional or permanent registration.",
+    "source": "https://nmc.org.in/whats-new/download/325",
+    "notice_date": "18 Jan 2024"
+  },
+  {
+    "id": "TRG-2024-5e",
+    "regulation": "NMC Guidelines on Temporary Registration 2024",
+    "section": "Section 5A(e)",
+    "title": "Do not offer patient care by foreign observers",
+    "description": "Clinical observership temporary registration is for max 6 months, non-extendable; observers may not be involved in direct patient care, consultation or handling clinical samples, nor make case-note entries or write prescriptions.",
+    "source": "https://nmc.org.in/whats-new/download/325",
+    "notice_date": "18 Jan 2024"
+  },
+  {
+    "id": "TRG-2024-5B",
+    "regulation": "NMC Guidelines on Temporary Registration 2024",
+    "section": "Section 5B & 5C",
+    "title": "Limit foreign expert visits to registered duration and purpose",
+    "description": "Expert-visit registration is only for demonstrating special clinical skills in an academic course, conference or equivalent activity, for at most three months per calendar year (no two consecutive 90-day periods; at least 30 days between), sponsored by a host with permanent IMR/NMR registration. Emergency temporary registration (disasters, pandemics) is for one month only.",
+    "source": "https://nmc.org.in/whats-new/download/325",
+    "notice_date": "18 Jan 2024"
+  },
+  {
+    "id": "EBOOK-2023-C3",
+    "regulation": "NMC Professional Conduct Review (Lessons from Case Archives) Vol-I 2023",
+    "section": "Case 3 take-home",
+    "title": "Do not use consultant/specialist titles without qualification",
+    "description": "Use of the title 'consultant/specialist' (e.g. 'Consultant sonologist' on the basis of a short PCPNDT certificate) must be restricted to those qualified in that specialty; per IMC 2002 clause 7.20 a physician shall not claim to be a specialist without a special qualification in that branch, and additional qualifications should be registered with the Medical Council. Care must be taken not to mislead the public through sign boards, visiting cards, announcements, etc.",
+    "source": "https://nmc.org.in/whats-new/download/531",
+    "notice_date": "06 Oct 2023"
+  },
+  {
+    "id": "EBOOK-2023-C3B",
+    "regulation": "NMC Professional Conduct Review (Lessons from Case Archives) Vol-I 2023",
+    "section": "Case 3 take-home",
+    "title": "Keep signboards and prescription pads to permitted particulars",
+    "description": "Per IMC 2002 clause 7.13, it is improper to use an unusually large signboard or write on it anything other than name, qualifications from a University/statutory body, titles, specialty name and registration number with the State Medical Council; prescription papers should carry the same contents. Signboards must not be affixed on a chemist's shop or where the doctor does not reside or work.",
+    "source": "https://nmc.org.in/whats-new/download/531",
+    "notice_date": "06 Oct 2023"
+  },
+  {
+    "id": "EBOOK-2023-C5",
+    "regulation": "NMC Professional Conduct Review (Lessons from Case Archives) Vol-I 2023",
+    "section": "Case 5 take-home",
+    "title": "Perform elective procedures only by qualified specialists",
+    "description": "All elective procedures should be performed by a doctor qualified in that specialty (e.g. elective LSCS not by a general surgeon); consent to treatment by an unqualified practitioner is invalid. Valid informed consent signed by the patient is required in elective cases unless minor, unconscious or incompetent.",
+    "source": "https://nmc.org.in/whats-new/download/531",
+    "notice_date": "06 Oct 2023"
+  },
+  {
+    "id": "EBOOK-2023-C7",
+    "regulation": "NMC Professional Conduct Review (Lessons from Case Archives) Vol-I 2023",
+    "section": "Case 7 take-home",
+    "title": "Avoid disparaging colleagues' clinical judgments",
+    "description": "Doctors should avoid making negative statements to patients about clinical judgments and procedures performed by professional colleagues, to preserve trust in the medical fraternity.",
+    "source": "https://nmc.org.in/whats-new/download/531",
+    "notice_date": "06 Oct 2023"
+  },
+  {
+    "id": "EBOOK-2023-C8",
+    "regulation": "NMC Professional Conduct Review (Lessons from Case Archives) Vol-I 2023",
+    "section": "Case 8 take-home",
+    "title": "Display charges upfront and never misrepresent qualifications",
+    "description": "Under the Clinical Establishments Act 2010, all professional and hospital charges should be displayed and made known to patients before treatment; overcharging/exploitation is unethical and receipts must be issued for all payments. Posing as a specialist (e.g. critical care specialist) without requisite qualification is unethical misrepresentation (IMC 2002 clause 7.20).",
+    "source": "https://nmc.org.in/whats-new/download/531",
+    "notice_date": "06 Oct 2023"
+  },
+  {
+    "id": "EBOOK-2023-C4",
+    "regulation": "NMC Professional Conduct Review (Lessons from Case Archives) Vol-I 2023",
+    "section": "Case 4 take-home",
+    "title": "Register clinical trials and follow ethics approvals",
+    "description": "RMPs conducting clinical trials must follow ICMR National Ethical Guidelines 2017 with institutional ethics committee approval, register trials prospectively with CTRI (mandatory since 15 June 2009), comply with New Drugs and Clinical Trials Rules 2019, and keep pharma funding transparent (not into personal accounts).",
+    "source": "https://nmc.org.in/whats-new/download/531",
+    "notice_date": "06 Oct 2023"
+  },
+  {
+    "id": "MCI-SINGHANIA-2020",
+    "regulation": "MCI Public Notice on Singhania University 2020",
+    "section": "Notice",
+    "title": "Do not claim medical qualifications from unpermitted courses",
+    "description": "Admissions to MBBS, Diploma or MD/MS/DM/M.Ch courses by any institution without prior Central Government permission under the IMC Act are illegal, and students so admitted do not get a recognised medical qualification entitling them to practise; MBBS admissions by Singhania University, Jhunjhunu, Rajasthan are illegal and void ab initio.",
+    "source": "https://nmc.org.in/whats-new/download/798",
+    "notice_date": "03 Aug 2020"
+  }
+]
