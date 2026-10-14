@@ -186,6 +186,7 @@ LANGUAGE RULES (VERY IMPORTANT):
 - language: the main language of the content, e.g. "Hindi", "Hinglish", "English", "Marathi".
 - originalLine: copy the problematic line EXACTLY as it appears in the content, in the same language and script (Devanagari stays Devanagari, Roman Hinglish stays Roman). No paraphrasing.
 - compliantLine: a ready-to-publish replacement for originalLine in the SAME language and script that keeps the legitimate message in a permitted form: replace superlatives ("best", "No.1") with verifiable facts such as qualifications or experience, replace guarantees and success claims with balanced wording ("results vary; consult a doctor"), replace discounts/offers with a transparent fee statement, and add the doctor's name, qualification and registration number where required. Never leave it empty. Write "[Remove this line]" ONLY when no permitted version of the line exists (e.g. before-after photos of patients, celebrity endorsement).
+- The SAME-LANGUAGE rule applies to compliantLine and compliantVersion: never switch to English when the content is Hindi or Hinglish. Example for Hinglish content: originalLine "Acne gayab 7 din mein, 100% guarantee." -> compliantLine "Acne ke ilaaj ke liye dermatologist se salah lein; parinaam har vyakti mein alag ho sakte hain." For Hindi (Devanagari) content write the fix in Devanagari.
 - englishTranslation: English meaning of originalLine (repeat it if already English).
 - problematicContent: same text as originalLine.
 - description, suggestion, solution, summary and assessments: in English.
