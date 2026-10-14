@@ -6,6 +6,7 @@ import OpenAI from 'openai';
 import ytdl from 'ytdl-core';
 import { YoutubeTranscript } from 'youtube-transcript';
 import { spawn } from 'child_process';
+import { transcribeYouTubeWithGemini } from '../geminiService.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -326,7 +327,7 @@ const fetchSubtitlesWithYtDlp = async (videoUrl) => {
       const proc = spawn(getYtDlpCommand(), [
         '--skip-download', '--write-subs', '--write-auto-subs',
         '--sub-langs', 'en,hi,en-orig,hi-orig,.*-orig',
-        '--sub-format', 'vtt', '--no-playlist', '--ignore-errors',
+        '--sub-format', 'vtt', '--no-playlist', '--ignore-errors', '--js-runtimes', 'node',
         '-o', path.join(dir, 'sub.%(ext)s'), videoUrl,
       ]);
       let stderr = '';
@@ -378,6 +379,16 @@ export const getYoutubeTranscript = async (videoUrl) => {
     if (subtitles) return subtitles;
   } catch (error) {
     console.warn('[YouTube Transcript] yt-dlp subtitles failed:', error.message);
+  }
+
+  // YouTube often blocks cloud servers; Gemini can read public videos by URL
+  if (process.env.ENABLE_GEMINI_YOUTUBE !== 'false') {
+    try {
+      console.log('[YouTube Transcript] Transcribing with Gemini...');
+      return await transcribeYouTubeWithGemini(normalized);
+    } catch (error) {
+      console.warn('[YouTube Transcript] Gemini transcription failed:', error.message);
+    }
   }
 
   console.log('[YouTube Transcript] Captions unavailable. Fetching metadata...');

@@ -316,6 +316,47 @@ export const analyzeWithGemini = async ({
 /* ===============================
    OPTIONAL: AUDIO SUMMARY
 ================================ */
+/* ===============================
+   YOUTUBE TRANSCRIPT (Gemini reads the public video by URL)
+   Used when YouTube blocks caption downloads from the server.
+================================ */
+export const transcribeYouTubeWithGemini = async (videoUrl) => {
+  const vertexAI = getVertexAIClient();
+  const model = vertexAI.getGenerativeModel({
+    model: MODEL_NAME,
+    generationConfig: {
+      temperature: 0.0,
+      maxOutputTokens: 32768,
+      // Low-resolution frames cut video tokens ~4x; enough to read on-screen text
+      mediaResolution: 'MEDIA_RESOLUTION_LOW',
+      thinkingConfig: { thinkingBudget: 0 }
+    }
+  });
+
+  const prompt = 'Transcribe everything spoken in this video verbatim, in its original language (keep Hindi/Hinglish as spoken). '
+    + 'After the transcript, add a new line starting with "ON-SCREEN TEXT:" listing any promotional or medical text shown on screen. '
+    + 'Plain text only, no timestamps, no commentary.';
+
+  const result = await withRateLimitRetry(() => withTimeout(
+    model.generateContent({
+      contents: [{ role: 'user', parts: [
+        { fileData: { fileUri: videoUrl, mimeType: 'video/*' } },
+        { text: prompt }
+      ] }]
+    }),
+    Number(process.env.YOUTUBE_GEMINI_TIMEOUT_MS) || 240000,
+    'Gemini YouTube transcription timed out'
+  ));
+
+  const text = (result?.response?.candidates?.[0]?.content?.parts || [])
+    .map((part) => part.text || '')
+    .join('')
+    .trim();
+  console.log('[Gemini] YouTube transcription', JSON.stringify({ chars: text.length, usage: result?.response?.usageMetadata?.totalTokenCount }));
+  if (!text) throw new Error('Gemini returned an empty transcript');
+  return text;
+};
+
 export const generateAudioSummary = async (text) => {
   const vertexAI = getVertexAIClient();
 
