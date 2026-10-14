@@ -197,7 +197,7 @@ const downloadWithYtDlp = async (videoUrl, outputPath) => {
 
 const getAudioDurationSeconds = async (filePath) => {
   const ffmpegLocation = ensureFfmpegAvailable();
-  const ffprobePath = path.join(ffmpegLocation, 'ffprobe.exe');
+  const ffprobePath = path.join(ffmpegLocation, process.platform === 'win32' ? 'ffprobe.exe' : 'ffprobe');
 
   return await withTimeout(new Promise((resolve, reject) => {
     const process = spawn(ffprobePath, [
