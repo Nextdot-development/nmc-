@@ -135,7 +135,12 @@ const resolveFfmpegLocation = () => {
     return normalized;
   }
 
-  return '';
+  // Linux/macOS: a directory holding ffprobe, a full path to ffmpeg, or a bare command on PATH
+  if (fs.existsSync(path.join(normalized, 'ffprobe'))) return normalized;
+  if (path.isAbsolute(normalized) && fs.existsSync(normalized)) return path.dirname(normalized);
+  const pathDirs = (process.env.PATH || '').split(path.delimiter);
+  const found = pathDirs.find((dir) => fs.existsSync(path.join(dir, normalized)) && fs.existsSync(path.join(dir, 'ffprobe')));
+  return found || '';
 };
 
 const ensureFfmpegAvailable = () => {
