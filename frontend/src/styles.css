@@ -701,3 +701,29 @@ kbd {
 @media (min-width: 1181px) and (max-height: 820px) {
   .shield-orbit { inset: -40px 6% auto auto; width: 76%; }
 }
+
+/* v4: simple auditor (content as in original NextComply screen, neon theme) */
+.auditor--simple { max-width: 1040px; }
+.simple { padding: 26px 30px 28px; display: flex; flex-direction: column; gap: 22px; }
+.simple__title { display: flex; align-items: center; gap: 12px; font-size: 24px; font-weight: 800; letter-spacing: -0.01em; }
+.simple__titleicon { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 12px; background: rgba(200, 245, 74, 0.14); color: var(--lime); box-shadow: 0 0 18px -6px rgba(200, 245, 74, 0.7); }
+.simple__row { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+.label { margin: 0 0 12px; font-size: 12.5px; font-weight: 700; letter-spacing: 0.12em; color: var(--muted); }
+.pills { display: flex; flex-wrap: wrap; gap: 10px; }
+.pill-btn {
+  display: inline-flex; align-items: center; gap: 8px; padding: 9px 16px; border-radius: 12px;
+  border: 1px solid var(--line-2); background: var(--panel); color: var(--text-2); font-weight: 600; font-size: 14px; cursor: pointer;
+}
+.pill-btn:hover { color: var(--text); border-color: #3a4150; }
+.pill-btn--active { color: var(--lime-ink); background: linear-gradient(90deg, #d4ff5c, var(--lime)); border-color: var(--lime); box-shadow: 0 0 20px -6px rgba(200, 245, 74, 0.7); }
+.auditor--simple .selectbox select { font-size: 16px; padding-top: 0; }
+.info-card { padding: 18px 20px; border-radius: 16px; border: 1px solid var(--line-2); background: var(--bg-2); display: flex; flex-direction: column; gap: 8px; }
+.info-card h4 { display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 700; letter-spacing: 0.1em; }
+.info-card h4 svg { color: var(--lime); }
+.info-card__value { margin: 0; display: flex; align-items: center; gap: 10px; font-weight: 600; }
+.info-card small { color: var(--muted); font-size: 13px; }
+.auditor--simple .inputbox textarea { min-height: 130px; }
+@media (max-width: 860px) {
+  .simple { padding: 20px 16px; }
+  .simple__row { grid-template-columns: 1fr; }
+}
