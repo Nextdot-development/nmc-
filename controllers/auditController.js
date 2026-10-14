@@ -72,7 +72,14 @@ export const getAuditHistory = async (req, res) => {
       .select('auditResult contentType originalInput createdAt')
       .lean();
 
-    const results = audits.map((record) => record.auditResult);
+    // Keep the audit result shape; add record metadata alongside it
+    const results = audits.map((record) => ({
+      ...record.auditResult,
+      _id: record._id,
+      contentType: record.contentType,
+      originalInput: record.originalInput,
+      createdAt: record.createdAt
+    }));
     return res.json(results);
   } catch (error) {
     console.error('[Audit Controller] History error:', error);
