@@ -39,6 +39,7 @@ export const CheckCircleIcon = icon(<><circle cx="12" cy="12" r="9" /><path d="M
 export const AlertIcon = icon(<><circle cx="12" cy="12" r="9" /><path d="M12 7v6M12 16.5v.5" /></>);
 export const XCircleIcon = icon(<><circle cx="12" cy="12" r="9" /><path d="M9 9l6 6M15 9l-6 6" /></>);
 export const UploadIcon = icon(<><path d="M12 16V4M7 9l5-5 5 5" /><path d="M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3" /></>);
+export const RefreshIcon = icon(<><path d="M20 11a8 8 0 00-14.9-3M4 4v4h4" /><path d="M4 13a8 8 0 0014.9 3M20 20v-4h-4" /></>);
 export const UserIcon = icon(<><circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0116 0" /></>);
 
 // Four-point star logo mark

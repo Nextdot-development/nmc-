@@ -1,14 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
+import { SidebarWaves, StackGraphic } from './Graphics.jsx';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../App.jsx';
 import {
-  ArrowUpRightIcon, BellIcon, ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon, ClockIcon, CogIcon,
-  DatabaseIcon, HomeIcon, LogoMark, LogoutIcon, MenuIcon, SearchIcon,
+  ArrowRightIcon, BellIcon, LayersIcon, ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon, ClockIcon, CogIcon,
+  HomeIcon, LogoMark, LogoutIcon, MenuIcon, SearchIcon,
 } from './Icons.jsx';
 
 const NAV = [
   { to: '/', label: 'Auditor', Icon: HomeIcon, end: true },
-  { to: '/rules', label: 'Rule Packs', Icon: DatabaseIcon },
+  { to: '/rules', label: 'Rule Packs', Icon: LayersIcon },
   { to: '/history', label: 'Audit History', Icon: ClockIcon },
   { to: '/settings', label: 'Settings', Icon: CogIcon },
 ];
@@ -28,6 +29,55 @@ export const IndiaFlag = () => (
 export const Avatar = ({ user, size = 'md' }) => {
   const initial = (user?.name || user?.email || 'U').trim().charAt(0).toUpperCase();
   return <span className={`avatar avatar--${size}`} title={user?.email}>{initial}</span>;
+};
+
+// Real product updates; the dot shows until the user has seen the latest one
+const UPDATES = [
+  { id: '2026-10-14-pack', title: 'NMC rule pack updated', body: '160 rules from the NMC Ethical Advertising Guidelines 2026, IMC Code of Ethics 2002, Telemedicine Guidelines and NMC advisories.' },
+];
+const SEEN_KEY = 'nc_nmc_seen_update';
+
+const Notifications = () => {
+  const [open, setOpen] = useState(false);
+  const [seen, setSeen] = useState(() => {
+    try { return localStorage.getItem(SEEN_KEY); } catch { return null; }
+  });
+  const ref = useRef(null);
+  const unread = seen !== UPDATES[0].id;
+
+  useEffect(() => {
+    if (!open) return undefined;
+    const close = (e) => { if (!ref.current?.contains(e.target)) setOpen(false); };
+    document.addEventListener('mousedown', close);
+    return () => document.removeEventListener('mousedown', close);
+  }, [open]);
+
+  const toggle = () => {
+    setOpen(!open);
+    if (unread) {
+      setSeen(UPDATES[0].id);
+      try { localStorage.setItem(SEEN_KEY, UPDATES[0].id); } catch { /* private mode */ }
+    }
+  };
+
+  return (
+    <div className="notify" ref={ref}>
+      <button type="button" className="square-btn square-btn--ghost" aria-label="Notifications" aria-expanded={open} onClick={toggle}>
+        <BellIcon width={22} height={22} />
+        {unread && <i className="notify__dot" />}
+      </button>
+      {open && (
+        <div className="notify__menu panel" role="dialog" aria-label="Notifications">
+          <strong>What's new</strong>
+          {UPDATES.map((u) => (
+            <NavLink key={u.id} to="/rules" className="notify__item" onClick={() => setOpen(false)}>
+              <span>{u.title}</span><small>{u.body}</small>
+            </NavLink>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 };
 
 export default function Layout() {
@@ -77,12 +127,13 @@ export default function Layout() {
           ))}
         </nav>
 
-        <div className="sidebar__glow" aria-hidden="true" />
+        <div className="sidebar__glow"><SidebarWaves /></div>
 
         <NavLink to="/rules" className="promo">
-          <strong>Stay compliant<br />grow with<br />confidence.</strong>
-          <span>AI-powered NMC audits for healthcare advertising.</span>
-          <span className="promo__arrow"><ArrowUpRightIcon width={18} height={18} /></span>
+          <StackGraphic />
+          <strong>Stay compliant<br />grow with<br /><em>confidence</em></strong>
+          <span>AI-powered NMC audits for healthcare advertising, claims and communications.</span>
+          <span className="promo__arrow"><ArrowRightIcon width={18} height={18} /></span>
         </NavLink>
 
         <div className="sidebar__user">
@@ -113,7 +164,7 @@ export default function Layout() {
           <form className="topsearch" onSubmit={search} role="search">
             <SearchIcon width={22} height={22} />
             <input ref={searchRef} value={query} onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search audits, rule packs, regulations..." aria-label="Search rule packs and regulations" />
+              placeholder="Search audits, rule packs, regulations or keywords..." aria-label="Search rule packs and regulations" />
             <span className="kbd" aria-hidden="true"><kbd>Ctrl</kbd><kbd>K</kbd></span>
           </form>
           <div className="topbar__right">
@@ -124,7 +175,7 @@ export default function Layout() {
               </select>
               <ChevronDownIcon width={18} height={18} />
             </label>
-            <button type="button" className="square-btn square-btn--ghost" aria-label="Notifications" title="No new notifications"><BellIcon width={22} height={22} /></button>
+            <Notifications />
             {user && <NavLink to="/settings" aria-label="Account"><Avatar user={user} size="xl" /></NavLink>}
           </div>
         </header>

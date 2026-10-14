@@ -2,12 +2,12 @@ import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../api.js';
 import AuditResult from '../components/AuditResult.jsx';
+import { ShieldOrbit } from '../components/Graphics.jsx';
 import {
-  BoltIcon, BulbIcon, CalendarIcon, ChartIcon, ChevronDownIcon, ChevronRightIcon, ClipboardIcon, DocIcon, GlobeIcon,
-  ImageIcon, LayersIcon, LinkIcon, MapPinIcon, MicIcon, ShieldCheckIcon, SparkIcon, TargetIcon, TextIcon, UploadIcon,
-  VideoIcon, HomeIcon,
+  BoltIcon, BulbIcon, CalendarIcon, ChartIcon, CheckCircleIcon, ChevronDownIcon, ClipboardIcon, DatabaseIcon, DocIcon,
+  GlobeIcon, HomeIcon, ImageIcon, LayersIcon, LinkIcon, MicIcon, ShieldCheckIcon, SparkIcon, TextIcon, UploadIcon,
+  VideoIcon, XCircleIcon, ArrowRightIcon, RefreshIcon,
 } from '../components/Icons.jsx';
-import { PACKS } from '../packs.js';
 import { formatDate, statusTone, StatusPill, TYPE_LABEL } from './History.jsx';
 
 const FORMATS = [
@@ -24,45 +24,34 @@ const RULE_PACKS = [
   { id: 'Pharmaceuticals', label: 'NMC · Pharmaceuticals', description: 'Audits drug and product promotion including doctor endorsements, pharma gifts and telemedicine rules.' },
 ];
 
+const FEATURES = [
+  { Icon: BoltIcon, tone: 'lime', label: <>AI powered<br />analysis</> },
+  { Icon: DatabaseIcon, tone: 'violet', label: <>NMC specific<br />rules</> },
+  { Icon: ShieldCheckIcon, tone: 'lime', label: <>Detailed<br />explanations</> },
+  { Icon: ChartIcon, tone: 'violet', label: <>Actionable<br />recommendations</> },
+];
+
+const SCOPE = [
+  { tone: 'green', label: 'IMC Professional Conduct Regulations, 2002' },
+  { tone: 'white', label: 'NMC Ethical Advertising Guidelines, 2026' },
+  { tone: 'amber', label: 'Telemedicine Practice Guidelines, 2020' },
+  { tone: 'violet', label: 'NMC clinical advisories & registration rules' },
+];
+
 const MAX_TEXT = 10000;
 const MAX_MB = 100;
 const STEPS = ['Reading your content', 'Checking NMC & IMC rules', 'Writing compliant rewrites'];
 const SAMPLE = 'Dr. Rakesh Sharma — Best Hair Transplant Specialist in Delhi! 100% guaranteed results, painless treatment. 50% OFF this Diwali only. See before-and-after photos of our celebrity patients. Book now on WhatsApp!';
-const DOT_COLORS = ['lime', 'violet', 'amber', 'cyan', 'pink'];
 
 const formatBytes = (n) => (n > 1024 * 1024 ? `${(n / 1024 / 1024).toFixed(1)} MB` : `${Math.max(1, Math.round(n / 1024))} KB`);
 
-const HeroOrb = () => (
-  <div className="orb" aria-hidden="true">
-    <svg viewBox="0 0 420 300" className="orb__svg">
-      <defs>
-        <linearGradient id="orbA" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#d8ff4a" />
-          <stop offset="0.45" stopColor="#7cf0a8" />
-          <stop offset="1" stopColor="#7c4dff" />
-        </linearGradient>
-        <linearGradient id="orbB" x1="1" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#b388ff" />
-          <stop offset="1" stopColor="#3b1d8f" />
-        </linearGradient>
-        <filter id="orbGlow" x="-50%" y="-50%" width="200%" height="200%">
-          <feGaussianBlur stdDeviation="10" />
-        </filter>
-      </defs>
-      <ellipse cx="250" cy="150" rx="150" ry="118" fill="none" stroke="#2a2f3a" strokeDasharray="2 6" />
-      <g transform="rotate(-28 250 140)">
-        <ellipse cx="250" cy="140" rx="100" ry="58" fill="none" stroke="url(#orbA)" strokeWidth="30" filter="url(#orbGlow)" opacity="0.55" />
-        <ellipse cx="250" cy="140" rx="100" ry="58" fill="none" stroke="url(#orbB)" strokeWidth="34" />
-        <ellipse cx="250" cy="140" rx="100" ry="58" fill="none" stroke="url(#orbA)" strokeWidth="14" strokeDasharray="300 400" strokeLinecap="round" />
-        <ellipse cx="250" cy="126" rx="88" ry="44" fill="none" stroke="#ffffff" strokeOpacity="0.25" strokeWidth="2" strokeDasharray="120 500" />
-      </g>
-      <circle cx="372" cy="70" r="4" fill="#d8ff4a" />
-      <circle cx="140" cy="200" r="4" fill="#9dff3d" />
-      <circle cx="330" cy="55" r="3" fill="#8b6cff" />
-    </svg>
-    <span className="orb__chip orb__chip--a"><ShieldCheckIcon width={22} height={22} /> Safer Content</span>
-    <span className="orb__chip orb__chip--b"><BoltIcon width={22} height={22} /> Faster Reviews</span>
-    <span className="orb__chip orb__chip--c"><ChartIcon width={22} height={22} /> Regulatory Clarity</span>
+const HeroArt = () => (
+  <div className="hero-art" aria-hidden="true">
+    <ShieldOrbit />
+    <span className="art-chip art-chip--a"><DocIcon width={18} height={18} /> NMC Regulations</span>
+    <span className="art-chip art-chip--b"><ShieldCheckIcon width={18} height={18} /> Healthcare Safety</span>
+    <span className="art-chip art-chip--c"><BulbIcon width={18} height={18} /> Clear Explanations</span>
+    <span className="art-chip art-chip--d"><ChartIcon width={18} height={18} /> Actionable Insights</span>
   </div>
 );
 
@@ -76,6 +65,10 @@ const Step = ({ n, title, sub, children }) => (
   </section>
 );
 
+const CardTitle = ({ Icon, tone = 'violet', children }) => (
+  <h3 className="card-title"><span className={`card-title__icon card-title__icon--${tone}`}><Icon width={18} height={18} /></span>{children}</h3>
+);
+
 export default function Auditor() {
   const [format, setFormat] = useState('text');
   const [pack, setPack] = useState('HealthCare');
@@ -87,20 +80,20 @@ export default function Auditor() {
   const [step, setStep] = useState(0);
   const [error, setError] = useState('');
   const [result, setResult] = useState(null);
-  const [ruleGroups, setRuleGroups] = useState(null);
+  const [ruleCount, setRuleCount] = useState(null);
   const [recent, setRecent] = useState(null);
   const fileInput = useRef(null);
   const resultRef = useRef(null);
+  const packSelect = useRef(null);
 
   const fmt = FORMATS.find((f) => f.id === format);
   const isFile = Boolean(fmt.accept);
   const activePack = RULE_PACKS.find((p) => p.id === pack);
-  const totalRules = ruleGroups?.reduce((n, g) => n + g.rules.length, 0);
 
   const loadRecent = () => api.history().then((items) => setRecent(Array.isArray(items) ? items.slice(0, 3) : [])).catch(() => setRecent([]));
 
   useEffect(() => {
-    api.rulePack().then((res) => setRuleGroups(res?.data?.groups || [])).catch(() => setRuleGroups([]));
+    api.rulePack().then((res) => setRuleCount(res?.data?.count ?? null)).catch(() => setRuleCount(null));
     loadRecent();
   }, []);
 
@@ -141,6 +134,13 @@ export default function Auditor() {
     }
   };
 
+  const clear = () => {
+    setText('');
+    setUrl('');
+    setFile(null);
+    setError('');
+  };
+
   const ready = (format === 'text' && text.trim().length > 10)
     || (format === 'url' && /^https?:\/\/\S+\.\S+/.test(url.trim()))
     || (isFile && file);
@@ -169,158 +169,167 @@ export default function Auditor() {
 
   const reset = () => {
     setResult(null);
-    setText('');
-    setUrl('');
-    setFile(null);
+    clear();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
     <div className="auditor">
-      <section className="hero">
-        <div className="hero__copy">
-          <span className="badge-live"><i /> AI AUDIT WORKSPACE</span>
-          <h1>
-            <span>COMPLIANCE,</span>
-            <span><b className="lime">WITHOUT</b> <b className="grad">THE COMPLEXITY</b></span>
-          </h1>
-          <p>Upload or paste your healthcare marketing content and let AI analyse it against NMC regulations with clear explanations and actionable recommendations.</p>
-        </div>
-        <HeroOrb />
-      </section>
-
       <div className="auditor__grid">
-        <form className="panel panel--glow composer" onSubmit={submit}>
-          <Step n="1" title="Select Content Format" sub="Choose the type of content you want to audit">
-            <div className="formats" role="radiogroup" aria-label="Content format">
-              {FORMATS.map(({ id, label, Icon }) => (
-                <button key={id} type="button" role="radio" aria-checked={format === id}
-                  className={`format ${format === id ? 'format--active' : ''}`} onClick={() => chooseFormat(id)}>
-                  <Icon width={24} height={24} /><span>{label}</span>
-                </button>
+        <div className="auditor__main">
+          <section className="hero">
+            <span className="badge-live"><i /> AI COMPLIANCE AUDITOR</span>
+            <h1>
+              <span>COMPLIANCE,</span>
+              <span><b className="lime">WITHOUT</b> THE <b className="grad">COMPLEXITY</b></span>
+            </h1>
+            <p>Upload or paste your healthcare marketing content and let AI analyse it against NMC regulations with clear explanations and actionable recommendations.</p>
+            <ul className="features">
+              {FEATURES.map(({ Icon, tone, label }, i) => (
+                <li key={i}><span className={`features__icon features__icon--${tone}`}><Icon width={20} height={20} /></span><span>{label}</span></li>
               ))}
-            </div>
-          </Step>
+            </ul>
+          </section>
 
-          <Step n="2" title="Provide Your Content"
-            sub={format === 'text' ? 'Paste your marketing copy or script below' : format === 'url' ? 'Enter the page or video link to audit' : `Upload your ${fmt.label.toLowerCase()} file`}>
-            {format === 'text' && (
-              <div className="inputbox">
-                <textarea value={text} onChange={(e) => setText(e.target.value.slice(0, MAX_TEXT))} rows={3}
-                  placeholder="Paste content to audit..." aria-label="Content to audit" />
-                <div className="inputbox__bar">
-                  <button type="button" className="chip-btn" onClick={paste}><ClipboardIcon width={18} height={18} /> Paste</button>
-                  <button type="button" className="chip-btn" onClick={() => setText(SAMPLE)}><BulbIcon width={18} height={18} /> Sample</button>
-                  <span className="counter">{text.length} / {MAX_TEXT}</span>
-                </div>
+          <form className="panel panel--glow composer" onSubmit={submit}>
+            <Step n="1" title="Select Content Format" sub="Choose the type of content you want to audit">
+              <div className="formats" role="radiogroup" aria-label="Content format">
+                {FORMATS.map(({ id, label, Icon }) => (
+                  <button key={id} type="button" role="radio" aria-checked={format === id}
+                    className={`format ${format === id ? 'format--active' : ''}`} onClick={() => chooseFormat(id)}>
+                    {format === id && <span className="format__check"><CheckCircleIcon width={18} height={18} /></span>}
+                    <Icon width={24} height={24} /><span>{label}</span>
+                  </button>
+                ))}
               </div>
-            )}
-            {format === 'url' && (
-              <div className="inputbox">
-                <input type="url" value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://clinic-website.in/offers" aria-label="URL to audit" />
-                <div className="inputbox__bar">
-                  <button type="button" className="chip-btn" onClick={paste}><ClipboardIcon width={18} height={18} /> Paste</button>
-                  <span className="counter">Websites, landing pages & YouTube</span>
-                </div>
-              </div>
-            )}
-            {isFile && (
-              <div className={`dropzone ${dragging ? 'dropzone--active' : ''}`}
-                onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
-                onDragLeave={() => setDragging(false)}
-                onDrop={(e) => { e.preventDefault(); setDragging(false); pickFile(e.dataTransfer.files?.[0]); }}
-                onClick={() => fileInput.current?.click()} role="button" tabIndex={0}
-                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') fileInput.current?.click(); }}>
-                <input ref={fileInput} type="file" accept={fmt.accept} hidden onChange={(e) => pickFile(e.target.files?.[0])} />
-                {file ? (
-                  <div className="dropzone__file">
-                    <fmt.Icon width={26} height={26} />
-                    <div><strong>{file.name}</strong><span>{formatBytes(file.size)}</span></div>
-                    <button type="button" className="chip-btn" onClick={(ev) => { ev.stopPropagation(); setFile(null); }}>Remove</button>
+            </Step>
+
+            <Step n="2" title="Provide Your Content"
+              sub={format === 'text' ? 'Paste your marketing copy or script below' : format === 'url' ? 'Enter the page or video link to audit' : `Upload your ${fmt.label.toLowerCase()} file`}>
+              {format === 'text' && (
+                <div className="inputbox">
+                  <textarea value={text} onChange={(e) => setText(e.target.value.slice(0, MAX_TEXT))} rows={2}
+                    placeholder="Paste your marketing content here..." aria-label="Content to audit" />
+                  <div className="inputbox__bar">
+                    <button type="button" className="chip-btn" onClick={paste}><ClipboardIcon width={17} height={17} /> Paste</button>
+                    <button type="button" className="chip-btn" onClick={() => setText(SAMPLE)}><SparkIcon width={17} height={17} /> Sample</button>
+                    <button type="button" className="chip-btn" onClick={clear}><XCircleIcon width={17} height={17} /> Clear</button>
+                    <span className="counter">{text.length} / {MAX_TEXT}</span>
                   </div>
-                ) : (
-                  <>
-                    <UploadIcon width={28} height={28} />
-                    <strong>Drop your {fmt.label.toLowerCase()} here or click to browse</strong>
-                    <span>{fmt.hint} · up to {MAX_MB} MB</span>
-                  </>
-                )}
+                </div>
+              )}
+              {format === 'url' && (
+                <div className="inputbox">
+                  <input type="url" value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://clinic-website.in/offers" aria-label="URL to audit" />
+                  <div className="inputbox__bar">
+                    <button type="button" className="chip-btn" onClick={paste}><ClipboardIcon width={17} height={17} /> Paste</button>
+                    <button type="button" className="chip-btn" onClick={clear}><XCircleIcon width={17} height={17} /> Clear</button>
+                    <span className="counter">Websites, landing pages & YouTube</span>
+                  </div>
+                </div>
+              )}
+              {isFile && (
+                <div className={`dropzone ${dragging ? 'dropzone--active' : ''}`}
+                  onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+                  onDragLeave={() => setDragging(false)}
+                  onDrop={(e) => { e.preventDefault(); setDragging(false); pickFile(e.dataTransfer.files?.[0]); }}
+                  onClick={() => fileInput.current?.click()} role="button" tabIndex={0}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') fileInput.current?.click(); }}>
+                  <input ref={fileInput} type="file" accept={fmt.accept} hidden onChange={(e) => pickFile(e.target.files?.[0])} />
+                  {file ? (
+                    <div className="dropzone__file">
+                      <fmt.Icon width={26} height={26} />
+                      <div><strong>{file.name}</strong><span>{formatBytes(file.size)}</span></div>
+                      <button type="button" className="chip-btn" onClick={(ev) => { ev.stopPropagation(); setFile(null); }}>Remove</button>
+                    </div>
+                  ) : (
+                    <>
+                      <UploadIcon width={26} height={26} />
+                      <strong>Drop your {fmt.label.toLowerCase()} here or click to browse</strong>
+                      <span>{fmt.hint} · up to {MAX_MB} MB</span>
+                    </>
+                  )}
+                </div>
+              )}
+            </Step>
+
+            <Step n="3" title="Review Settings" sub="Confirm the rule pack and geography for this audit">
+              <div className="settings-row">
+                <label className="selectbox">
+                  <span className="selectbox__icon"><GlobeIcon width={24} height={24} /></span>
+                  <span className="selectbox__text"><small>Geography</small>
+                    <select defaultValue="India" aria-label="Geography"><option>India</option></select>
+                  </span>
+                  <ChevronDownIcon />
+                </label>
+                <label className="selectbox">
+                  <span className="selectbox__icon"><LayersIcon width={24} height={24} /></span>
+                  <span className="selectbox__text"><small>Rule Pack</small>
+                    <select ref={packSelect} value={pack} onChange={(e) => setPack(e.target.value)} aria-label="Rule pack">
+                      {RULE_PACKS.map((p) => <option key={p.id} value={p.id}>{p.label}</option>)}
+                    </select>
+                  </span>
+                  <ChevronDownIcon />
+                </label>
+              </div>
+            </Step>
+
+            <button className="run-btn" disabled={!ready || busy}>
+              <SparkIcon width={22} height={22} /> {busy ? 'Auditing…' : 'Run compliance audit'} {!busy && <ArrowRightIcon width={22} height={22} />}
+            </button>
+
+            {busy && (
+              <div className="progress" aria-live="polite">
+                <div className="progress__bar"><span /></div>
+                <ol>
+                  {STEPS.map((s, i) => <li key={s} className={i < step ? 'done' : i === step ? 'active' : ''}>{s}</li>)}
+                </ol>
+                <p>Usually 10–40 seconds. Videos can take a few minutes.</p>
               </div>
             )}
-          </Step>
-
-          <Step n="3" title="Review Settings" sub="Select geography and rule pack for this audit">
-            <div className="settings-row">
-              <label className="selectbox">
-                <span className="selectbox__icon"><GlobeIcon width={24} height={24} /></span>
-                <span className="selectbox__text"><small>Geography</small>
-                  <select defaultValue="India" aria-label="Geography"><option>India</option></select>
-                </span>
-                <ChevronDownIcon />
-              </label>
-              <label className="selectbox">
-                <span className="selectbox__icon"><LayersIcon width={24} height={24} /></span>
-                <span className="selectbox__text"><small>Rule Pack</small>
-                  <select value={pack} onChange={(e) => setPack(e.target.value)} aria-label="Rule pack">
-                    {RULE_PACKS.map((p) => <option key={p.id} value={p.id}>{p.label}</option>)}
-                  </select>
-                </span>
-                <ChevronDownIcon />
-              </label>
-            </div>
-          </Step>
-
-          <button className="run-btn" disabled={!ready || busy}>
-            <SparkIcon width={22} height={22} /> {busy ? 'Auditing…' : 'Run audit'} {!busy && <span aria-hidden="true">→</span>}
-          </button>
-
-          {busy && (
-            <div className="progress" aria-live="polite">
-              <div className="progress__bar"><span /></div>
-              <ol>
-                {STEPS.map((s, i) => <li key={s} className={i < step ? 'done' : i === step ? 'active' : ''}>{s}</li>)}
-              </ol>
-              <p>Usually 10–40 seconds. Videos can take a few minutes.</p>
-            </div>
-          )}
-          {error && <p className="alert" role="alert">{error}</p>}
-        </form>
+            {error && <p className="alert" role="alert">{error}</p>}
+          </form>
+        </div>
 
         <aside className="sidecol">
-          <Link to="/rules" className="panel card-pack">
-            <h3 className="kicker"><LayersIcon width={20} height={20} /> ACTIVE RULE PACK</h3>
-            <div className="card-pack__main">
+          <HeroArt />
+
+          <div className="panel side-card">
+            <div className="panel__head">
+              <CardTitle Icon={LayersIcon}>Active Rule Pack</CardTitle>
+              <button type="button" className="ghost-btn ghost-btn--sm" onClick={() => setPack(pack === 'HealthCare' ? 'Pharmaceuticals' : 'HealthCare')}>
+                <RefreshIcon width={15} height={15} /> Change
+              </button>
+            </div>
+            <Link to="/rules" className="card-pack__main">
               <span className="card-pack__icon"><LayersIcon width={34} height={34} /></span>
               <div>
                 <div className="card-pack__title"><strong>{activePack.label}</strong><span className="badge-active"><i /> Active</span></div>
                 <p>{activePack.description}</p>
               </div>
-              <ChevronRightIcon className="card-pack__chev" />
-            </div>
+            </Link>
             <dl className="facts">
-              <dt><HomeIcon width={18} height={18} /> Regulator</dt><dd>National Medical Commission</dd>
-              <dt><MapPinIcon width={18} height={18} /> Geography</dt><dd>India</dd>
-              <dt><TargetIcon width={18} height={18} /> Total Rules</dt><dd>{totalRules ? `${totalRules} regulations` : '—'}</dd>
-              <dt><CalendarIcon width={18} height={18} /> Last Updated</dt><dd>Oct 2026</dd>
+              <dt><HomeIcon width={17} height={17} /> Regulator</dt><dd>National Medical Commission</dd>
+              <dt><GlobeIcon width={17} height={17} /> Geography</dt><dd>India</dd>
+              <dt><GlobeIcon width={17} height={17} /> Total Rules</dt><dd>{ruleCount ? `${ruleCount} regulations` : '—'}</dd>
+              <dt><CalendarIcon width={17} height={17} /> Last Updated</dt><dd>Oct 2026</dd>
             </dl>
-          </Link>
+          </div>
 
-          <div className="panel">
+          <div className="panel side-card">
             <div className="panel__head">
-              <h3 className="kicker"><HomeIcon width={20} height={20} /> REGULATORY SCOPE</h3>
-              <Link to="/rules" className="ghost-btn">View all</Link>
+              <CardTitle Icon={HomeIcon} tone="lime">Regulatory Scope</CardTitle>
+              <Link to="/rules" className="ghost-btn ghost-btn--sm">View all</Link>
             </div>
             <ul className="scope">
-              {PACKS.slice(0, 3).map((p, i) => (
-                <li key={p.id}><i className={`dot dot--${DOT_COLORS[i]}`} />{p.scope}</li>
-              ))}
+              {SCOPE.map((s) => <li key={s.label}><i className={`ring-dot ring-dot--${s.tone}`} />{s.label}</li>)}
             </ul>
           </div>
 
-          <div className="panel">
+          <div className="panel side-card">
             <div className="panel__head">
-              <h3 className="kicker"><ChartIcon width={20} height={20} /> RECENT AUDITS</h3>
-              <Link to="/history" className="ghost-btn">View all</Link>
+              <CardTitle Icon={ChartIcon} tone="lime">Recent Audits</CardTitle>
+              <Link to="/history" className="ghost-btn ghost-btn--sm">View all</Link>
             </div>
             {recent === null && <p className="muted small">Loading…</p>}
             {recent?.length === 0 && <p className="muted small">No audits yet — run your first one.</p>}
@@ -331,7 +340,7 @@ export default function Auditor() {
                 return (
                   <li key={item._id}>
                     <Link to={`/history/${item._id}`} state={{ item }} className="recent__item">
-                      <span className="recent__icon"><Icon width={22} height={22} /></span>
+                      <span className="recent__icon"><Icon width={20} height={20} /></span>
                       <span className="recent__text">
                         <strong>{item.originalInput || 'Audit'}</strong>
                         <small>{TYPE_LABEL[item.contentType] || 'Audit'} • {formatDate(item.createdAt)}</small>
