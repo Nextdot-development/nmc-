@@ -8,7 +8,7 @@ import { YoutubeTranscript } from 'youtube-transcript';
 import OpenAI from 'openai';
 import { analyzeCompliance, extractClaims } from './aiProvider.js';
 import { extractTextFromDocument } from './documentService.js';
-import { getYoutubeTranscript } from './youtubeTranscriptService.js';
+import { getYoutubeTranscript, isTranscriptUnavailable } from './youtubeTranscriptService.js';
 import { getRulesForSelection } from './rulesService.js';
 import AuditRecord from '../models/AuditRecord.js';
 import { extractTextFromImage } from './ocrService.js';
@@ -457,6 +457,8 @@ const processUrl = async ({ url, category, analysisMode, country, region, rules 
     }
 
     const truncatedTranscript = truncateForAI(transcriptText);
+    const hasTranscript = Boolean(transcriptText) && !isTranscriptUnavailable(transcriptText)
+      && !/transcript unavailable/i.test(transcriptText.slice(0, 80));
 
     const auditResult = await analyzeCompliance({
       content: truncatedTranscript,
@@ -465,8 +467,17 @@ const processUrl = async ({ url, category, analysisMode, country, region, rules 
       analysisMode,
       country,
       region,
-      rules
+      rules,
+      contentContext: hasTranscript
+        ? 'Input is the spoken transcript of a YouTube video (from its captions).'
+        : 'No transcript was available; input is only the video title and description. Say so in the summary.'
     });
+
+    auditResult.videoTranscript = {
+      available: hasTranscript,
+      text: hasTranscript ? transcriptText : '',
+      chars: hasTranscript ? transcriptText.length : 0
+    };
 
     return {
       contentType: 'video',

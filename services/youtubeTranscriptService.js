@@ -301,6 +301,58 @@ export const transcribeAudioWithOpenAI = async (filePath) => {
   return text;
 };
 
+// Convert a WebVTT caption file to plain text, removing timings, tags and the
+// rolling duplicate lines that YouTube auto-captions repeat.
+export const vttToText = (vtt = '') => {
+  const lines = [];
+  for (const raw of vtt.split(/\r?\n/)) {
+    const line = raw
+      .replace(/<[^>]+>/g, '')
+      .replace(/&nbsp;/g, ' ')
+      .replace(/&amp;/g, '&')
+      .trim();
+    if (!line || line === 'WEBVTT' || /^(Kind|Language|NOTE)\b/.test(line) || /-->/.test(line) || /^\d+$/.test(line)) continue;
+    if (lines[lines.length - 1] === line) continue;
+    lines.push(line);
+  }
+  return lines.join(' ').replace(/\s+/g, ' ').trim();
+};
+
+// Subtitles via yt-dlp: manual subs first, then auto-captions in the video's own language
+const fetchSubtitlesWithYtDlp = async (videoUrl) => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'yt-subs-'));
+  try {
+    await withTimeout(new Promise((resolve, reject) => {
+      const proc = spawn(getYtDlpCommand(), [
+        '--skip-download', '--write-subs', '--write-auto-subs',
+        '--sub-langs', 'en,hi,en-orig,hi-orig,.*-orig',
+        '--sub-format', 'vtt', '--no-playlist', '--ignore-errors',
+        '-o', path.join(dir, 'sub.%(ext)s'), videoUrl,
+      ]);
+      let stderr = '';
+      proc.stderr.on('data', (d) => { stderr += d.toString(); });
+      proc.on('error', reject);
+      proc.on('close', () => resolve(stderr));
+    }), AUDIO_TIMEOUT_MS, 'yt-dlp subtitles timed out');
+
+    const files = fs.readdirSync(dir).filter((f) => f.endsWith('.vtt'));
+    // Prefer human subtitles (no -orig suffix), English, then Hindi, then any
+    const rank = (f) => (f.includes('-orig') ? 10 : 0) + (/\.en[.-]/.test(f) ? 0 : /\.hi[.-]/.test(f) ? 1 : 2);
+    for (const file of files.sort((a, b) => rank(a) - rank(b))) {
+      const text = vttToText(fs.readFileSync(path.join(dir, file), 'utf8'));
+      if (text.length > 20) {
+        console.log(`[YouTube Transcript] yt-dlp subtitles: ${file} (${text.length} chars)`);
+        return text;
+      }
+    }
+    return '';
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+};
+
+export const isTranscriptUnavailable = (text = '') => /^YouTube (video )?transcript unavailable/i.test(text);
+
 export const getYoutubeTranscript = async (videoUrl) => {
   const normalized = normalizeUrl(videoUrl);
 
@@ -319,6 +371,13 @@ export const getYoutubeTranscript = async (videoUrl) => {
     }
   } catch (error) {
     console.warn('[YouTube Transcript] Captions failed:', error.message);
+  }
+
+  try {
+    const subtitles = await fetchSubtitlesWithYtDlp(normalized);
+    if (subtitles) return subtitles;
+  } catch (error) {
+    console.warn('[YouTube Transcript] yt-dlp subtitles failed:', error.message);
   }
 
   console.log('[YouTube Transcript] Captions unavailable. Fetching metadata...');

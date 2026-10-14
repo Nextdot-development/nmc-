@@ -63,6 +63,47 @@ const Violation = ({ v, index }) => {
   );
 };
 
+const VideoTranscript = ({ data }) => {
+  const [copied, setCopied] = useState(false);
+  if (!data.available) {
+    return (
+      <div className="panel transcript-box transcript-box--missing">
+        <h3 className="kicker">VIDEO TRANSCRIPT</h3>
+        <p>No captions were available for this video, so only its title and description were audited.
+          Upload the video file (Video option) to audit what is actually said.</p>
+      </div>
+    );
+  }
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(data.text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch { /* clipboard blocked */ }
+  };
+  const download = () => {
+    const url = URL.createObjectURL(new Blob([data.text], { type: 'text/plain;charset=utf-8' }));
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'video-transcript.txt';
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+  return (
+    <div className="panel transcript-box">
+      <div className="transcript-box__head">
+        <h3 className="kicker">VIDEO TRANSCRIPT</h3>
+        <span className="muted small">{Number(data.chars).toLocaleString('en-IN')} characters</span>
+        <div className="transcript-box__actions no-print">
+          <button type="button" className="ghost-btn ghost-btn--sm" onClick={copy}>{copied ? 'Copied ✓' : 'Copy'}</button>
+          <button type="button" className="ghost-btn ghost-btn--sm" onClick={download}>Download .txt</button>
+        </div>
+      </div>
+      <div className="transcript-box__text">{data.text}</div>
+    </div>
+  );
+};
+
 export default function AuditResult({ result, onReset, meta }) {
   const [showText, setShowText] = useState(false);
   const violations = [...(result?.violations || [])].sort(
@@ -98,6 +139,8 @@ export default function AuditResult({ result, onReset, meta }) {
         </div>
       </div>
 
+      {result?.videoTranscript && <VideoTranscript data={result.videoTranscript} />}
+
       <div className="result__grid">
         <div className="panel stat">
           <h3 className="kicker">PENALTY RISK</h3>
@@ -120,7 +163,7 @@ export default function AuditResult({ result, onReset, meta }) {
         {violations.map((v, i) => <Violation key={i} v={v} index={i} />)}
       </div>
 
-      {result?.transcription && (
+      {result?.transcription && !result?.videoTranscript?.available && (
         <div className="panel transcript">
           <button type="button" className="link-btn" onClick={() => setShowText(!showText)} aria-expanded={showText}>
             {showText ? 'Hide' : 'Show'} the text we audited

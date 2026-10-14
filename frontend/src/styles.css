@@ -527,3 +527,12 @@ input:focus, textarea:focus { border-color: var(--green); box-shadow: 0 0 0 3px 
 .pill-btn--active svg { color: #fff; }
 .pill-btn:hover:not(.pill-btn--active) { border-color: var(--navy); color: var(--navy); }
 .coverage { margin: 0; padding: 8px 12px; border-radius: 10px; background: #eef2ff; color: var(--navy); font-size: 13px; }
+
+/* video transcript */
+.transcript-box { padding: 18px 20px; display: flex; flex-direction: column; gap: 12px; }
+.transcript-box__head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.transcript-box__actions { margin-left: auto; display: flex; gap: 8px; }
+.transcript-box__text { max-height: 320px; overflow: auto; padding: 14px 16px; border-radius: 12px; background: var(--bg-2); border: 1px solid var(--line); color: var(--text-2); font-size: 14.5px; line-height: 1.7; white-space: pre-wrap; }
+.transcript-box--missing { background: #fff8e6; border-color: #f6e0a8; }
+.transcript-box--missing p { margin: 0; color: #7a5a00; font-size: 14px; }
+@media print { .transcript-box__text { max-height: none; overflow: visible; } }
