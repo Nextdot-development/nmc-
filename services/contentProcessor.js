@@ -541,8 +541,10 @@ const processUrl = async ({ url, category, analysisMode, country, region, rules 
   let lastError;
 
   for (const method of extractionPlan) {
+    let extracted = false;
     try {
       const { extractedText, extractionMethod } = await extractBlogContentByMethod(url, method);
+      extracted = true;
       console.log('[Pipeline] Scraping completed', JSON.stringify({ method: extractionMethod, length: extractedText.length }));
 
       const auditInputResult = await buildAuditInput({
@@ -596,6 +598,8 @@ const processUrl = async ({ url, category, analysisMode, country, region, rules 
         auditResult
       };
     } catch (error) {
+      // Page was read but the audit itself failed: report that instead of trying other scrapers
+      if (extracted && !/too short/i.test(error.message)) throw error;
       lastError = error;
       console.warn('[Pipeline] Extraction attempt failed', JSON.stringify({ method, message: error.message }));
     }

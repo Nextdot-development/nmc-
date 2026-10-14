@@ -194,6 +194,7 @@ FORMAT RULES:
 - suggestion: numbered points (1., 2., 3.)
 - solution: numbered points (1., 2., 3.)
 - Max 3 points per field
+- transcription: for audio/video give the transcript; for text, documents and web pages return only the first 300 characters of the content (do NOT copy the whole input)
 - If only 1 point exists, return ONLY "1."
 
 SCORING (MANDATORY):
@@ -258,7 +259,7 @@ export const analyzeWithGemini = async ({
     model: MODEL_NAME,
     generationConfig: {
       temperature: 0.0,
-      maxOutputTokens: 8192,
+      maxOutputTokens: 32768,
       topP: 0.95,
       responseMimeType: "application/json",
       // gemini-2.5-flash bills thinking tokens against maxOutputTokens.
