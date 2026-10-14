@@ -1,6 +1,7 @@
 import { scrapeUrl, extractReadableFromUrl, extractMetadataFromUrl, extractBlogContentByMethod } from './scrapingService.js';
 import { transcribe } from './transcriptionService.js';
 import { performAudit, performMultimodalAudit } from './auditService.js';
+import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -344,7 +345,9 @@ const normalizeGeminiResult = (result) => {
     ...(result.sourceText ? { sourceText: result.sourceText } : {}),
     ...(result.coverage ? { coverage: result.coverage } : {}),
     ...(result.videoTranscript ? { videoTranscript: result.videoTranscript } : {}),
-    ...(result.metadata ? { metadata: result.metadata } : {})
+    ...(result.metadata ? { metadata: result.metadata } : {}),
+    ...(result.language ? { language: result.language } : {}),
+    ...(result.compliantVersion ? { compliantVersion: result.compliantVersion } : {})
   };
 };
 
@@ -354,7 +357,8 @@ const saveAuditRecord = async ({
   originalInput,
   extractedText,
   transcript,
-  auditResult
+  auditResult,
+  contentHash = ''
 }) => {
   const normalizedResult = normalizeGeminiResult(auditResult);
 
@@ -364,7 +368,8 @@ const saveAuditRecord = async ({
     originalInput,
     extractedText,
     transcript,
-    auditResult: normalizedResult
+    auditResult: normalizedResult,
+    contentHash
   });
 
   await record.save();
@@ -696,8 +701,23 @@ const processDocumentBuffer = async ({ buffer, mimetype, originalInput, category
   };
 };
 
+// Bump when the prompt or output shape changes so old cached results are not reused
+const PROMPT_VERSION = 'p3';
+const URL_CACHE_DAYS = 7;
+
+// Same content + same rule pack + same prompt => same fingerprint
+const fingerprintContent = (input, contentType, { category, rules }) => {
+  const hash = crypto.createHash('sha256');
+  hash.update(`${PROMPT_VERSION}|${contentType}|${category || ''}|`);
+  hash.update(crypto.createHash('sha256').update(JSON.stringify(rules || [])).digest('hex'));
+  if (input.text) hash.update(`text|${String(input.text).replace(/\s+/g, ' ').trim()}`);
+  else if (input.url) hash.update(`url|${String(input.url).trim()}`);
+  else if (input.file?.buffer) hash.update(`file|${input.file.mimetype}|`).update(input.file.buffer);
+  return hash.digest('hex');
+};
+
 export const processContent = async (input, options = {}) => {
-  const { userId, category, analysisMode, country, region } = options;
+  const { userId, category, analysisMode, country, region, fresh = false } = options;
 
   if (!userId) {
     throw new Error('Authentication required');
@@ -705,6 +725,29 @@ export const processContent = async (input, options = {}) => {
 
   const contentType = detectContentType(input);
   const rules = getRulesForSelection({ country, region, category });
+  const contentHash = fingerprintContent(input, contentType, { category, rules });
+
+  // Consistency: return the earlier result for identical content unless a fresh audit is requested
+  if (!fresh) {
+    const query = { contentHash };
+    if (contentType === 'url') query.createdAt = { $gte: new Date(Date.now() - URL_CACHE_DAYS * 864e5) };
+    const previous = await AuditRecord.findOne(query).sort({ createdAt: -1 }).lean();
+    if (previous?.auditResult) {
+      console.log('[Audit] Reusing result for identical content', JSON.stringify({ contentHash: contentHash.slice(0, 12) }));
+      const reused = { ...previous.auditResult, reused: { auditedAt: previous.createdAt } };
+      await AuditRecord.create({
+        userId,
+        contentType: previous.contentType,
+        originalInput: previous.originalInput,
+        extractedText: previous.extractedText,
+        transcript: previous.transcript,
+        auditResult: reused,
+        contentHash
+      });
+      return reused;
+    }
+  }
+
   let processingResult;
 
   if (contentType === 'text') {
@@ -766,7 +809,8 @@ export const processContent = async (input, options = {}) => {
     originalInput: processingResult.originalInput,
     extractedText: processingResult.extractedText,
     transcript: processingResult.transcript,
-    auditResult: processingResult.auditResult
+    auditResult: processingResult.auditResult,
+    contentHash
   });
 
   return processingResult.auditResult;

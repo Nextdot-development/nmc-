@@ -27,10 +27,23 @@ const toPoints = (text = '') => {
   return parts.length ? parts : [String(text)];
 };
 
+const CopyButton = ({ text, label = 'Copy' }) => {
+  const [done, setDone] = useState(false);
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setDone(true);
+      setTimeout(() => setDone(false), 1500);
+    } catch { /* clipboard blocked */ }
+  };
+  return <button type="button" className="ghost-btn ghost-btn--sm no-print" onClick={copy}>{done ? 'Copied ✓' : label}</button>;
+};
+
 const Violation = ({ v, index }) => {
   const sev = SEVERITY_ORDER.includes(v.severity) ? v.severity : 'Medium';
-  const translation = v.englishTranslation && v.englishTranslation.trim() !== (v.problematicContent || '').trim()
-    ? v.englishTranslation : '';
+  const original = v.originalLine || v.problematicContent || '';
+  const translation = v.englishTranslation && v.englishTranslation.trim() !== original.trim() ? v.englishTranslation : '';
+  const removeOnly = /^\[?remove this line\]?$/i.test((v.compliantLine || '').trim());
   return (
     <article id={`issue-${index + 1}`} className={`violation violation--${sev.toLowerCase()}`}>
       <header className="violation__head">
@@ -39,23 +52,34 @@ const Violation = ({ v, index }) => {
         <h4>{v.regulation}</h4>
       </header>
       {v.description && <p className="violation__desc">{v.description}</p>}
-      {v.problematicContent && (
-        <blockquote className="quote">
-          <span className="quote__label">Flagged content</span>
-          “{v.problematicContent}”
-          {translation && <span className="quote__translation">English: {translation}</span>}
-        </blockquote>
+
+      {original && (
+        <div className="linefix">
+          <div className="linefix__row linefix__row--bad">
+            <span className="linefix__tag">✕ This line</span>
+            <p>“{original}”</p>
+            {translation && <small>English: {translation}</small>}
+          </div>
+          {v.compliantLine && (
+            <div className="linefix__row linefix__row--good">
+              <span className="linefix__tag">✓ {removeOnly ? 'Fix' : 'Replace with'}</span>
+              <p>{removeOnly ? 'Remove this line.' : `“${v.compliantLine}”`}</p>
+              {!removeOnly && <CopyButton text={v.compliantLine} />}
+            </div>
+          )}
+        </div>
       )}
+
       <div className="fixes">
         {v.suggestion && (
           <div>
-            <h5>What to change</h5>
+            <h5>Why it fails</h5>
             <ol>{toPoints(v.suggestion).map((p, i) => <li key={i}>{p}</li>)}</ol>
           </div>
         )}
         {v.solution && (
           <div>
-            <h5><SparkIcon width={14} height={14} /> Compliant rewrite</h5>
+            <h5><SparkIcon width={14} height={14} /> How to fix</h5>
             <ol>{toPoints(v.solution).map((p, i) => <li key={i}>{p}</li>)}</ol>
           </div>
         )}
@@ -169,7 +193,7 @@ const SourceText = ({ data, violations = [] }) => {
   );
 };
 
-export default function AuditResult({ result, onReset, meta }) {
+export default function AuditResult({ result, onReset, onFresh, meta }) {
   const [showText, setShowText] = useState(false);
   const violations = [...(result?.violations || [])].sort(
     (a, b) => SEVERITY_ORDER.indexOf(a.severity) - SEVERITY_ORDER.indexOf(b.severity)
@@ -187,7 +211,14 @@ export default function AuditResult({ result, onReset, meta }) {
           <span className="kicker">AUDIT RESULT</span>
           <StatusPill status={result?.status} />
           {meta && <p className="result__meta">{meta}</p>}
+          {result?.language && <span className="lang-badge">Language: {result.language}</span>}
           <p className="result__summary">{result?.summary}</p>
+          {result?.reused && (
+            <p className="reused">
+              This exact content was audited on {new Date(result.reused.auditedAt).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })} — showing the same result so it stays consistent.
+              {onFresh && <button type="button" className="link-btn" onClick={onFresh}>Re-audit fresh</button>}
+            </p>
+          )}
           {result?.coverage && (
             <p className="coverage">
               Checked <b>{result.coverage.percent}%</b> of this page's text ({Number(result.coverage.auditedChars).toLocaleString('en-IN')} characters, menus removed).
@@ -227,6 +258,16 @@ export default function AuditResult({ result, onReset, meta }) {
       <div className="violations">
         {violations.map((v, i) => <Violation key={i} v={v} index={i} />)}
       </div>
+
+      {result?.compliantVersion && violations.length > 0 && (
+        <div className="panel compliant-version">
+          <div className="transcript-box__head">
+            <h3 className="kicker">COMPLIANT VERSION — READY TO USE</h3>
+            <div className="transcript-box__actions"><CopyButton text={result.compliantVersion} label="Copy full text" /></div>
+          </div>
+          <div className="compliant-version__text">{result.compliantVersion}</div>
+        </div>
+      )}
 
       {source && <SourceText data={source} violations={violations} />}
 

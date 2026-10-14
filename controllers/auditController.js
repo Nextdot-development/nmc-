@@ -41,6 +41,7 @@ export const createAudit = async (req, res) => {
     // Router automatically selects model based on content type, size, and complexity
     const auditResult = await processContent(input, {
       userId: req.user?.id,
+      fresh: req.body.fresh === 'true' || req.body.fresh === true,
       category,
       analysisMode,
       country,

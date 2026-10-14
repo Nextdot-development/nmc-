@@ -91,8 +91,8 @@ export default function Auditor() {
     || (format === 'url' && /^https?:\/\/\S+\.\S+/.test(url.trim()))
     || (isFile && file);
 
-  const submit = async (e) => {
-    e.preventDefault();
+  const submit = async (e, { fresh = false } = {}) => {
+    e?.preventDefault();
     if (!ready || busy) return;
     setError('');
     setResult(null);
@@ -103,6 +103,7 @@ export default function Auditor() {
         text: format === 'text' ? text.trim() : undefined,
         url: format === 'url' ? url.trim() : undefined,
         file: isFile ? file : undefined,
+        fresh,
       });
       setResult(res);
     } catch (err) {
@@ -225,7 +226,7 @@ export default function Auditor() {
       </form>
 
       <div ref={resultRef}>
-        {result && <AuditResult result={result} onReset={reset} />}
+        {result && <AuditResult result={result} onReset={reset} onFresh={() => submit(null, { fresh: true })} />}
       </div>
     </div>
   );

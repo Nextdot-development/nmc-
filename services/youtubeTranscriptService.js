@@ -359,9 +359,19 @@ const fetchSubtitlesWithYtDlp = async (videoUrl) => {
     }), AUDIO_TIMEOUT_MS, 'yt-dlp subtitles timed out');
 
     const files = fs.readdirSync(dir).filter((f) => f.endsWith('.vtt'));
-    // Prefer human subtitles (no -orig suffix), English, then Hindi, then any
-    const rank = (f) => (f.includes('-orig') ? 10 : 0) + (/\.en[.-]/.test(f) ? 0 : /\.hi[.-]/.test(f) ? 1 : 2);
-    for (const file of files.sort((a, b) => rank(a) - rank(b))) {
+    // The "-orig" auto-caption track tells us the language actually spoken. Use that
+    // language's track (never an auto-translation, e.g. English captions of a Hindi video).
+    const langOf = (f) => (f.match(/^sub\.([a-zA-Z-]+?)(-orig)?\.vtt$/) || [])[1] || '';
+    const spoken = langOf(files.find((f) => f.includes('-orig')) || '');
+    const rank = (f) => {
+      const lang = langOf(f);
+      if (spoken) {
+        if (lang !== spoken) return 99; // translation into another language
+        return f.includes('-orig') ? 1 : 0; // cleaned track before raw ASR
+      }
+      return /^sub\.en\./.test(f) ? 0 : /^sub\.hi\./.test(f) ? 1 : 2; // only uploaded subtitles exist
+    };
+    for (const file of files.filter((f) => rank(f) < 99).sort((a, b) => rank(a) - rank(b))) {
       const text = vttToText(fs.readFileSync(path.join(dir, file), 'utf8'));
       if (text.length > 20) {
         console.log(`[YouTube Transcript] yt-dlp subtitles: ${file} (${text.length} chars)`);

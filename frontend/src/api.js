@@ -69,7 +69,7 @@ export const api = {
   login: (email, password) => request('/api/auth/login', { method: 'POST', body: { email, password }, auth: false }),
   signup: (name, email, password) => request('/api/auth/signup', { method: 'POST', body: { name, email, password }, auth: false }),
 
-  audit: ({ text, url, file, category }) => {
+  audit: ({ text, url, file, category, fresh = false }) => {
     const form = new FormData();
     form.append('country', 'India');
     form.append('category', category);
@@ -77,6 +77,7 @@ export const api = {
     if (text) form.append('text', text);
     if (url) form.append('url', url);
     if (file) form.append('file', file);
+    if (fresh) form.append('fresh', 'true');
     return request('/api/audit', { method: 'POST', form });
   },
 

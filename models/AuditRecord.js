@@ -27,6 +27,12 @@ const AuditRecordSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.Mixed,
     required: true
   },
+  // Fingerprint of the audited content + rule pack + prompt version, used to return
+  // the same result for the same content (no index: the collection is shared)
+  contentHash: {
+    type: String,
+    default: ''
+  },
   createdAt: {
     type: Date,
     default: Date.now

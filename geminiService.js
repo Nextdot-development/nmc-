@@ -177,41 +177,37 @@ Use ONLY the rules listed below to identify violations and generate fixes.
 ${rulesBlock}
 
 CRITICAL OUTPUT RULES:
-- Return ONLY valid JSON
-- Do NOT repeat points
-- Do NOT restart numbering
-- Each recommendation must be ACTIONABLE and REPLACEMENT-BASED
+- Return ONLY valid JSON matching the schema below.
+- Go through the content line by line, in order, and check every line against every rule above. Be exhaustive and consistent: the same content must always produce the same findings.
+- Report each problematic line ONCE, under the single most specific rule. Never repeat a line.
+- Do NOT flag content that a rule expressly permits (e.g. factual name, address, departments, facilities, accreditation, timings or a factual fee disclosure).
 
-RECOMMENDATION STYLE (VERY IMPORTANT):
-❌ Wrong: "Remove misleading claim"
-✅ Correct:
-"Replace the sentence:
-  'This medicine cures diabetes permanently'
- with:
-  'This product may help support diabetes management when used under medical supervision.'"
+LANGUAGE RULES (VERY IMPORTANT):
+- language: the main language of the content, e.g. "Hindi", "Hinglish", "English", "Marathi".
+- originalLine: copy the problematic line EXACTLY as it appears in the content, in the same language and script (Devanagari stays Devanagari, Roman Hinglish stays Roman). No paraphrasing.
+- compliantLine: a ready-to-publish replacement for originalLine in the SAME language and script, keeping the intent but removing the violation. Never leave it empty. If the line has to go entirely, write "[Remove this line]".
+- englishTranslation: English meaning of originalLine (repeat it if already English).
+- problematicContent: same text as originalLine.
+- description, suggestion, solution, summary and assessments: in English.
+- compliantVersion: if the content is shorter than 3000 characters, the full content rewritten with every violation fixed, in its original language and script; otherwise "".
 
 FORMAT RULES:
-- suggestion: numbered points (1., 2., 3.)
-- solution: numbered points (1., 2., 3.)
-- Max 3 points per field
-- transcription: for audio/video give the transcript; for text, documents and web pages return only the first 300 characters of the content (do NOT copy the whole input)
-- If only 1 point exists, return ONLY "1."
+- suggestion: what to change and why, numbered points (1., 2.), max 3.
+- solution: steps to make the line compliant, numbered points (1., 2.), max 3.
+- transcription: for audio/video give the transcript; for text, documents and web pages return only the first 300 characters of the content (do NOT copy the whole input).
 
-SCORING (MANDATORY):
-- score: integer 0-100 compliance score. 100 = fully compliant, 0 = severely non-compliant. Higher is better.
-- status must match score: "Compliant" = 80-100 with no Critical or High violations; "Needs Review" = 50-79; "Non-Compliant" = 0-49. Any Critical violation means "Non-Compliant".
+SCORING:
+- score: integer 0-100, higher is better. status: "Compliant", "Needs Review" or "Non-Compliant" (any Critical violation means "Non-Compliant").
 - ethicalMarketing.score: integer 0-100, higher = more ethical.
-
-ACCURACY RULES:
-- Do NOT flag content that a rule expressly permits (e.g. factual name, address, departments, facilities, accreditation, timings or a factual fee disclosure).
-- Report each problematic phrase once, under the single most specific rule. Do not repeat the same content under several rules.
 
 JSON SCHEMA:
 {
   "score": number,
   "status": "Compliant" | "Needs Review" | "Non-Compliant",
+  "language": string,
   "summary": string,
   "transcription": string,
+  "compliantVersion": string,
   "financialPenalty": {
     "riskLevel": "High" | "Medium" | "Low" | "None",
     "description": string
@@ -225,6 +221,8 @@ JSON SCHEMA:
       "severity": "Critical" | "High" | "Medium" | "Low",
       "regulation": string,
       "description": string,
+      "originalLine": string,
+      "compliantLine": string,
       "problematicContent": string,
       "englishTranslation": string,
       "suggestion": string,
@@ -260,7 +258,9 @@ export const analyzeWithGemini = async ({
     generationConfig: {
       temperature: 0.0,
       maxOutputTokens: 32768,
-      topP: 0.95,
+      topP: 0.1,
+      topK: 1,
+      seed: 20261014,
       responseMimeType: "application/json",
       // gemini-2.5-flash bills thinking tokens against maxOutputTokens.
       // Thinking is disabled here so the whole budget goes to the JSON body.

@@ -40,9 +40,11 @@ const truncateContent = (content) => {
 const AUDIT_SCHEMA = {
   type: 'object',
   additionalProperties: false,
-  required: ['score', 'status', 'summary', 'transcription', 'financialPenalty', 'ethicalMarketing', 'violations'],
+  required: ['score', 'status', 'language', 'summary', 'transcription', 'compliantVersion', 'financialPenalty', 'ethicalMarketing', 'violations'],
   properties: {
     score: { type: 'number' },
+    language: { type: 'string' },
+    compliantVersion: { type: 'string' },
     status: { type: 'string', enum: ['Compliant', 'Needs Review', 'Non-Compliant'] },
     summary: { type: 'string' },
     transcription: { type: 'string' },
@@ -69,11 +71,13 @@ const AUDIT_SCHEMA = {
       items: {
         type: 'object',
         additionalProperties: false,
-        required: ['severity', 'regulation', 'description', 'problematicContent', 'englishTranslation', 'suggestion', 'solution'],
+        required: ['severity', 'regulation', 'description', 'originalLine', 'compliantLine', 'problematicContent', 'englishTranslation', 'suggestion', 'solution'],
         properties: {
           severity: { type: 'string', enum: ['Critical', 'High', 'Medium', 'Low'] },
           regulation: { type: 'string' },
           description: { type: 'string' },
+          originalLine: { type: 'string' },
+          compliantLine: { type: 'string' },
           problematicContent: { type: 'string' },
           englishTranslation: { type: 'string' },
           suggestion: { type: 'string' },
