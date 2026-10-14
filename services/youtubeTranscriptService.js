@@ -272,7 +272,12 @@ const validateYoutubeUrl = async (videoUrl) => {
 
 export const downloadYoutubeAudio = async (videoUrl, outputPath) => {
   console.log('[YouTube Transcript] Downloading audio...');
-  await validateYoutubeUrl(videoUrl);
+  try {
+    await validateYoutubeUrl(videoUrl);
+  } catch (error) {
+    // ytdl-core is unmaintained (often 410); yt-dlp validates the video itself
+    console.warn('[YouTube Transcript] ytdl-core validation skipped:', error.message);
+  }
   await downloadWithYtDlp(videoUrl, outputPath);
   await validateDownloadedAudio(outputPath);
 };
