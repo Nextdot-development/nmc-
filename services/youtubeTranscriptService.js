@@ -159,6 +159,9 @@ const downloadWithYtDlp = async (videoUrl, outputPath) => {
       '-x',
       '--audio-format',
       'mp3',
+      '--postprocessor-args',
+      'ExtractAudio:-ac 1 -ar 16000 -b:a 32k',
+      '--no-playlist',
       '-o',
       outputPath,
       videoUrl
@@ -283,15 +286,24 @@ export const transcribeAudioWithOpenAI = async (filePath) => {
   };
   const mimeType = mimeMap[extension] || 'application/octet-stream';
 
-  const response = await withTimeout(
+  const transcribe = (model) => withTimeout(
     retryWithBackoff(() => client.audio.transcriptions.create({
-      model: 'gpt-4o-transcribe',
+      model,
       file: fs.createReadStream(filePath),
       mime_type: mimeType
     }), MAX_RETRIES, 'OpenAI transcription'),
     TRANSCRIBE_TIMEOUT_MS,
     'Audio transcription timed out'
   );
+
+  let response;
+  try {
+    response = await transcribe('gpt-4o-transcribe');
+  } catch (error) {
+    // gpt-4o-transcribe has a shorter duration limit; Whisper handles long audio
+    console.warn('[YouTube Transcript] gpt-4o-transcribe failed, retrying with whisper-1:', error.message);
+    response = await transcribe('whisper-1');
+  }
 
   const text = response?.text?.trim() || '';
   if (!text) {
@@ -381,6 +393,19 @@ export const getYoutubeTranscript = async (videoUrl) => {
     console.warn('[YouTube Transcript] yt-dlp subtitles failed:', error.message);
   }
 
+  // Audio download + OpenAI speech-to-text (gpt-4o-transcribe, Whisper fallback)
+  if (process.env.OPENAI_API_KEY && process.env.ENABLE_YOUTUBE_AUDIO !== 'false') {
+    const tempFile = path.join(os.tmpdir(), `yt-audio-${Date.now()}.mp3`);
+    try {
+      await downloadYoutubeAudio(normalized, tempFile);
+      return await transcribeAudioWithOpenAI(tempFile);
+    } catch (error) {
+      console.warn('[YouTube Transcript] Audio + OpenAI transcription failed:', error.message.slice(0, 200));
+    } finally {
+      fs.unlink(tempFile, () => undefined);
+    }
+  }
+
   // YouTube often blocks cloud servers; Gemini can read public videos by URL
   if (process.env.ENABLE_GEMINI_YOUTUBE !== 'false') {
     try {
@@ -411,19 +436,6 @@ export const getYoutubeTranscript = async (videoUrl) => {
     }
   } catch (error) {
     console.warn('[YouTube Transcript] oEmbed metadata failed:', error.message);
-  }
-
-  // Audio download only as last resort
-  if (ALLOW_AUDIO_DOWNLOAD) {
-    const tempFile = path.join(os.tmpdir(), `yt-audio-${Date.now()}.mp3`);
-    try {
-      await retryWithBackoff(() => downloadYoutubeAudio(normalized, tempFile), MAX_RETRIES, 'Audio download');
-      return await transcribeAudioWithOpenAI(tempFile);
-    } catch (error) {
-      console.warn('[YouTube Transcript] Audio transcription failed:', error.message);
-    } finally {
-      fs.unlink(tempFile, () => undefined);
-    }
   }
 
   return `YouTube transcript unavailable. Video URL: ${normalized}. Please provide a summary or upload a file.`;
