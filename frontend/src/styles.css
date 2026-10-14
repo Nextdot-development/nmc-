@@ -672,3 +672,32 @@ kbd {
   .inputbox textarea { min-height: 44px; }
   .hero-art { height: 170px; }
 }
+
+
+/* v3: less text, more breathing room */
+.hero h1 { font-size: clamp(26px, 2.5vw, 42px); margin: 4px 0 6px; }
+.hero p { font-size: 15px; }
+.features { margin-top: 12px; gap: 18px; }
+.features li { font-size: 13px; font-weight: 600; color: var(--text); }
+.features__icon { width: 34px; height: 34px; }
+.features__icon svg { width: 17px; height: 17px; }
+.step__head h2 { font-size: 15px; }
+.step__num { width: 32px; height: 32px; font-size: 14px; }
+.card-pack__main { margin: 0; padding: 0; border: 0; }
+.card-pack__icon { width: 50px; height: 50px; border-radius: 12px; }
+.card-pack__main p { margin-top: 4px; font-size: 13px; color: var(--muted); }
+.hero-art { height: 150px; }
+.art-chip { padding: 6px 10px; font-size: 12px; }
+.art-chip--b { top: 70px; left: 0; }
+.art-chip--d { top: 96px; right: 0; }
+.scope { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 12px; }
+.promo strong { font-size: 15px; }
+@media (min-width: 1181px) and (max-height: 820px) {
+  .hero-art { height: 132px; }
+  .hero h1 { margin: 2px 0 4px; }
+}
+.side-card { position: relative; z-index: 1; background: linear-gradient(180deg, rgba(18, 22, 29, 0.96), rgba(14, 17, 23, 0.96)); }
+.shield-orbit { inset: -34px 0 auto auto; width: 88%; }
+@media (min-width: 1181px) and (max-height: 820px) {
+  .shield-orbit { inset: -40px 6% auto auto; width: 76%; }
+}

@@ -25,17 +25,17 @@ const RULE_PACKS = [
 ];
 
 const FEATURES = [
-  { Icon: BoltIcon, tone: 'lime', label: <>AI powered<br />analysis</> },
-  { Icon: DatabaseIcon, tone: 'violet', label: <>NMC specific<br />rules</> },
-  { Icon: ShieldCheckIcon, tone: 'lime', label: <>Detailed<br />explanations</> },
-  { Icon: ChartIcon, tone: 'violet', label: <>Actionable<br />recommendations</> },
+  { Icon: BoltIcon, tone: 'lime', label: 'AI analysis' },
+  { Icon: DatabaseIcon, tone: 'violet', label: 'NMC rules' },
+  { Icon: ShieldCheckIcon, tone: 'lime', label: 'Clear reasons' },
+  { Icon: ChartIcon, tone: 'violet', label: 'Ready fixes' },
 ];
 
 const SCOPE = [
-  { tone: 'green', label: 'IMC Professional Conduct Regulations, 2002' },
-  { tone: 'white', label: 'NMC Ethical Advertising Guidelines, 2026' },
-  { tone: 'amber', label: 'Telemedicine Practice Guidelines, 2020' },
-  { tone: 'violet', label: 'NMC clinical advisories & registration rules' },
+  { tone: 'white', label: 'NMC Advertising 2026' },
+  { tone: 'green', label: 'IMC Ethics 2002' },
+  { tone: 'amber', label: 'Telemedicine 2020' },
+  { tone: 'violet', label: 'NMC Advisories' },
 ];
 
 const MAX_TEXT = 10000;
@@ -48,10 +48,8 @@ const formatBytes = (n) => (n > 1024 * 1024 ? `${(n / 1024 / 1024).toFixed(1)} M
 const HeroArt = () => (
   <div className="hero-art" aria-hidden="true">
     <ShieldOrbit />
-    <span className="art-chip art-chip--a"><DocIcon width={18} height={18} /> NMC Regulations</span>
-    <span className="art-chip art-chip--b"><ShieldCheckIcon width={18} height={18} /> Healthcare Safety</span>
-    <span className="art-chip art-chip--c"><BulbIcon width={18} height={18} /> Clear Explanations</span>
-    <span className="art-chip art-chip--d"><ChartIcon width={18} height={18} /> Actionable Insights</span>
+    <span className="art-chip art-chip--b"><ShieldCheckIcon width={16} height={16} /> NMC Safe</span>
+    <span className="art-chip art-chip--d"><ChartIcon width={16} height={16} /> Instant Fixes</span>
   </div>
 );
 
@@ -59,7 +57,7 @@ const Step = ({ n, title, sub, children }) => (
   <section className="step">
     <header className="step__head">
       <span className="step__num">{n}</span>
-      <div><h2>{title}</h2><p>{sub}</p></div>
+      <h2>{title}</h2>
     </header>
     {children}
   </section>
@@ -178,12 +176,11 @@ export default function Auditor() {
       <div className="auditor__grid">
         <div className="auditor__main">
           <section className="hero">
-            <span className="badge-live"><i /> AI COMPLIANCE AUDITOR</span>
             <h1>
               <span>COMPLIANCE,</span>
               <span><b className="lime">WITHOUT</b> THE <b className="grad">COMPLEXITY</b></span>
             </h1>
-            <p>Upload or paste your healthcare marketing content and let AI analyse it against NMC regulations with clear explanations and actionable recommendations.</p>
+            <p>Check any healthcare ad against NMC rules in seconds.</p>
             <ul className="features">
               {FEATURES.map(({ Icon, tone, label }, i) => (
                 <li key={i}><span className={`features__icon features__icon--${tone}`}><Icon width={20} height={20} /></span><span>{label}</span></li>
@@ -192,7 +189,7 @@ export default function Auditor() {
           </section>
 
           <form className="panel panel--glow composer" onSubmit={submit}>
-            <Step n="1" title="Select Content Format" sub="Choose the type of content you want to audit">
+            <Step n="1" title="Content type">
               <div className="formats" role="radiogroup" aria-label="Content format">
                 {FORMATS.map(({ id, label, Icon }) => (
                   <button key={id} type="button" role="radio" aria-checked={format === id}
@@ -204,12 +201,11 @@ export default function Auditor() {
               </div>
             </Step>
 
-            <Step n="2" title="Provide Your Content"
-              sub={format === 'text' ? 'Paste your marketing copy or script below' : format === 'url' ? 'Enter the page or video link to audit' : `Upload your ${fmt.label.toLowerCase()} file`}>
+            <Step n="2" title="Your content">
               {format === 'text' && (
                 <div className="inputbox">
                   <textarea value={text} onChange={(e) => setText(e.target.value.slice(0, MAX_TEXT))} rows={2}
-                    placeholder="Paste your marketing content here..." aria-label="Content to audit" />
+                    placeholder="Paste your ad here..." aria-label="Content to audit" />
                   <div className="inputbox__bar">
                     <button type="button" className="chip-btn" onClick={paste}><ClipboardIcon width={17} height={17} /> Paste</button>
                     <button type="button" className="chip-btn" onClick={() => setText(SAMPLE)}><SparkIcon width={17} height={17} /> Sample</button>
@@ -224,7 +220,7 @@ export default function Auditor() {
                   <div className="inputbox__bar">
                     <button type="button" className="chip-btn" onClick={paste}><ClipboardIcon width={17} height={17} /> Paste</button>
                     <button type="button" className="chip-btn" onClick={clear}><XCircleIcon width={17} height={17} /> Clear</button>
-                    <span className="counter">Websites, landing pages & YouTube</span>
+                    <span className="counter">Website or YouTube</span>
                   </div>
                 </div>
               )}
@@ -245,15 +241,15 @@ export default function Auditor() {
                   ) : (
                     <>
                       <UploadIcon width={26} height={26} />
-                      <strong>Drop your {fmt.label.toLowerCase()} here or click to browse</strong>
-                      <span>{fmt.hint} · up to {MAX_MB} MB</span>
+                      <strong>Drop or click to upload</strong>
+                      <span>{fmt.hint} · {MAX_MB} MB max</span>
                     </>
                   )}
                 </div>
               )}
             </Step>
 
-            <Step n="3" title="Review Settings" sub="Confirm the rule pack and geography for this audit">
+            <Step n="3" title="Settings">
               <div className="settings-row">
                 <label className="selectbox">
                   <span className="selectbox__icon"><GlobeIcon width={24} height={24} /></span>
@@ -275,7 +271,7 @@ export default function Auditor() {
             </Step>
 
             <button className="run-btn" disabled={!ready || busy}>
-              <SparkIcon width={22} height={22} /> {busy ? 'Auditing…' : 'Run compliance audit'} {!busy && <ArrowRightIcon width={22} height={22} />}
+              <SparkIcon width={22} height={22} /> {busy ? 'Auditing…' : 'Run audit'} {!busy && <ArrowRightIcon width={22} height={22} />}
             </button>
 
             {busy && (
@@ -284,7 +280,6 @@ export default function Auditor() {
                 <ol>
                   {STEPS.map((s, i) => <li key={s} className={i < step ? 'done' : i === step ? 'active' : ''}>{s}</li>)}
                 </ol>
-                <p>Usually 10–40 seconds. Videos can take a few minutes.</p>
               </div>
             )}
             {error && <p className="alert" role="alert">{error}</p>}
@@ -296,29 +291,23 @@ export default function Auditor() {
 
           <div className="panel side-card">
             <div className="panel__head">
-              <CardTitle Icon={LayersIcon}>Active Rule Pack</CardTitle>
+              <CardTitle Icon={LayersIcon}>Rule Pack</CardTitle>
               <button type="button" className="ghost-btn ghost-btn--sm" onClick={() => setPack(pack === 'HealthCare' ? 'Pharmaceuticals' : 'HealthCare')}>
                 <RefreshIcon width={15} height={15} /> Change
               </button>
             </div>
             <Link to="/rules" className="card-pack__main">
-              <span className="card-pack__icon"><LayersIcon width={34} height={34} /></span>
+              <span className="card-pack__icon"><LayersIcon width={28} height={28} /></span>
               <div>
                 <div className="card-pack__title"><strong>{activePack.label}</strong><span className="badge-active"><i /> Active</span></div>
-                <p>{activePack.description}</p>
+                <p>{ruleCount ? `${ruleCount} rules` : 'NMC rules'} · India · Oct 2026</p>
               </div>
             </Link>
-            <dl className="facts">
-              <dt><HomeIcon width={17} height={17} /> Regulator</dt><dd>National Medical Commission</dd>
-              <dt><GlobeIcon width={17} height={17} /> Geography</dt><dd>India</dd>
-              <dt><GlobeIcon width={17} height={17} /> Total Rules</dt><dd>{ruleCount ? `${ruleCount} regulations` : '—'}</dd>
-              <dt><CalendarIcon width={17} height={17} /> Last Updated</dt><dd>Oct 2026</dd>
-            </dl>
           </div>
 
           <div className="panel side-card">
             <div className="panel__head">
-              <CardTitle Icon={HomeIcon} tone="lime">Regulatory Scope</CardTitle>
+              <CardTitle Icon={HomeIcon} tone="lime">Sources</CardTitle>
               <Link to="/rules" className="ghost-btn ghost-btn--sm">View all</Link>
             </div>
             <ul className="scope">
@@ -328,7 +317,7 @@ export default function Auditor() {
 
           <div className="panel side-card">
             <div className="panel__head">
-              <CardTitle Icon={ChartIcon} tone="lime">Recent Audits</CardTitle>
+              <CardTitle Icon={ChartIcon} tone="lime">Recent</CardTitle>
               <Link to="/history" className="ghost-btn ghost-btn--sm">View all</Link>
             </div>
             {recent === null && <p className="muted small">Loading…</p>}

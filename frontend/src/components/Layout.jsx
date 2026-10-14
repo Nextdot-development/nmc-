@@ -132,7 +132,6 @@ export default function Layout() {
         <NavLink to="/rules" className="promo">
           <StackGraphic />
           <strong>Stay compliant<br />grow with<br /><em>confidence</em></strong>
-          <span>AI-powered NMC audits for healthcare advertising, claims and communications.</span>
           <span className="promo__arrow"><ArrowRightIcon width={18} height={18} /></span>
         </NavLink>
 
@@ -164,7 +163,7 @@ export default function Layout() {
           <form className="topsearch" onSubmit={search} role="search">
             <SearchIcon width={22} height={22} />
             <input ref={searchRef} value={query} onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search audits, rule packs, regulations or keywords..." aria-label="Search rule packs and regulations" />
+              placeholder="Search rules..." aria-label="Search rule packs and regulations" />
             <span className="kbd" aria-hidden="true"><kbd>Ctrl</kbd><kbd>K</kbd></span>
           </form>
           <div className="topbar__right">
