@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { api } from '../api.js';
-import { ExternalIcon, SearchIcon } from '../components/Icons.jsx';
+import { ExternalIcon, LayersIcon, SearchIcon } from '../components/Icons.jsx';
 import { PACKS, packMeta } from '../packs.js';
 
 const Rule = ({ rule }) => {
@@ -18,7 +19,7 @@ const Rule = ({ rule }) => {
           <div className="rule__foot">
             <code>{rule.id}</code>
             {rule.source && (
-              <a href={rule.source} target="_blank" rel="noopener noreferrer">Official source <ExternalIcon /></a>
+              <a href={rule.source} target="_blank" rel="noopener noreferrer">Official source <ExternalIcon width={14} height={14} /></a>
             )}
           </div>
         </div>
@@ -28,10 +29,12 @@ const Rule = ({ rule }) => {
 };
 
 export default function RulePack() {
+  const [params, setParams] = useSearchParams();
   const [groups, setGroups] = useState(null);
   const [error, setError] = useState('');
-  const [query, setQuery] = useState('');
   const [active, setActive] = useState('all');
+  const query = params.get('q') || '';
+  const setQuery = (q) => setParams(q ? { q } : {}, { replace: true });
 
   useEffect(() => {
     api.rulePack()
@@ -53,9 +56,7 @@ export default function RulePack() {
       .filter((g) => active === 'all' || g.id === active)
       .map((g) => ({
         ...g,
-        rules: q
-          ? g.rules.filter((r) => [r.title, r.description, r.section, r.id].join(' ').toLowerCase().includes(q))
-          : g.rules,
+        rules: q ? g.rules.filter((r) => [r.title, r.description, r.section, r.id, r.regulation].join(' ').toLowerCase().includes(q)) : g.rules,
       }))
       .filter((g) => g.rules.length);
   }, [groups, query, active]);
@@ -64,26 +65,25 @@ export default function RulePack() {
 
   return (
     <div className="page">
-      <div className="page__intro">
-        <p className="eyebrow">Rule pack · India</p>
-        <h1>The <em>{total || 160}</em> rules every audit checks.</h1>
-        <p className="muted">Built from a review of all 1,014 notices on nmc.org.in/whats-new plus the operative IMC Code of Ethics. The NMC RMP Conduct Regulations 2023 are held in abeyance and are not used.</p>
-      </div>
+      <header className="page-head">
+        <span className="badge-live"><i /> RULE PACKS · INDIA</span>
+        <h1>The <b className="lime">{total || 160}</b> <b className="grad">NMC rules</b></h1>
+        <p>Built from a review of all 1,014 notices on nmc.org.in/whats-new plus the operative IMC Code of Ethics. The NMC RMP Conduct Regulations 2023 are held in abeyance and are not used.</p>
+      </header>
 
-      {error && <p className="alert alert--error">{error}</p>}
-      {!groups && !error && <div className="card skeleton">Loading rule pack…</div>}
+      {error && <p className="alert">{error}</p>}
+      {!groups && !error && <div className="panel skeleton">Loading rule pack…</div>}
 
       {groups && (
         <>
           <div className="rules-toolbar">
-            <label className="search">
+            <label className="searchbox">
               <SearchIcon />
-              <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search rules — e.g. testimonial, discount, stem cell, telemedicine" aria-label="Search rules" />
+              <input value={query} onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search rules — testimonial, discount, stem cell, telemedicine…" aria-label="Search rules" />
             </label>
             <div className="chips" role="group" aria-label="Filter by source">
-              <button type="button" className={`chip ${active === 'all' ? 'chip--active' : ''}`} onClick={() => setActive('all')}>
-                All <span>{total}</span>
-              </button>
+              <button type="button" className={`chip ${active === 'all' ? 'chip--active' : ''}`} onClick={() => setActive('all')}>All <span>{total}</span></button>
               {groups.map((g) => (
                 <button key={g.id} type="button" className={`chip ${active === g.id ? 'chip--active' : ''}`} onClick={() => setActive(g.id)}>
                   {g.short} <span>{g.rules.length}</span>
@@ -92,23 +92,22 @@ export default function RulePack() {
             </div>
           </div>
 
-          {query && <p className="muted results-note">{shown} rule{shown === 1 ? '' : 's'} match “{query}”</p>}
+          {query && <p className="muted small results-note">{shown} rule{shown === 1 ? '' : 's'} match “{query}”</p>}
 
           {visible.map((g) => (
-            <section key={g.id} className="card rule-group">
+            <section key={g.id} className="panel rule-group">
               <header className="rule-group__head">
+                <span className="card-pack__icon card-pack__icon--sm"><LayersIcon width={24} height={24} /></span>
                 <div>
                   <h2>{g.label}</h2>
-                  <p className="muted">{g.issuer}</p>
+                  <p className="muted small">{g.issuer}</p>
                 </div>
-                <span className="rule-group__count">{g.rules.length} rules</span>
+                <span className="badge-active"><i /> {g.rules.length} rules</span>
               </header>
-              <ul className="rules">
-                {g.rules.map((r) => <Rule key={r.id} rule={r} />)}
-              </ul>
+              <ul className="rules">{g.rules.map((r) => <Rule key={r.id} rule={r} />)}</ul>
             </section>
           ))}
-          {visible.length === 0 && <div className="card empty">No rule matches your search.</div>}
+          {visible.length === 0 && <div className="panel empty">No rule matches your search.</div>}
         </>
       )}
     </div>

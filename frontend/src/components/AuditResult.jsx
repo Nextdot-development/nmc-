@@ -1,15 +1,8 @@
 import { useState } from 'react';
-import { PrintIcon } from './Icons.jsx';
+import { PrintIcon, SparkIcon } from './Icons.jsx';
+import { StatusPill, statusTone } from '../pages/History.jsx';
 
 const SEVERITY_ORDER = ['Critical', 'High', 'Medium', 'Low'];
-
-const statusTone = (status = '') => {
-  const s = status.toLowerCase();
-  if (s.startsWith('compliant')) return 'ok';
-  if (s.includes('review')) return 'warn';
-  return 'bad';
-};
-
 const scoreTone = (score) => (score >= 80 ? 'ok' : score >= 50 ? 'warn' : 'bad');
 
 const ScoreRing = ({ score }) => {
@@ -18,7 +11,7 @@ const ScoreRing = ({ score }) => {
   const c = 2 * Math.PI * r;
   return (
     <div className={`ring ring--${scoreTone(value)}`} role="img" aria-label={`Compliance score ${value} out of 100`}>
-      <svg viewBox="0 0 120 120" width="132" height="132">
+      <svg viewBox="0 0 120 120" width="140" height="140">
         <circle cx="60" cy="60" r={r} className="ring__track" />
         <circle cx="60" cy="60" r={r} className="ring__value" strokeDasharray={c} strokeDashoffset={c * (1 - value / 100)} />
       </svg>
@@ -61,7 +54,7 @@ const Violation = ({ v, index }) => {
         )}
         {v.solution && (
           <div>
-            <h5>Compliant rewrite</h5>
+            <h5><SparkIcon width={14} height={14} /> Compliant rewrite</h5>
             <ol>{toPoints(v.solution).map((p, i) => <li key={i}>{p}</li>)}</ol>
           </div>
         )}
@@ -76,58 +69,53 @@ export default function AuditResult({ result, onReset, meta }) {
     (a, b) => SEVERITY_ORDER.indexOf(a.severity) - SEVERITY_ORDER.indexOf(b.severity)
   );
   const counts = SEVERITY_ORDER.map((s) => [s, violations.filter((v) => v.severity === s).length]);
-  const tone = statusTone(result?.status);
+  const risk = result?.financialPenalty?.riskLevel;
 
   return (
     <section className="result" aria-live="polite">
-      <div className="result__hero card">
+      <div className={`panel panel--glow result__hero result__hero--${statusTone(result?.status)}`}>
         <ScoreRing score={result?.score} />
         <div className="result__headline">
-          <span className={`pill pill--${tone}`}>{result?.status || 'Result'}</span>
+          <span className="kicker">AUDIT RESULT</span>
+          <StatusPill status={result?.status} />
           {meta && <p className="result__meta">{meta}</p>}
           <p className="result__summary">{result?.summary}</p>
           <div className="result__counts">
             {counts.map(([s, n]) => (
-              <span key={s} className={`count sev--${s.toLowerCase()} ${n ? '' : 'count--zero'}`}>{n} {s}</span>
+              <span key={s} className={`sev sev--${s.toLowerCase()} ${n ? '' : 'sev--zero'}`}>{n} {s}</span>
             ))}
           </div>
         </div>
         <div className="result__actions no-print">
-          <button type="button" className="btn btn--ghost" onClick={() => window.print()}><PrintIcon /> Save as PDF</button>
-          {onReset && <button type="button" className="btn btn--primary" onClick={onReset}>New audit</button>}
+          <button type="button" className="ghost-btn" onClick={() => window.print()}><PrintIcon width={18} height={18} /> Save as PDF</button>
+          {onReset && <button type="button" className="run-btn run-btn--sm" onClick={onReset}>New audit</button>}
         </div>
       </div>
 
       <div className="result__grid">
-        <div className="card stat">
-          <h3>Penalty risk</h3>
-          <span className={`pill pill--${{ High: 'bad', Medium: 'warn', Low: 'ok', None: 'ok' }[result?.financialPenalty?.riskLevel] || 'warn'}`}>
-            {result?.financialPenalty?.riskLevel || '—'}
-          </span>
+        <div className="panel stat">
+          <h3 className="kicker">PENALTY RISK</h3>
+          <span className={`status status--${{ High: 'bad', Medium: 'warn', Low: 'ok', None: 'ok' }[risk] || 'warn'}`}>{risk || '—'}</span>
           <p>{result?.financialPenalty?.description}</p>
         </div>
-        <div className="card stat">
-          <h3>Ethical marketing</h3>
-          <span className={`pill pill--${scoreTone(result?.ethicalMarketing?.score ?? 0)}`}>
-            {result?.ethicalMarketing?.score ?? '—'} / 100
-          </span>
+        <div className="panel stat">
+          <h3 className="kicker">ETHICAL MARKETING</h3>
+          <span className={`status status--${scoreTone(result?.ethicalMarketing?.score ?? 0)}`}>{result?.ethicalMarketing?.score ?? '—'} / 100</span>
           <p>{result?.ethicalMarketing?.assessment}</p>
         </div>
       </div>
 
       <div className="section-head">
         <h3>{violations.length ? `${violations.length} issue${violations.length > 1 ? 's' : ''} found` : 'No violations found'}</h3>
-        {violations.length > 0 && <p className="muted">Sorted by severity. Each issue cites the NMC / IMC clause it breaks.</p>}
+        {violations.length > 0 && <p className="muted small">Sorted by severity. Each issue cites the NMC / IMC clause it breaks.</p>}
       </div>
-      {violations.length === 0 && (
-        <div className="card empty">This content did not break any rule in the NMC rule pack.</div>
-      )}
+      {violations.length === 0 && <div className="panel empty">This content did not break any rule in the NMC rule pack.</div>}
       <div className="violations">
         {violations.map((v, i) => <Violation key={i} v={v} index={i} />)}
       </div>
 
       {result?.transcription && (
-        <div className="card transcript">
+        <div className="panel transcript">
           <button type="button" className="link-btn" onClick={() => setShowText(!showText)} aria-expanded={showText}>
             {showText ? 'Hide' : 'Show'} the text we audited
           </button>

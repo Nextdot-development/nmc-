@@ -1,50 +1,138 @@
-import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../App.jsx';
-import { BookIcon, ClockIcon, LogoutIcon, ShieldIcon } from './Icons.jsx';
+import {
+  ArrowUpRightIcon, BellIcon, ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon, ClockIcon, CogIcon,
+  DatabaseIcon, HomeIcon, LogoMark, LogoutIcon, MenuIcon, SearchIcon,
+} from './Icons.jsx';
 
-export const Brand = ({ light = false }) => (
-  <span className={`brand ${light ? 'brand--light' : ''}`}>
-    <span className="brand__mark" aria-hidden="true">N</span>
-    <span className="brand__name">NextComply <em>AI</em></span>
-    <span className="brand__tag">NMC</span>
-  </span>
+const NAV = [
+  { to: '/', label: 'Auditor', Icon: HomeIcon, end: true },
+  { to: '/rules', label: 'Rule Packs', Icon: DatabaseIcon },
+  { to: '/history', label: 'Audit History', Icon: ClockIcon },
+  { to: '/settings', label: 'Settings', Icon: CogIcon },
+];
+
+export const IndiaFlag = () => (
+  <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true" className="flag">
+    <clipPath id="flagclip"><circle cx="11" cy="11" r="10" /></clipPath>
+    <g clipPath="url(#flagclip)">
+      <rect width="22" height="7.4" fill="#ff9933" />
+      <rect y="7.3" width="22" height="7.4" fill="#ffffff" />
+      <rect y="14.6" width="22" height="7.4" fill="#138808" />
+      <circle cx="11" cy="11" r="2.2" fill="none" stroke="#000080" strokeWidth="0.8" />
+    </g>
+  </svg>
 );
+
+export const Avatar = ({ user, size = 'md' }) => {
+  const initial = (user?.name || user?.email || 'U').trim().charAt(0).toUpperCase();
+  return <span className={`avatar avatar--${size}`} title={user?.email}>{initial}</span>;
+};
 
 export default function Layout() {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
-  const initial = (user?.name || user?.email || '?').trim().charAt(0).toUpperCase();
+  const location = useLocation();
+  const [collapsed, setCollapsed] = useState(false);
+  const [drawer, setDrawer] = useState(false);
+  const [query, setQuery] = useState('');
+  const searchRef = useRef(null);
+
+  useEffect(() => setDrawer(false), [location.pathname]);
+
+  useEffect(() => {
+    const onKey = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        searchRef.current?.focus();
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
+
+  const search = (e) => {
+    e.preventDefault();
+    const q = query.trim();
+    navigate(q ? `/rules?q=${encodeURIComponent(q)}` : '/rules');
+  };
 
   return (
-    <div className="shell">
-      <header className="topbar">
-        <div className="topbar__inner">
-          <NavLink to="/" className="topbar__brand" aria-label="NextComply AI home"><Brand /></NavLink>
-          <nav className="nav" aria-label="Main">
-            <NavLink to="/" end className="nav__link"><ShieldIcon /><span>Audit</span></NavLink>
-            <NavLink to="/rules" className="nav__link"><BookIcon /><span>Rule Pack</span></NavLink>
-            {user && <NavLink to="/history" className="nav__link"><ClockIcon /><span>History</span></NavLink>}
-          </nav>
-          <div className="topbar__user">
-            {user ? (
-              <>
-                <span className="avatar" title={user.email}>{initial}</span>
-                <button type="button" className="icon-btn" onClick={() => { signOut(); navigate('/login'); }} aria-label="Sign out" title="Sign out">
-                  <LogoutIcon />
-                </button>
-              </>
-            ) : (
-              <NavLink to="/login" className="btn btn--small">Sign in</NavLink>
-            )}
-          </div>
+    <div className={`app ${collapsed ? 'app--collapsed' : ''} ${drawer ? 'app--drawer' : ''}`}>
+      <aside className="sidebar">
+        <div className="sidebar__top">
+          <NavLink to="/" className="sidebar__logo" aria-label="NextComply AI home"><LogoMark /></NavLink>
+          <button type="button" className="square-btn sidebar__collapse" onClick={() => setCollapsed(!collapsed)}
+            aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}>
+            {collapsed ? <ChevronRightIcon /> : <ChevronLeftIcon />}
+          </button>
         </div>
-      </header>
-      <main className="main">
-        <Outlet />
-      </main>
-      <footer className="footer">
-        NextComply AI · NMC Edition — guidance tool, not legal advice. Rules sourced from nmc.org.in.
-      </footer>
+
+        <nav className="sidenav" aria-label="Main">
+          {NAV.map(({ to, label, Icon, end }) => (
+            <NavLink key={to} to={to} end={end} className="sidenav__link" title={label}>
+              <Icon width={22} height={22} /><span>{label}</span>
+            </NavLink>
+          ))}
+        </nav>
+
+        <div className="sidebar__glow" aria-hidden="true" />
+
+        <NavLink to="/rules" className="promo">
+          <strong>Stay compliant<br />grow with<br />confidence.</strong>
+          <span>AI-powered NMC audits for healthcare advertising.</span>
+          <span className="promo__arrow"><ArrowUpRightIcon width={18} height={18} /></span>
+        </NavLink>
+
+        <div className="sidebar__user">
+          {user ? (
+            <>
+              <NavLink to="/settings" className="usercard">
+                <Avatar user={user} size="lg" />
+                <span className="usercard__text">
+                  <strong>{user.name || 'Account'}</strong>
+                  <span>{user.email}</span>
+                </span>
+                <ChevronRightIcon className="usercard__chev" />
+              </NavLink>
+              <button type="button" className="signout" onClick={() => { signOut(); navigate('/login'); }}>
+                <LogoutIcon width={22} height={22} /><span>Sign Out</span>
+              </button>
+            </>
+          ) : (
+            <NavLink to="/login" className="signout"><LogoutIcon width={22} height={22} /><span>Sign In</span></NavLink>
+          )}
+        </div>
+      </aside>
+      <button type="button" className="scrim" aria-label="Close menu" onClick={() => setDrawer(false)} />
+
+      <div className="workspace">
+        <header className="topbar">
+          <button type="button" className="square-btn topbar__menu" onClick={() => setDrawer(true)} aria-label="Open menu"><MenuIcon /></button>
+          <form className="topsearch" onSubmit={search} role="search">
+            <SearchIcon width={22} height={22} />
+            <input ref={searchRef} value={query} onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search audits, rule packs, regulations..." aria-label="Search rule packs and regulations" />
+            <span className="kbd" aria-hidden="true"><kbd>Ctrl</kbd><kbd>K</kbd></span>
+          </form>
+          <div className="topbar__right">
+            <label className="country" title="Geography">
+              <IndiaFlag />
+              <select defaultValue="India" aria-label="Geography">
+                <option value="India">India</option>
+              </select>
+              <ChevronDownIcon width={18} height={18} />
+            </label>
+            <button type="button" className="square-btn square-btn--ghost" aria-label="Notifications" title="No new notifications"><BellIcon width={22} height={22} /></button>
+            {user && <NavLink to="/settings" aria-label="Account"><Avatar user={user} size="xl" /></NavLink>}
+          </div>
+        </header>
+
+        <main className="content">
+          <Outlet />
+        </main>
+      </div>
     </div>
   );
 }

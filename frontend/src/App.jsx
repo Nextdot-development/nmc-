@@ -7,6 +7,7 @@ import Auditor from './pages/Auditor.jsx';
 import RulePack from './pages/RulePack.jsx';
 import History from './pages/History.jsx';
 import HistoryDetail from './pages/HistoryDetail.jsx';
+import Settings from './pages/Settings.jsx';
 
 const AuthContext = createContext(null);
 export const useAuth = () => useContext(AuthContext);
@@ -48,6 +49,7 @@ export default function App() {
           <Route path="/rules" element={<RulePack />} />
           <Route path="/history" element={<RequireAuth><History /></RequireAuth>} />
           <Route path="/history/:id" element={<RequireAuth><HistoryDetail /></RequireAuth>} />
+          <Route path="/settings" element={<RequireAuth><Settings /></RequireAuth>} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

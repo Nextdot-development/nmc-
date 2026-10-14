@@ -1,20 +1,31 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../api.js';
-import { ChevronIcon } from '../components/Icons.jsx';
+import { AlertIcon, CheckCircleIcon, ChevronRightIcon, DocIcon, ImageIcon, LinkIcon, MicIcon, VideoIcon, XCircleIcon } from '../components/Icons.jsx';
 
-const TYPE_LABEL = { text: 'Text', url: 'URL', webpage: 'Web page', image: 'Image', video: 'Video', audio: 'Audio', document: 'Document' };
+export const TYPE_LABEL = { text: 'Text', url: 'URL', webpage: 'URL', image: 'Image', video: 'Video', audio: 'Audio', document: 'Document' };
+const TYPE_ICON = { url: LinkIcon, webpage: LinkIcon, image: ImageIcon, video: VideoIcon, audio: MicIcon };
 
-const tone = (status = '') => {
-  const s = status.toLowerCase();
+export const statusTone = (status = '') => {
+  const s = String(status).toLowerCase();
   if (s.startsWith('compliant')) return 'ok';
   if (s.includes('review')) return 'warn';
   return 'bad';
 };
 
+export const StatusPill = ({ status, small = false }) => {
+  const tone = statusTone(status);
+  const Icon = tone === 'ok' ? CheckCircleIcon : tone === 'warn' ? AlertIcon : XCircleIcon;
+  return (
+    <span className={`status status--${tone} ${small ? 'status--small' : ''}`}>
+      <Icon width={small ? 14 : 16} height={small ? 14 : 16} /> {status || 'Result'}
+    </span>
+  );
+};
+
 export const formatDate = (iso) => {
   if (!iso) return '';
-  return new Date(iso).toLocaleString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit' });
+  return new Date(iso).toLocaleString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 };
 
 export default function History() {
@@ -27,15 +38,16 @@ export default function History() {
 
   return (
     <div className="page">
-      <div className="page__intro">
-        <p className="eyebrow">History</p>
-        <h1>Your past <em>audits</em>.</h1>
-      </div>
+      <header className="page-head">
+        <span className="badge-live"><i /> AUDIT HISTORY</span>
+        <h1>Your past <b className="grad">audits</b></h1>
+        <p>Every audit you run is saved here with its score, status and full report.</p>
+      </header>
 
-      {error && <p className="alert alert--error">{error}</p>}
-      {!items && !error && <div className="card skeleton">Loading…</div>}
+      {error && <p className="alert">{error}</p>}
+      {!items && !error && <div className="panel skeleton">Loading…</div>}
       {items && items.length === 0 && (
-        <div className="card empty">No audits yet. <Link to="/">Run your first audit →</Link></div>
+        <div className="panel empty">No audits yet. <Link to="/">Run your first audit →</Link></div>
       )}
 
       {items && items.length > 0 && (
@@ -43,19 +55,18 @@ export default function History() {
           {items.map((item) => {
             const r = item.auditResult || item;
             const violations = r.violations?.length || 0;
+            const Icon = TYPE_ICON[item.contentType] || DocIcon;
             return (
               <li key={item._id}>
-                <Link to={`/history/${item._id}`} state={{ item }} className="card history__item">
-                  <span className={`history__score score--${tone(r.status)}`}>{Math.round(Number(r.score) || 0)}</span>
+                <Link to={`/history/${item._id}`} state={{ item }} className="panel history__item">
+                  <span className="recent__icon"><Icon width={22} height={22} /></span>
                   <div className="history__main">
-                    <div className="history__meta">
-                      <span className="tag">{TYPE_LABEL[item.contentType] || 'Audit'}</span>
-                      <span>{formatDate(item.createdAt)}</span>
-                    </div>
-                    <p className="history__input">{item.originalInput || r.summary || 'Audit'}</p>
-                    <p className="muted">{r.status} · {violations} issue{violations === 1 ? '' : 's'}</p>
+                    <strong>{item.originalInput || r.summary || 'Audit'}</strong>
+                    <small>{TYPE_LABEL[item.contentType] || 'Audit'} • {formatDate(item.createdAt)} • {violations} issue{violations === 1 ? '' : 's'}</small>
                   </div>
-                  <ChevronIcon />
+                  <span className={`score-chip score-chip--${statusTone(r.status)}`}>{Math.round(Number(r.score) || 0)}</span>
+                  <StatusPill status={r.status} small />
+                  <ChevronRightIcon className="history__chev" />
                 </Link>
               </li>
             );

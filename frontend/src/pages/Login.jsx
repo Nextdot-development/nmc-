@@ -2,12 +2,12 @@ import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { api } from '../api.js';
 import { useAuth } from '../App.jsx';
-import { Brand } from '../components/Layout.jsx';
+import { BoltIcon, ChartIcon, LogoMark, ShieldCheckIcon, SparkIcon } from '../components/Icons.jsx';
 
 const highlights = [
-  ['160', 'NMC & IMC rules checked on every audit'],
-  ['5', 'official sources — Ethical Advertising 2026, IMC 2002, Telemedicine and more'],
-  ['4', 'formats — text, website URL, image/PDF and video/audio'],
+  [ShieldCheckIcon, '160 NMC & IMC rules', 'checked on every audit'],
+  [BoltIcon, 'Results in seconds', 'with clause-level citations'],
+  [ChartIcon, 'Compliant rewrites', 'for every flagged line'],
 ];
 
 export default function Login() {
@@ -41,47 +41,45 @@ export default function Login() {
   return (
     <div className="auth">
       <section className="auth__story">
-        <Brand light />
-        <div className="auth__pitch">
-          <p className="eyebrow eyebrow--light">For doctors, hospitals & healthcare marketers</p>
-          <h1>Publish health ads that <em>pass</em> the National Medical Commission.</h1>
-          <p className="auth__lede">
-            Paste a post, drop a link or upload a creative. NextComply checks it against the NMC Ethical
-            Advertising Guidelines and the IMC Code of Ethics, flags every risky line and rewrites it for you.
-          </p>
+        <div className="auth__brand"><LogoMark /> <span>NextComply <b className="lime">AI</b></span></div>
+        <div>
+          <span className="badge-live"><i /> NMC EDITION</span>
+          <h1>
+            <span>COMPLIANCE,</span>
+            <span><b className="lime">WITHOUT</b></span>
+            <span><b className="grad">THE COMPLEXITY</b></span>
+          </h1>
+          <p>Audit doctor, clinic, hospital and pharma advertising against National Medical Commission rules — with clear explanations and ready-to-use compliant rewrites.</p>
         </div>
         <ul className="auth__stats">
-          {highlights.map(([value, label]) => (
-            <li key={value}><strong>{value}</strong><span>{label}</span></li>
+          {highlights.map(([Icon, title, sub]) => (
+            <li key={title} className="panel"><span className="recent__icon"><Icon width={22} height={22} /></span><span><strong>{title}</strong><small>{sub}</small></span></li>
           ))}
         </ul>
       </section>
 
       <section className="auth__panel">
-        <form className="auth__form" onSubmit={submit}>
+        <form className="panel panel--glow auth__form" onSubmit={submit}>
           <h2>{mode === 'login' ? 'Welcome back' : 'Create your account'}</h2>
-          <p className="muted">{mode === 'login' ? 'Sign in to run NMC compliance audits.' : 'Free to start. Takes 30 seconds.'}</p>
+          <p className="muted">{mode === 'login' ? 'Sign in to your AI audit workspace.' : 'Start auditing in under a minute.'}</p>
 
           {mode === 'signup' && (
-            <label className="field">
-              <span>Full name</span>
+            <label className="field"><span>Full name</span>
               <input value={form.name} onChange={update('name')} required autoComplete="name" placeholder="Dr. Ananya Rao" />
             </label>
           )}
-          <label className="field">
-            <span>Email</span>
+          <label className="field"><span>Email</span>
             <input type="email" value={form.email} onChange={update('email')} required autoComplete="email" placeholder="you@clinic.in" />
           </label>
-          <label className="field">
-            <span>Password</span>
+          <label className="field"><span>Password</span>
             <input type="password" value={form.password} onChange={update('password')} required minLength={6}
               autoComplete={mode === 'login' ? 'current-password' : 'new-password'} placeholder="••••••••" />
           </label>
 
-          {error && <p className="alert alert--error" role="alert">{error}</p>}
+          {error && <p className="alert" role="alert">{error}</p>}
 
-          <button className="btn btn--primary btn--block" disabled={busy}>
-            {busy ? 'Please wait…' : mode === 'login' ? 'Sign in' : 'Create account'}
+          <button className="run-btn" disabled={busy}>
+            <SparkIcon width={20} height={20} /> {busy ? 'Please wait…' : mode === 'login' ? 'Sign in' : 'Create account'}
           </button>
 
           <p className="auth__switch">
