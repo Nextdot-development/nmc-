@@ -151,7 +151,22 @@ export const getRulesForSelection = ({ country, region, category }) => {
   return rulePaths.flatMap((dirPath) => readRulesFromDir(dirPath));
 };
 
+// Full rule pack for a country, grouped by source file, for display in the UI
+export const getRulePack = (country = 'india') => {
+  const countrySlug = COUNTRY_TO_SLUG[country] || (country || '').toLowerCase();
+  const nestedRulesRoot = path.join(RULES_ROOT, RULES_SUBDIR);
+  const scanRoot = fs.existsSync(nestedRulesRoot) ? nestedRulesRoot : RULES_ROOT;
+  const dirPath = path.join(scanRoot, countrySlug, 'common');
+  if (!countrySlug || !fs.existsSync(dirPath)) return [];
+
+  return fs.readdirSync(dirPath)
+    .filter((name) => name.endsWith('.json'))
+    .sort()
+    .map((name) => ({ pack: name.replace(/\.json$/, ''), rules: safeReadJson(path.join(dirPath, name)) }));
+};
+
 export default {
   getRulesMetadata,
-  getRulesForSelection
+  getRulesForSelection,
+  getRulePack
 };

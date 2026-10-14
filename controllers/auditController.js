@@ -69,7 +69,7 @@ export const getAuditHistory = async (req, res) => {
       .sort({ createdAt: -1 })
       .limit(parseInt(limit))
       .skip(parseInt(skip))
-      .select('auditResult')
+      .select('auditResult contentType originalInput createdAt')
       .lean();
 
     const results = audits.map((record) => record.auditResult);
