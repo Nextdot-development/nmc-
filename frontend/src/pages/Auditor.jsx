@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { api } from '../api.js';
 import AuditResult from '../components/AuditResult.jsx';
 import { BannerArt } from '../components/Graphics.jsx';
+import { COUNTRY } from '../country.js';
 import {
   ArrowRightIcon, CheckCircleIcon, ChevronDownIcon, DocIcon, GlobeIcon, ImageIcon, LayersIcon, LinkIcon, MicIcon,
   ShieldCheckIcon, SparkIcon, TextIcon, UploadIcon, VideoIcon,
@@ -110,7 +111,7 @@ export default function Auditor() {
       <section className="banner">
         <div className="banner__copy">
           <h1><span className="simple__titleicon"><ShieldCheckIcon width={22} height={22} /></span> Compliance <b>Auditor</b></h1>
-          <p>NMC rules · India</p>
+          <p>{COUNTRY.regulator} rules · {COUNTRY.name}</p>
         </div>
         <BannerArt />
       </section>

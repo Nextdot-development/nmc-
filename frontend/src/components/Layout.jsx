@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { ShieldLogo, SidebarArt } from './Graphics.jsx';
+import { COUNTRY } from '../country.js';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../App.jsx';
 import {
@@ -131,8 +132,7 @@ export default function Layout() {
 
         <div className="promo">
           <SidebarArt />
-          <strong>Built for a Safer,<br />Healthier <em>India</em></strong>
-          <i className="promo__flagline" />
+          <strong>Built for a Safer,<br />Healthier <em>{COUNTRY.name}</em></strong>
         </div>
 
         <div className="sidebar__user">
