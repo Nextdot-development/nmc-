@@ -236,7 +236,7 @@ export default function Landing() {
   };
 
   const ctaFor = (p) => ({
-    label: { free: 'Start free', starter: 'Choose Starter', premium: 'Choose Premium', enterprise: 'Contact sales' }[p.id] || 'Choose',
+    label: { free: 'Start for free', starter: 'Choose Starter', premium: 'Choose Premium', enterprise: "Let's connect" }[p.id] || 'Choose',
     disabled: false,
   });
 
@@ -351,7 +351,7 @@ export default function Landing() {
             <p>Prices include GST. 1 credit = one text, PDF or image audit.</p>
           </div>
           {plans === null ? <div className="panel skeleton">Loading plans…</div>
-            : plans.length ? <div className="reveal"><PlanCards plans={plans.filter((p) => p.id !== 'free')} onChoose={onChoose} ctaFor={ctaFor} /></div>
+            : plans.length ? <div className="reveal"><PlanCards plans={plans} onChoose={onChoose} ctaFor={ctaFor} /></div>
               : <p className="muted center">Pricing could not load right now. Please refresh the page.</p>}
         </section>
 

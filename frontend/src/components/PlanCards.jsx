@@ -1,19 +1,12 @@
 import { FORMAT_NAMES, inr } from '../billing.js';
-import { CheckCircleIcon, StarIcon, XCircleIcon } from './Icons.jsx';
-
-// Marketing examples of what a plan's credits buy
-const EXAMPLES = {
-  free: '2 text + 1 image audit',
-  starter: 'e.g. 8 text + 10 image + 2 videos',
-  premium: 'e.g. 18 text + 20 image + 4 videos + 2 websites',
-  enterprise: 'Volume pricing for teams',
-};
+import { ArrowRightIcon, CheckCircleIcon, SparkIcon } from './Icons.jsx';
 
 const formatList = (formats) => {
   if (formats.includes('url') && formats.length >= 6) return 'All formats incl. websites & YouTube';
   return formats.map((f) => FORMAT_NAMES[f]).join(', ');
 };
 
+// Generic feature list for a plan
 export const planFeatures = (p) => [
   [true, formatList(p.formats)],
   [p.maxMediaMinutes > 0, p.maxMediaMinutes ? `Video & audio up to ${p.maxMediaMinutes} min` : 'Video & audio'],
@@ -22,52 +15,107 @@ export const planFeatures = (p) => [
   [true, 'Report in the language of your ad'],
   [p.pdf, 'PDF report download'],
   [true, p.historyDays ? `Audit history: ${p.historyDays >= 365 ? '12 months' : p.historyDays >= 180 ? '6 months' : `${p.historyDays} days`}` : 'Unlimited audit history'],
-  [true, p.seats ? `${p.seats} user${p.seats > 1 ? 's' : ''}` : 'Users as you need'],
   [p.rollover, 'Unused credits roll over'],
-  [Boolean(p.topup) || p.id === 'enterprise', p.topup ? `Top-up: ${p.topup.credits} credits for ${inr(p.topup.price)}` : p.id === 'enterprise' ? 'Dedicated support & GST invoice' : 'Top-ups'],
 ];
 
-const priceBlock = (p) => {
-  if (p.price === null) return <><b>{inr(p.pricePerCredit)}</b><span>/ credit + GST</span></>;
-  if (p.price === 0) return <><b>₹0</b><span>forever</span></>;
-  return <><b>{inr(p.price)}</b><span>/ month</span></>;
+const historyText = (days) => (days ? (days >= 365 ? '12-month' : days >= 180 ? '6-month' : `${days}-day`) : 'Unlimited');
+
+// What each paid card says; every line comes from the plan settings
+const bullets = (p) => {
+  if (p.id === 'starter') return [
+    'Text, PDF, Word & poster/image audits',
+    `Video & audio audits up to ${p.maxMediaMinutes} min, with full transcript`,
+    'Line-by-line compliant rewrite for every issue',
+    'Report in your ad’s language — Hindi, Hinglish, Marathi, English',
+    'PDF reports with NMC clause citations',
+    `${historyText(p.historyDays)} audit history`,
+    `Top-up: ${p.topup.credits} credits for ${inr(p.topup.price)}`,
+  ];
+  if (p.id === 'premium') return [
+    'Every format incl. website URLs & YouTube links',
+    `Video & audio audits up to ${p.maxMediaMinutes} min, with full transcript`,
+    'Full corrected version, ready to paste',
+    'PDF reports with NMC clause citations',
+    `${historyText(p.historyDays)} audit history`,
+    'Unused credits roll over one month',
+    `Top-up: ${p.topup.credits} credits for ${inr(p.topup.price)}`,
+  ];
+  return [
+    `Volume credits from ${p.minCredits} per month`,
+    `Longer video & audio — up to ${p.maxMediaMinutes} min`,
+    'Everything in Premium',
+    'Unlimited audit history',
+    'Dedicated support for your team',
+    'GST invoice & bank-transfer payment',
+  ];
 };
 
-const creditLine = (p) => {
-  if (p.credits === null) return `From ${p.minCredits} credits / month`;
-  return p.period === 'once' ? `${p.credits} credits, one time` : `${p.credits} credits every month`;
-};
+const RIBBON = { starter: 'MOST POPULAR', premium: 'BEST VALUE', enterprise: 'ENTERPRISE & INSTITUTIONS' };
+const FOOT = { starter: '30-day prepaid · no auto-renewal', premium: '30-day prepaid · no auto-renewal', enterprise: 'Custom contracts & volume pricing' };
+
+const perCredit = (p) => Math.round(p.price / p.credits);
 
 export default function PlanCards({ plans, current, busy, onChoose, ctaFor }) {
+  const free = plans.find((p) => p.id === 'free');
+  const paid = plans.filter((p) => p.id !== 'free');
+  const freeCta = free && ctaFor(free, current === 'free');
+
   return (
-    <div className="plans">
-      {plans.map((p, i) => {
-        const isCurrent = current === p.id;
-        const cta = ctaFor(p, isCurrent);
-        return (
-          <article key={p.id} className={`plan ${p.popular ? 'plan--popular' : ''} ${isCurrent ? 'plan--current' : ''}`} style={{ '--i': i }}>
-            {p.popular && <span className="plan__ribbon"><StarIcon width={13} height={13} /> Most popular</span>}
-            <header>
-              <h3>{p.name}</h3>
-              <p className="plan__tag">{p.tagline}</p>
-              <p className="plan__price">{priceBlock(p)}</p>
-              <p className="plan__credits">{creditLine(p)}</p>
-              <p className="plan__example">{EXAMPLES[p.id]}</p>
-            </header>
-            <button type="button" className={`plan__cta ${p.popular ? 'run-btn' : 'ghost-btn'}`} disabled={cta.disabled || busy === p.id}
-              onClick={() => onChoose(p)}>
-              {busy === p.id ? 'Opening…' : cta.label}
+    <div className="pc">
+      {free && (
+        <div className="pc-free">
+          <span className="pc-free__icon"><SparkIcon width={20} height={20} /></span>
+          <div className="pc-free__title">
+            <strong>Try it free — ₹0</strong>
+            <small>{free.credits} audits included (2 text + 1 image)</small>
+          </div>
+          <ul className="pc-free__chips">
+            <li><CheckCircleIcon width={14} height={14} /> Line-by-line fixes for top {free.fixPreviewLines} issues</li>
+            <li><CheckCircleIcon width={14} height={14} /> Report in your language</li>
+            <li><CheckCircleIcon width={14} height={14} /> {free.historyDays}-day history</li>
+          </ul>
+          <div className="pc-free__cta">
+            <button type="button" disabled={freeCta.disabled} onClick={() => onChoose(free)}>
+              {freeCta.label} {!freeCta.disabled && <ArrowRightIcon width={15} height={15} />}
             </button>
-            <ul className="plan__features">
-              {planFeatures(p).map(([on, text]) => (
-                <li key={text} className={on ? '' : 'off'}>
-                  {on ? <CheckCircleIcon width={17} height={17} /> : <XCircleIcon width={17} height={17} />} {text}
-                </li>
-              ))}
-            </ul>
-          </article>
-        );
-      })}
+            <small>No credit card needed · instant access</small>
+          </div>
+        </div>
+      )}
+
+      <div className="pc-grid">
+        {paid.map((p) => {
+          const cta = ctaFor(p, current === p.id);
+          const dark = p.id === 'enterprise';
+          return (
+            <article key={p.id} className={`pc-card ${dark ? 'pc-card--dark' : ''} ${current === p.id ? 'pc-card--current' : ''}`}>
+              <span className="pc-card__ribbon">{RIBBON[p.id]}</span>
+              <h3>{p.name}</h3>
+              <p className="pc-card__tag">{p.tagline}</p>
+              <div className="pc-card__price">
+                {dark ? (
+                  <>
+                    <b className="pc-card__custom">Custom</b>
+                    <small>{inr(p.pricePerCredit)} per credit + GST · volume pricing for your team</small>
+                  </>
+                ) : (
+                  <>
+                    <p><b>{inr(p.price)}</b><span>/month</span></p>
+                    <small>{p.credits} credits every month · about {inr(perCredit(p))} per credit</small>
+                  </>
+                )}
+              </div>
+              <ul>
+                {bullets(p).map((t) => <li key={t}><CheckCircleIcon width={17} height={17} /> {t}</li>)}
+              </ul>
+              <button type="button" className="pc-card__cta" disabled={cta.disabled || busy === p.id} onClick={() => onChoose(p)}>
+                {busy === p.id ? 'Opening…' : cta.label} {!cta.disabled && busy !== p.id && <ArrowRightIcon width={15} height={15} />}
+              </button>
+              <small className="pc-card__foot">{FOOT[p.id]}</small>
+            </article>
+          );
+        })}
+      </div>
     </div>
   );
 }

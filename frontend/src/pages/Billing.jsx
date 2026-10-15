@@ -107,7 +107,7 @@ export default function Billing() {
       )}
 
       {catalog ? (
-        <PlanCards plans={catalog.plans.filter((p) => p.id !== 'free')} current={account?.plan} busy={busy} onChoose={onChoose} ctaFor={ctaFor} />
+        <PlanCards plans={catalog.plans} current={account?.plan} busy={busy} onChoose={onChoose} ctaFor={ctaFor} />
       ) : (
         <div className="panel skeleton">Loading plans…</div>
       )}
