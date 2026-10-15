@@ -134,6 +134,7 @@ export default function Landing() {
   const navigate = useNavigate();
   const [plans, setPlans] = useState(null);
   const [scrolled, setScrolled] = useState(false);
+  const progressRef = useRef(null);
   const [open, setOpen] = useState(-1);
   const [result, setResult] = useState(null);
   const [checking, setChecking] = useState(false);
@@ -142,7 +143,11 @@ export default function Landing() {
 
   useEffect(() => {
     api.plans().then((res) => setPlans(res.plans)).catch(() => setPlans([]));
-    const onScroll = () => setScrolled(window.scrollY > 40);
+    const onScroll = () => {
+      setScrolled(window.scrollY > 40);
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      if (progressRef.current) progressRef.current.style.transform = `scaleX(${max > 0 ? window.scrollY / max : 0})`;
+    };
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
@@ -172,6 +177,7 @@ export default function Landing() {
 
   return (
     <div className="dl">
+      <span className="dl-progress" ref={progressRef} aria-hidden="true" />
       <a href="/rules" className="dl-announce" onClick={(e) => { e.preventDefault(); navigate('/rules'); }}>
         New: NMC Ethical Advertising Guidelines 2026 — 160 rules now live <ArrowRightIcon width={14} height={14} />
       </a>
@@ -200,6 +206,8 @@ export default function Landing() {
         {/* hero */}
         <section className="dl-hero">
           <div className="dl-hero__glow" aria-hidden="true" />
+          <div className="dl-hero__glow dl-hero__glow--2" aria-hidden="true" />
+          <div className="dl-hero__grid" aria-hidden="true" />
           <div className="dl-hero__copy">
             <span className="dl-pill"><i /> Built on 160 NMC rules · Updated Oct 2026</span>
             <h1>Publish healthcare ads <span>without the NMC notice.</span></h1>
@@ -218,6 +226,9 @@ export default function Landing() {
             </div>
           </div>
           <div id="scanner" className="dl-hero__scanner">
+            <span className="dl-float dl-float--a" aria-hidden="true"><CheckCircleIcon width={16} height={16} /> Clause-cited</span>
+            <span className="dl-float dl-float--b" aria-hidden="true"><LanguageIcon width={16} height={16} /> Hinglish ready</span>
+            <span className="dl-float dl-float--c" aria-hidden="true"><ShieldCheckIcon width={16} height={16} /> 160 NMC rules</span>
             <Scanner signupHref={signupHref} onStart={() => setChecking(true)} onResult={(r) => { setResult(r); setChecking(false); }} />
           </div>
         </section>
@@ -247,6 +258,7 @@ export default function Landing() {
 
         {/* regulatory reality */}
         <section className="dl-dark">
+          <div className="dl-dark__grid" aria-hidden="true" />
           <div className="dl-dark__inner">
             <span className="dl-dark__kicker"><AlertIcon width={15} height={15} /> REGULATORY REALITY CHECK</span>
             <h2>Every post carries your registration.</h2>

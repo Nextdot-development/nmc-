@@ -5,6 +5,7 @@ import App from './App.jsx';
 import './styles.css';
 import './landing.css';
 import './landing-page.css';
+import './landing-premium.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
