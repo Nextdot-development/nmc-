@@ -61,9 +61,45 @@ export const scoreFromViolations = (violations = []) => {
   return { score, status };
 };
 
-const finalizeResult = (result) => {
+/* ===============================
+   RULE-PACK BINDING
+   Every finding must cite a rule that exists in the pack. Citation text comes
+   from the pack (not the model); findings without a valid rule are dropped.
+================================ */
+const normalizeRef = (s = '') => String(s).toLowerCase().replace(/[^a-z0-9]+/g, '');
+
+const bindToRulePack = (violations, rules = []) => {
+  if (!rules.length) return { violations, dropped: [] };
+  const byId = new Map(rules.map((r) => [normalizeRef(r.id), r]));
+  const kept = [];
+  const dropped = [];
+  for (const v of violations) {
+    let rule = byId.get(normalizeRef(v.ruleId));
+    if (!rule) {
+      // Fall back to the cited section + title when the ID was mistyped
+      const cited = normalizeRef(v.regulation);
+      rule = rules.find((r) => r.section && r.title && cited.includes(normalizeRef(r.title)) && cited.includes(normalizeRef(r.section)));
+    }
+    if (!rule) {
+      dropped.push({ ruleId: v.ruleId || '', regulation: v.regulation || '', line: v.originalLine || v.problematicContent || '' });
+      continue;
+    }
+    kept.push({
+      ...v,
+      ruleId: rule.id,
+      regulation: `${rule.regulation} - ${rule.title}${rule.section ? ` (Section: ${rule.section})` : ''}`,
+      ruleSource: rule.source || ''
+    });
+  }
+  if (dropped.length) console.warn('[AI] Dropped findings without a valid rule', JSON.stringify(dropped));
+  return { violations: kept, dropped };
+};
+
+const finalizeResult = (result, rules = []) => {
   if (!result || typeof result !== 'object') return result;
-  result.violations = dedupeViolations(Array.isArray(result.violations) ? result.violations : []);
+  const bound = bindToRulePack(Array.isArray(result.violations) ? result.violations : [], rules);
+  result.ruleCheck = { kept: bound.violations.length, dropped: bound.dropped.length };
+  result.violations = dedupeViolations(bound.violations);
   // Fill the line-level fix fields from the older ones when a model omits them
   result.violations = result.violations.map((v) => ({
     ...v,
@@ -78,7 +114,7 @@ const finalizeResult = (result) => {
 };
 
 export const analyzeCompliance = async (params) =>
-  finalizeResult(await withFallback('audit', () => analyzeWithClaude(params), () => analyzeWithGemini(params)));
+  finalizeResult(await withFallback('audit', () => analyzeWithClaude(params), () => analyzeWithGemini(params)), params.rules);
 
 export const extractClaims = (text) =>
   withFallback('claim extraction', () => extractClaimsWithClaude(text), () => extractClaimsWithGemini(text));

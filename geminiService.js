@@ -146,7 +146,8 @@ const buildRulesBlock = (rules = []) => {
   const lines = rules.slice(0, maxRules).map((rule, index) => {
     const section = rule.section ? ` (Section: ${rule.section})` : '';
     const description = rule.description ? `: ${rule.description}` : '';
-    return `${index + 1}. ${rule.regulation} - ${rule.title}${section}${description}`;
+    const id = rule.id ? `[${rule.id}] ` : '';
+    return `${index + 1}. ${id}${rule.regulation} - ${rule.title}${section}${description}`;
   });
 
   if (rules.length > maxRules) {
@@ -173,7 +174,7 @@ Audit the given ${inputType} content for ${jurisdiction}${regionLabel} advertisi
 ${contextBlock}
 
 RULE PACK (MANDATORY):
-Use ONLY the rules listed below to identify violations and generate fixes.
+Use ONLY the rules listed below to identify violations and generate fixes. Every violation MUST cite exactly one rule by its [ID] in "ruleId". If a concern does not match any listed rule, do NOT report it.
 ${rulesBlock}
 
 CRITICAL OUTPUT RULES:
@@ -199,6 +200,12 @@ FORMAT RULES:
 - solution: steps to make the line compliant, numbered points (1., 2.), max 3.
 - transcription: for audio/video give the transcript; for text, documents and web pages return only the first 300 characters of the content (do NOT copy the whole input).
 
+SEVERITY (apply consistently):
+- Critical: guaranteed or false cure/outcome claims, promoting a prohibited or unapproved therapy (e.g. stem cell for autism), sex determination, a doctor endorsing a drug/product, identifiable patient information, before-after or celebrity patient promotion, commissions or kickbacks.
+- High: superlative or ranking claims ("best", "No.1"), success rates or patient counts, discounts/free offers/inducements, testimonials or reviews used for promotion, pushy solicitation ("book now", "call now"), case promotion naming the treating doctor.
+- Medium: missing doctor name, qualification or registration number; ratings, awards or rankings without source; AI-generated content without a label; vague exaggeration.
+- Low: minor disclosure or wording gaps that do not mislead.
+
 SCORING:
 - score: integer 0-100, higher is better. status: "Compliant", "Needs Review" or "Non-Compliant" (any Critical violation means "Non-Compliant").
 - ethicalMarketing.score: integer 0-100, higher = more ethical.
@@ -221,6 +228,7 @@ JSON SCHEMA:
   },
   "violations": [
     {
+      "ruleId": string,
       "severity": "Critical" | "High" | "Medium" | "Low",
       "regulation": string,
       "description": string,

@@ -52,6 +52,12 @@ const Violation = ({ v, index, L }) => {
         <span className={`sev sev--${sev.toLowerCase()}`}>{sev}</span>
         <h4>{v.regulation}</h4>
       </header>
+      {(v.ruleId || v.ruleSource) && (
+        <p className="violation__rule">
+          {v.ruleId && <code>{v.ruleId}</code>}
+          {v.ruleSource && <a href={v.ruleSource} target="_blank" rel="noopener noreferrer">Official source ↗</a>}
+        </p>
+      )}
       {v.description && <p className="violation__desc">{v.description}</p>}
 
       {original && (

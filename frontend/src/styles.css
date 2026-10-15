@@ -570,3 +570,7 @@ input:focus, textarea:focus { border-color: var(--green); box-shadow: 0 0 0 3px 
 .lang-badge { display: inline-flex; padding: 3px 10px; border-radius: 999px; background: #eef2ff; color: var(--navy); font-size: 12.5px; font-weight: 700; }
 .reused { margin: 0; padding: 8px 12px; border-radius: 10px; background: #fff8e6; color: #7a5a00; font-size: 13px; }
 .reused .link-btn { margin-left: 8px; }
+
+.violation__rule { margin: 6px 0 0; display: flex; gap: 12px; align-items: center; font-size: 12.5px; }
+.violation__rule code { background: #eef2ff; color: var(--navy); padding: 2px 8px; border-radius: 6px; font-weight: 700; }
+.violation__rule a { font-weight: 700; }

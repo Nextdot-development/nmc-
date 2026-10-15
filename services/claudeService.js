@@ -71,9 +71,10 @@ const AUDIT_SCHEMA = {
       items: {
         type: 'object',
         additionalProperties: false,
-        required: ['severity', 'regulation', 'description', 'originalLine', 'compliantLine', 'problematicContent', 'englishTranslation', 'suggestion', 'solution'],
+        required: ['ruleId', 'severity', 'regulation', 'description', 'originalLine', 'compliantLine', 'problematicContent', 'englishTranslation', 'suggestion', 'solution'],
         properties: {
           severity: { type: 'string', enum: ['Critical', 'High', 'Medium', 'Low'] },
+          ruleId: { type: 'string' },
           regulation: { type: 'string' },
           description: { type: 'string' },
           originalLine: { type: 'string' },

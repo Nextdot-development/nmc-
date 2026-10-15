@@ -347,6 +347,7 @@ const normalizeGeminiResult = (result) => {
     ...(result.videoTranscript ? { videoTranscript: result.videoTranscript } : {}),
     ...(result.metadata ? { metadata: result.metadata } : {}),
     ...(result.language ? { language: result.language } : {}),
+    ...(result.ruleCheck ? { ruleCheck: result.ruleCheck } : {}),
     ...(result.compliantVersion ? { compliantVersion: result.compliantVersion } : {})
   };
 };
@@ -705,7 +706,7 @@ const processDocumentBuffer = async ({ buffer, mimetype, originalInput, category
 };
 
 // Bump when the prompt or output shape changes so old cached results are not reused
-const PROMPT_VERSION = 'p8';
+const PROMPT_VERSION = 'p9';
 const URL_CACHE_DAYS = 7;
 
 // Same content + same rule pack + same prompt => same fingerprint
