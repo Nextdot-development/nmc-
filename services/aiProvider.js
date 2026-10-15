@@ -141,7 +141,7 @@ const splitLines = (text = '') => String(text)
   .map((l) => l.replace(/^[\s*\-•#>]+/, '').trim())
   .filter((l) => l.length >= 4 && l.length <= 400);
 
-const findUncoveredRedFlags = (content, violations) => {
+export const findUncoveredRedFlags = (content, violations) => {
   const covered = violations.map((v) => normalizeKey(v.originalLine || v.problematicContent || '')).filter(Boolean);
   const missed = [];
   for (const line of splitLines(content)) {
