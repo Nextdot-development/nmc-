@@ -189,7 +189,8 @@ LANGUAGE RULES (VERY IMPORTANT):
 - The SAME-LANGUAGE rule applies to compliantLine and compliantVersion: never switch to English when the content is Hindi or Hinglish. Example for Hinglish content: originalLine "Acne gayab 7 din mein, 100% guarantee." -> compliantLine "Acne ke ilaaj ke liye dermatologist se salah lein; parinaam har vyakti mein alag ho sakte hain." For Hindi (Devanagari) content write the fix in Devanagari.
 - englishTranslation: English meaning of originalLine (repeat it if already English).
 - problematicContent: same text as originalLine.
-- description, suggestion, solution, summary and assessments: in English.
+- Write the WHOLE report in the content's language and script: summary, every violation's description, suggestion and solution, financialPenalty.description and ethicalMarketing.assessment. Hindi (Devanagari) content -> Hindi in Devanagari; Hinglish -> Hinglish in Roman script; Marathi, Tamil, Bengali, Gujarati, Punjabi etc. -> that language in its own script; English -> English.
+- Keep in English only: the "regulation" field (official rule name and section) and "englishTranslation".
 - compliantVersion: REQUIRED (never empty) when the content is shorter than 3000 characters: the full content rewritten with every violation fixed, in its original language and script, ready to publish. For longer content return "".
 
 FORMAT RULES:

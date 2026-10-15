@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PrintIcon, SparkIcon } from './Icons.jsx';
 import { StatusPill, statusTone } from '../pages/History.jsx';
+import { labelsFor } from '../reportLabels.js';
 
 const SEVERITY_ORDER = ['Critical', 'High', 'Medium', 'Low'];
 const scoreTone = (score) => (score >= 80 ? 'ok' : score >= 50 ? 'warn' : 'bad');
@@ -27,7 +28,7 @@ const toPoints = (text = '') => {
   return parts.length ? parts : [String(text)];
 };
 
-const CopyButton = ({ text, label = 'Copy' }) => {
+const CopyButton = ({ text, label = 'Copy', doneLabel = 'Copied ✓' }) => {
   const [done, setDone] = useState(false);
   const copy = async () => {
     try {
@@ -36,10 +37,10 @@ const CopyButton = ({ text, label = 'Copy' }) => {
       setTimeout(() => setDone(false), 1500);
     } catch { /* clipboard blocked */ }
   };
-  return <button type="button" className="ghost-btn ghost-btn--sm no-print" onClick={copy}>{done ? 'Copied ✓' : label}</button>;
+  return <button type="button" className="ghost-btn ghost-btn--sm no-print" onClick={copy}>{done ? doneLabel : label}</button>;
 };
 
-const Violation = ({ v, index }) => {
+const Violation = ({ v, index, L }) => {
   const sev = SEVERITY_ORDER.includes(v.severity) ? v.severity : 'Medium';
   const original = v.originalLine || v.problematicContent || '';
   const translation = v.englishTranslation && v.englishTranslation.trim() !== original.trim() ? v.englishTranslation : '';
@@ -56,15 +57,15 @@ const Violation = ({ v, index }) => {
       {original && (
         <div className="linefix">
           <div className="linefix__row linefix__row--bad">
-            <span className="linefix__tag">✕ This line</span>
+            <span className="linefix__tag">{L.thisLine}</span>
             <p>“{original}”</p>
-            {translation && <small>English: {translation}</small>}
+            {translation && <small>{L.english}: {translation}</small>}
           </div>
           {v.compliantLine && (
             <div className="linefix__row linefix__row--good">
-              <span className="linefix__tag">✓ {removeOnly ? 'Fix' : 'Replace with'}</span>
-              <p>{removeOnly ? 'Remove this line.' : `“${v.compliantLine}”`}</p>
-              {!removeOnly && <CopyButton text={v.compliantLine} />}
+              <span className="linefix__tag">{removeOnly ? L.fix : L.replaceWith}</span>
+              <p>{removeOnly ? L.removeLine : `“${v.compliantLine}”`}</p>
+              {!removeOnly && <CopyButton text={v.compliantLine} label={L.copy} />}
             </div>
           )}
         </div>
@@ -73,13 +74,13 @@ const Violation = ({ v, index }) => {
       <div className="fixes">
         {v.suggestion && (
           <div>
-            <h5>Why it fails</h5>
+            <h5>{L.whyFails}</h5>
             <ol>{toPoints(v.suggestion).map((p, i) => <li key={i}>{p}</li>)}</ol>
           </div>
         )}
         {v.solution && (
           <div>
-            <h5><SparkIcon width={14} height={14} /> How to fix</h5>
+            <h5><SparkIcon width={14} height={14} /> {L.howToFix}</h5>
             <ol>{toPoints(v.solution).map((p, i) => <li key={i}>{p}</li>)}</ol>
           </div>
         )}
@@ -200,6 +201,7 @@ export default function AuditResult({ result, onReset, onFresh, meta }) {
   );
   const counts = SEVERITY_ORDER.map((s) => [s, violations.filter((v) => v.severity === s).length]);
   const risk = result?.financialPenalty?.riskLevel;
+  const L = labelsFor(result?.language);
   // Older audits only carry the YouTube transcript
   const source = result?.sourceText || (result?.videoTranscript ? { type: 'video', ...result.videoTranscript } : null);
 
@@ -208,10 +210,10 @@ export default function AuditResult({ result, onReset, onFresh, meta }) {
       <div className={`panel panel--glow result__hero result__hero--${statusTone(result?.status)}`}>
         <ScoreRing score={result?.score} />
         <div className="result__headline">
-          <span className="kicker">AUDIT RESULT</span>
+          <span className="kicker">{L.auditResult}</span>
           <StatusPill status={result?.status} />
           {meta && <p className="result__meta">{meta}</p>}
-          {result?.language && <span className="lang-badge">Language: {result.language}</span>}
+          {result?.language && <span className="lang-badge">{L.language}: {result.language}</span>}
           <p className="result__summary">{result?.summary}</p>
           {result?.reused && (
             <p className="reused">
@@ -239,31 +241,31 @@ export default function AuditResult({ result, onReset, onFresh, meta }) {
 
       <div className="result__grid">
         <div className="panel stat">
-          <h3 className="kicker">PENALTY RISK</h3>
+          <h3 className="kicker">{L.penalty}</h3>
           <span className={`status status--${{ High: 'bad', Medium: 'warn', Low: 'ok', None: 'ok' }[risk] || 'warn'}`}>{risk || '—'}</span>
           <p>{result?.financialPenalty?.description}</p>
         </div>
         <div className="panel stat">
-          <h3 className="kicker">ETHICAL MARKETING</h3>
+          <h3 className="kicker">{L.ethical}</h3>
           <span className={`status status--${scoreTone(result?.ethicalMarketing?.score ?? 0)}`}>{result?.ethicalMarketing?.score ?? '—'} / 100</span>
           <p>{result?.ethicalMarketing?.assessment}</p>
         </div>
       </div>
 
       <div className="section-head">
-        <h3>{violations.length ? `${violations.length} issue${violations.length > 1 ? 's' : ''} found` : 'No violations found'}</h3>
-        {violations.length > 0 && <p className="muted small">Sorted by severity. Each issue cites the NMC / IMC clause it breaks.</p>}
+        <h3>{violations.length ? L.issuesFound(violations.length) : L.noViolations}</h3>
+        {violations.length > 0 && <p className="muted small">{L.sorted}</p>}
       </div>
       {violations.length === 0 && <div className="panel empty">This content did not break any rule in the NMC rule pack.</div>}
       <div className="violations">
-        {violations.map((v, i) => <Violation key={i} v={v} index={i} />)}
+        {violations.map((v, i) => <Violation key={i} v={v} index={i} L={L} />)}
       </div>
 
       {result?.compliantVersion && violations.length > 0 && (
         <div className="panel compliant-version">
           <div className="transcript-box__head">
-            <h3 className="kicker">COMPLIANT VERSION — READY TO USE</h3>
-            <div className="transcript-box__actions"><CopyButton text={result.compliantVersion} label="Copy full text" /></div>
+            <h3 className="kicker">{L.compliantVersion}</h3>
+            <div className="transcript-box__actions"><CopyButton text={result.compliantVersion} label={L.copyFull} /></div>
           </div>
           <div className="compliant-version__text">{result.compliantVersion}</div>
         </div>
