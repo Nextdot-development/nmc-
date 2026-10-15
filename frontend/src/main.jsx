@@ -6,6 +6,7 @@ import './styles.css';
 import './landing.css';
 import './landing-page.css';
 import './landing-classic.css';
+import './app-classic.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

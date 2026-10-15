@@ -7,7 +7,7 @@ import { Landmark, ShieldLogo } from '../components/Graphics.jsx';
 
 const highlights = [
   [ShieldCheckIcon, '160 NMC & IMC rules', 'checked on every audit'],
-  [BoltIcon, 'Results in seconds', 'with clause-level citations'],
+  [BoltIcon, 'Results in about a minute', 'with clause-level citations'],
   [ChartIcon, 'Compliant rewrites', 'for every flagged line'],
 ];
 
@@ -46,12 +46,8 @@ export default function Login() {
         <Link to="/" className="auth__brand"><ShieldLogo /> <span>NextComply <b className="lime">AI</b></span></Link>
         <Landmark className="auth__gate" />
         <div>
-          <span className="badge-live"><i /> NMC EDITION</span>
-          <h1>
-            <span>COMPLIANCE,</span>
-            <span><b className="lime">WITHOUT</b></span>
-            <span><b className="grad">THE COMPLEXITY</b></span>
-          </h1>
+          <span className="badge-live"><i /> NMC GUIDELINES · 160 RULES</span>
+          <h1>Compliance, without the complexity.<em>Stay NMC compliant.</em></h1>
           <p>Audit doctor, clinic, hospital and pharma advertising against National Medical Commission rules — with clear explanations and ready-to-use compliant rewrites.</p>
         </div>
         <ul className="auth__stats">
