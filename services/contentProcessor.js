@@ -348,6 +348,7 @@ const normalizeGeminiResult = (result) => {
     ...(result.metadata ? { metadata: result.metadata } : {}),
     ...(result.language ? { language: result.language } : {}),
     ...(result.ruleCheck ? { ruleCheck: result.ruleCheck } : {}),
+    ...(result.safetyNet ? { safetyNet: result.safetyNet } : {}),
     ...(result.compliantVersion ? { compliantVersion: result.compliantVersion } : {})
   };
 };
