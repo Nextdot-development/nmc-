@@ -836,7 +836,8 @@ export const processContent = async (input, options = {}) => {
     extractedText: processingResult.extractedText,
     transcript: processingResult.transcript,
     auditResult: processingResult.auditResult,
-    contentHash
+    // An incomplete result (no summary) is kept in history but never reused
+    contentHash: String(processingResult.auditResult?.summary || '').trim() ? contentHash : ''
   });
 
   return processingResult.auditResult;
