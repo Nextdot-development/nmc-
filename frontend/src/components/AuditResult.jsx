@@ -221,7 +221,13 @@ export default function AuditResult({ result, onReset, onFresh, meta }) {
               {onFresh && <button type="button" className="link-btn" onClick={onFresh}>Re-audit fresh</button>}
             </p>
           )}
-          {result?.coverage && (
+          {result?.coverage?.scope === 'metadata_only' && (
+            <p className="reused">
+              This page's content could not be read (it may need a login or load with JavaScript), so only its title and description were checked.
+              Copy the page text and audit it with the Text option for a full check.
+            </p>
+          )}
+          {result?.coverage && result.coverage.scope !== 'metadata_only' && (
             <p className="coverage">
               Checked <b>{result.coverage.percent}%</b> of this page's text ({Number(result.coverage.auditedChars).toLocaleString('en-IN')} characters, menus removed).
               Only this one page was audited — other pages of the website are not included.

@@ -638,6 +638,8 @@ const processUrl = async ({ url, category, analysisMode, country, region, rules 
         rules,
         contentContext: 'Input is page metadata only. Provide best-effort compliance analysis.'
       });
+      // Flag it so the report can warn that the page body was not read
+      auditResult.coverage = { scope: 'metadata_only', pageChars: metadataText.length, auditedChars: truncatedText.length, percent: 0 };
 
       return {
         contentType: 'webpage',
