@@ -9,16 +9,17 @@ const SEVERITY_ORDER = ['Critical', 'High', 'Medium', 'Low'];
 const scoreTone = (score) => (score >= 80 ? 'ok' : score >= 50 ? 'warn' : 'bad');
 
 const ScoreRing = ({ score }) => {
-  const value = Math.max(0, Math.min(100, Math.round(Number(score) || 0)));
+  const missing = score === null || score === undefined || score === '';
+  const value = missing ? 0 : Math.max(0, Math.min(100, Math.round(Number(score) || 0)));
   const r = 52;
   const c = 2 * Math.PI * r;
   return (
-    <div className={`ring ring--${scoreTone(value)}`} role="img" aria-label={`Compliance score ${value} out of 100`}>
+    <div className={`ring ring--${missing ? 'warn' : scoreTone(value)}`} role="img" aria-label={missing ? 'Not scored: content could not be read' : `Compliance score ${value} out of 100`}>
       <svg viewBox="0 0 120 120" width="140" height="140">
         <circle cx="60" cy="60" r={r} className="ring__track" />
         <circle cx="60" cy="60" r={r} className="ring__value" strokeDasharray={c} strokeDashoffset={c * (1 - value / 100)} />
       </svg>
-      <div className="ring__label"><strong>{value}</strong><span>/ 100</span></div>
+      <div className="ring__label"><strong>{missing ? '—' : value}</strong><span>{missing ? 'not scored' : '/ 100'}</span></div>
     </div>
   );
 };

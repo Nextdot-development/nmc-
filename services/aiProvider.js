@@ -1,5 +1,6 @@
 import { analyzeWithGemini, extractClaimsWithGemini } from '../geminiService.js';
 import { analyzeWithClaude, extractClaimsWithClaude, isClaudeConfigured } from './claudeService.js';
+import { severityFor } from '../config/ruleSeverity.js';
 
 /* ===============================
    PROVIDER ROUTING
@@ -86,6 +87,8 @@ const bindToRulePack = (violations, rules = []) => {
     }
     kept.push({
       ...v,
+      // Severity is fixed per rule (not chosen by the model) so results are repeatable
+      severity: severityFor(rule.id, v.originalLine || v.problematicContent || ''),
       ruleId: rule.id,
       regulation: `${rule.regulation} - ${rule.title}${rule.section ? ` (Section: ${rule.section})` : ''}`,
       ruleSource: rule.source || ''

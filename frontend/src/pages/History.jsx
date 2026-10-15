@@ -66,7 +66,7 @@ export default function History() {
                     <strong>{item.originalInput || r.summary || 'Audit'}</strong>
                     <small>{TYPE_LABEL[item.contentType] || 'Audit'} • {formatDate(item.createdAt)} • {violations} issue{violations === 1 ? '' : 's'}</small>
                   </div>
-                  <span className={`score-chip score-chip--${statusTone(r.status)}`}>{Math.round(Number(r.score) || 0)}</span>
+                  <span className={`score-chip score-chip--${statusTone(r.status)}`}>{r.score === null || r.score === undefined ? '—' : Math.round(Number(r.score) || 0)}</span>
                   <StatusPill status={r.status} small />
                   <ChevronRightIcon className="history__chev" />
                 </Link>

@@ -426,8 +426,8 @@ const processMediaBuffer = async ({ buffer, mimetype, inputType, originalInput, 
   };
 };
 
-const processImageBuffer = async ({ buffer, originalInput, category, analysisMode, country, region, rules }) => {
-  const extractedText = await extractTextFromImage(buffer);
+const processImageBuffer = async ({ buffer, extractedText: preRead = '', originalInput, category, analysisMode, country, region, rules }) => {
+  const extractedText = preRead || await extractTextFromImage(buffer);
 
   if (!extractedText || !extractedText.trim()) {
     throw new Error('Unable to extract readable text from image');
@@ -711,14 +711,52 @@ const processDocumentBuffer = async ({ buffer, mimetype, originalInput, category
 const PROMPT_VERSION = 'p9';
 const URL_CACHE_DAYS = 7;
 
+// Tracking parameters that do not change what a link points to
+const TRACKING_PARAMS = /^(utm_\w+|fbclid|gclid|igsh|igshid|si|pp|feature|xtok|ref|ref_src|source|s|t|mibextid)$/i;
+
+// One key per video or page, whatever share link or tracking tail was used
+export const normalizeUrlKey = (raw = '') => {
+  const value = String(raw).trim();
+  try {
+    const u = new URL(value);
+    const host = u.hostname.replace(/^(www\.|m\.)/, '').toLowerCase();
+    let yt = '';
+    if (host === 'youtu.be') yt = u.pathname.slice(1).split('/')[0];
+    else if (host.endsWith('youtube.com')) yt = u.searchParams.get('v') || (u.pathname.match(/^\/(shorts|live|embed)\/([^/?#]+)/) || [])[2] || '';
+    if (yt) return `yt:${yt}`;
+    if (host.endsWith('instagram.com')) {
+      const m = u.pathname.match(/^\/(reel|p|tv)\/([^/?#]+)/);
+      if (m) return `ig:${m[2]}`;
+    }
+    const params = [...u.searchParams.entries()].filter(([k]) => !TRACKING_PARAMS.test(k)).sort(([a], [b]) => a.localeCompare(b));
+    const query = params.length ? `?${new URLSearchParams(params)}` : '';
+    return `${host}${u.pathname.replace(/\/+$/, '') || '/'}${query}`;
+  } catch {
+    return value.toLowerCase();
+  }
+};
+
+// Ignore differences that do not change the meaning: spacing, quote and dash styles, case
+export const normalizeTextKey = (text = '') => String(text)
+  .normalize('NFKC')
+  .replace(/[‘’‚′`]/g, "'")
+  .replace(/[“”„″]/g, '"')
+  .replace(/[–—−]/g, '-')
+  .replace(/[​-‍﻿]/g, '')
+  .replace(/\s+/g, ' ')
+  .trim()
+  .toLowerCase();
+
 // Same content + same rule pack + same prompt => same fingerprint
-const fingerprintContent = (input, contentType, { category, rules, context }) => {
+const fingerprintContent = (input, contentType, { category, rules, context, imageText }) => {
   const hash = crypto.createHash('sha256');
   hash.update(`${PROMPT_VERSION}|${contentType}|${category || ''}|`);
   if (context) hash.update(`ctx|${context}|`);
   hash.update(crypto.createHash('sha256').update(JSON.stringify(rules || [])).digest('hex'));
-  if (input.text) hash.update(`text|${String(input.text).replace(/\s+/g, ' ').trim()}`);
-  else if (input.url) hash.update(`url|${String(input.url).trim()}`);
+  if (input.text) hash.update(`text|${normalizeTextKey(input.text)}`);
+  else if (input.url) hash.update(`url|${normalizeUrlKey(input.url)}`);
+  // Two screenshots of the same ad have different bytes but the same text
+  else if (imageText) hash.update(`imagetext|${normalizeTextKey(imageText)}`);
   else if (input.file?.buffer) hash.update(`file|${input.file.mimetype}|`).update(input.file.buffer);
   return hash.digest('hex');
 };
@@ -733,7 +771,12 @@ export const processContent = async (input, options = {}) => {
 
   const contentType = detectContentType(input);
   const rules = getRulesForSelection({ country, region, category });
-  const contentHash = fingerprintContent(input, contentType, { category, rules, context });
+  // Images are keyed by their text, so read it first (and reuse it for the audit)
+  let imageText = '';
+  if (contentType === 'image') {
+    imageText = await extractTextFromImage(input.file.buffer).catch(() => '');
+  }
+  const contentHash = fingerprintContent(input, contentType, { category, rules, context, imageText: imageText.trim().length >= 20 ? imageText : '' });
 
   // Consistency: return the earlier result for identical content unless a fresh audit is requested
   if (!fresh) {
@@ -780,6 +823,7 @@ export const processContent = async (input, options = {}) => {
   } else if (contentType === 'image') {
     processingResult = await processImageBuffer({
       buffer: input.file.buffer,
+      extractedText: imageText,
       originalInput: input.file.originalname || 'uploaded image',
       category,
       analysisMode,
@@ -814,6 +858,19 @@ export const processContent = async (input, options = {}) => {
     };
   }
 
+  // Nothing real was read (YouTube without a transcript, or only a page title): do not call it compliant
+  const ar = processingResult.auditResult;
+  if (ar && typeof ar === 'object' && ((youtube && !youtube.available) || ar.coverage?.scope === 'metadata_only')) {
+    ar.incomplete = { reason: youtube && !youtube.available ? 'no_transcript' : 'metadata_only' };
+    if (!ar.violations?.length) {
+      ar.score = null;
+      ar.status = 'Needs Review';
+      ar.summary = youtube && !youtube.available
+        ? 'The video could not be transcribed, so only its title and description were checked. This is not a full audit. Try again later, or upload the video file or paste its script as text.'
+        : 'This page could not be read (it may need a login or load with JavaScript), so only its title and description were checked. This is not a full audit. Paste the page text into the Text option instead.';
+    }
+  }
+
   // Build a ready-to-use corrected version from the line fixes when the model did not return one
   const audit = processingResult.auditResult;
   if (audit && !audit.compliantVersion && fullText && fullText.length < 3000 && audit.violations?.length) {
@@ -837,7 +894,7 @@ export const processContent = async (input, options = {}) => {
     transcript: processingResult.transcript,
     auditResult: processingResult.auditResult,
     // An incomplete result (no summary) is kept in history but never reused
-    contentHash: /\S/.test(String(processingResult.auditResult?.summary || '').replace(/^Summary unavailable\.?$/i, '')) ? contentHash : ''
+    contentHash: !processingResult.auditResult?.incomplete && /\S/.test(String(processingResult.auditResult?.summary || '').replace(/^Summary unavailable\.?$/i, '')) ? contentHash : ''
   });
 
   return processingResult.auditResult;

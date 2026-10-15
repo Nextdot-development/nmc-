@@ -36,7 +36,10 @@ export const createAudit = async (req, res) => {
     
     // Prepare input object
     const input = {};
-    if (text) input.text = text;
+    // A link pasted into the text box is audited as that link, so both tabs give the same result
+    const onlyLink = !url && !file && typeof text === 'string' && /^https?:\/\/\S+$/i.test(text.trim());
+    if (onlyLink) input.url = text.trim();
+    else if (text) input.text = text;
     if (url) input.url = url;
     if (file) input.file = file;
     
@@ -69,7 +72,10 @@ export const createAudit = async (req, res) => {
     // Identical content returns the earlier result, which costs nothing
     let charged = charge.credits;
     let balance = charge.balance;
-    if (auditResult?.reused && charge.credits) {
+    if (auditResult?.incomplete && charge.credits) {
+      balance = await refundCredits(req.user.id, charge, 'Content could not be read');
+      charged = 0;
+    } else if (auditResult?.reused && charge.credits) {
       balance = await refundCredits(req.user.id, charge, 'Same content as an earlier audit');
       charged = 0;
     }
