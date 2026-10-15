@@ -24,7 +24,7 @@ export const planFeatures = (p) => [
   [true, p.historyDays ? `Audit history: ${p.historyDays >= 365 ? '12 months' : p.historyDays >= 180 ? '6 months' : `${p.historyDays} days`}` : 'Unlimited audit history'],
   [true, p.seats ? `${p.seats} user${p.seats > 1 ? 's' : ''}` : 'Users as you need'],
   [p.rollover, 'Unused credits roll over'],
-  [Boolean(p.topup) || p.id === 'enterprise', p.topup ? `Top-up: ${p.topup.credits} credits for ${inr(p.topup.price)}` : p.id === 'enterprise' ? 'API access & dedicated support' : 'Top-ups'],
+  [Boolean(p.topup) || p.id === 'enterprise', p.topup ? `Top-up: ${p.topup.credits} credits for ${inr(p.topup.price)}` : p.id === 'enterprise' ? 'Dedicated support & GST invoice' : 'Top-ups'],
 ];
 
 const priceBlock = (p) => {

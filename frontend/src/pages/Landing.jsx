@@ -376,7 +376,7 @@ export default function Landing() {
           <div className="enterprise-band__copy reveal">
             <span className="lkicker">ENTERPRISE</span>
             <h2>Running a hospital chain, pharma brand or agency?</h2>
-            <p>Volume credits at ₹20 each, unlimited history, team access, API and invoicing. Tell us what you need.</p>
+            <p>Volume credits at ₹20 each, unlimited history, dedicated support and GST invoicing. Tell us what you need.</p>
           </div>
           <div className="panel reveal enterprise-band__form"><EnterpriseForm user={user} title="Get a custom plan" /></div>
         </section>

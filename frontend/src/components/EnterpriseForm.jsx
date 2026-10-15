@@ -44,7 +44,7 @@ export default function EnterpriseForm({ user, title = 'Talk to us about Enterpr
           </select>
         </label>
         <label className="field enterprise-form__wide"><span>What do you need?</span>
-          <textarea rows={3} value={form.message} onChange={update('message')} placeholder="Team size, formats, API, invoicing…" />
+          <textarea rows={3} value={form.message} onChange={update('message')} placeholder="Team size, formats, monthly volume, invoicing…" />
         </label>
       </div>
       {error && <p className="alert" role="alert">{error}</p>}
