@@ -8,8 +8,7 @@ import PlanCards from '../components/PlanCards.jsx';
 import EnterpriseForm from '../components/EnterpriseForm.jsx';
 import TryAudit from '../components/TryAudit.jsx';
 import {
-  ArrowRightIcon, BoltIcon, CheckCircleIcon, ChevronRightIcon, DocIcon, GlobeIcon, ImageIcon, ShieldCheckIcon, TextIcon,
-  UploadIcon, VideoIcon,
+  ArrowRightIcon, BoltIcon, CheckCircleIcon, ChevronRightIcon, DocIcon, GlobeIcon, ImageIcon, LockIcon, ShieldCheckIcon, TextIcon, UploadIcon, VideoIcon,
 } from '../components/Icons.jsx';
 
 const reducedMotion = () => typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
@@ -91,6 +90,7 @@ const HeroVisual = () => {
       <img src="/landing/hero-doctor.jpg" alt="" className="hv__photo" width="554" height="492" />
 
       <div className="hv__card hv__ad">
+        <p className="hv__label">Ad Audit Result</p>
         <span className="hv__thumb">
           <img src="/landing/ad-thumb.jpg" alt="" />
           <b>Delhi ka No.1<br />hair clinic</b>
@@ -118,7 +118,7 @@ const HeroVisual = () => {
       <div className="hv__card hv__score">
         <ScoreRing score={score} size="1" />
         <span>
-          <strong>NMC Audit</strong>
+          <strong>NMC Compliance Score</strong>
           <em className={score > 50 ? 'is-checking' : ''}>{score > 50 ? 'Checking…' : 'Non-Compliant'}</em>
           <small>3 issues · 160 rules checked</small>
         </span>
@@ -160,17 +160,16 @@ const AuditMock = () => {
     <div className="amock reveal" aria-label="Example of the NextComply auditor" role="img">
       <div className="amock__left">
         <div className="amock__tabs">
-          <span><TextIcon /> Text</span>
-          <span className="is-on"><ImageIcon /> Image</span>
+          <span className="is-on"><TextIcon /> Text</span>
+          <span><ImageIcon /> Image</span>
           <span><VideoIcon /> Video</span>
           <span><GlobeIcon /> Website</span>
         </div>
-        <div className="amock__drop">
-          <span className="amock__up"><UploadIcon /></span>
-          <strong>Upload your ad, post or creative</strong>
-          <small>PNG, JPG or PDF</small>
-          <span className="amock__btn">Upload file</span>
+        <div className="amock__text">
+          <span>Paste your post, poster text, video script or website content here…</span>
+          <small>0 / 2000</small>
         </div>
+        <span className="amock__btn">Analyze with NextComply AI <ArrowRightIcon width={16} height={16} /></span>
       </div>
       <div className="amock__right">
         <h4>Audit Results</h4>
@@ -244,7 +243,7 @@ export default function Landing() {
   return (
     <div className="landing">
       <header className={`lnav ${scrolled ? 'lnav--scrolled' : ''}`}>
-        <Link to="/" className="lnav__brand"><ShieldLogo /><span>NextComply AI</span></Link>
+        <Link to="/" className="lnav__brand"><ShieldLogo /><span>NextComply AI<small>{COUNTRY.regulator} compliance made simple</small></span></Link>
         <nav className="lnav__links" aria-label="Sections">
           <a href="#try">Try free</a>
           <a href="#features">Features</a>
@@ -267,8 +266,8 @@ export default function Landing() {
       <main>
         <section className="lhero">
           <div className="lhero__copy">
-            <span className="lbadge"><i /> {COUNTRY.regulator} COMPLIANCE · 160 RULES</span>
-            <h1>Publish healthcare ads without <em>{COUNTRY.regulator} worries.</em></h1>
+            <span className="lbadge"><i /> {COUNTRY.regulator} GUIDELINES · 160 RULES · {COUNTRY.name.toUpperCase()} FOCUSED</span>
+            <h1>Publish healthcare ads with confidence. <em>Stay {COUNTRY.regulator} compliant.</em></h1>
             <p className="lhero__lead">
               NextComply AI checks your posts, posters, videos and websites against {COUNTRY.regulator} rules — and shows exactly which line to change, in simple language.
             </p>
@@ -290,7 +289,7 @@ export default function Landing() {
         </section>
 
         <section className="audience">
-          <p>Built for healthcare professionals, clinics and healthcare brands across {COUNTRY.name}</p>
+          <p>BUILT FOR HEALTHCARE PROFESSIONALS, CLINICS AND HEALTHCARE BRANDS ACROSS {COUNTRY.name.toUpperCase()}</p>
           <ul>
             {AUDIENCE.map(([label, icon], i) => (
               <li key={label} className="reveal" style={{ '--i': i }}>{icon}<span>{label}</span></li>
@@ -303,8 +302,8 @@ export default function Landing() {
         <section id="features" className="lwhy">
           <div className="lwhy__copy reveal">
             <span className="lkicker">WHY NEXTCOMPLY AI</span>
-            <h2>Stay compliant.<br />Build trust. Grow safely.</h2>
-            <p>{COUNTRY.regulator} guidelines are strict — one wrong claim can lead to complaints, penalties or loss of trust. NextComply AI helps you catch issues before you publish.</p>
+            <h2>Stay compliant.<br />Build trust.</h2>
+            <p>{COUNTRY.regulator} guidelines are strict — one wrong claim can lead to complaints, penalties or loss of trust. NextComply AI helps you catch issues before you publish and communicate responsibly.</p>
             <ul>
               {WHY_POINTS.map((t) => <li key={t}><CheckCircleIcon /> {t}</li>)}
             </ul>
@@ -323,6 +322,26 @@ export default function Landing() {
               </li>
             ))}
           </ol>
+        </section>
+
+        <section className="lguide">
+          <div className="lguide__panel reveal">
+            <Landmark className="lguide__art" />
+            <div>
+              <h2>Built on {COUNTRY.regulator} Guidelines</h2>
+              <p>Every audit checks your content against 160 rules from the {COUNTRY.regulator} Ethical Advertising Guidelines 2026, the IMC Code of Ethics 2002 and the Telemedicine Practice Guidelines — each with a link to its official source.</p>
+              <Link to="/rules">See the full rule pack <ArrowRightIcon width={15} height={15} /></Link>
+            </div>
+          </div>
+          <div className="lguide__langs reveal">
+            <h3>Supports Indian Languages</h3>
+            <p>Get results in the same language as your content.</p>
+            <ul>
+              {[['A', 'English', 'en'], ['अ', 'Hindi', 'hi'], ['अ', 'Hinglish', 'hg'], ['अ', 'Marathi', 'mr']].map(([g, name, k]) => (
+                <li key={k} className={`lang lang--${k}`}><b>{g}</b>{name}</li>
+              ))}
+            </ul>
+          </div>
         </section>
 
         <section id="pricing" className="lsection">
@@ -363,14 +382,20 @@ export default function Landing() {
         </section>
 
         <section className="lcta reveal">
-          <div>
-            <h2>Be compliant. Communicate responsibly.<br />Focus on what you do best — patient care.</h2>
-            <p>Join NextComply AI and publish with confidence.</p>
+          <div className="lcta__copy">
+            <span className="lcta__eyebrow">RESPONSIBLE COMMUNICATION. STRONGER HEALTHCARE.</span>
+            <h2>Be compliant. Focus on what you do best — patient care.</h2>
+            <div className="lcta__action">
+              <Link to={startHref} className="lbtn lbtn--white lbtn--lg">{user ? 'Open dashboard' : 'Get started free'} <ArrowRightIcon width={20} height={20} /></Link>
+              <small>No card needed · 3 free audits</small>
+            </div>
           </div>
-          <div className="lcta__action">
-            <Link to={startHref} className="lbtn lbtn--white lbtn--lg">{user ? 'Open dashboard' : 'Get started free'} <ArrowRightIcon width={20} height={20} /></Link>
-            <small>No card needed · 3 free audits</small>
-          </div>
+          <ul className="lcta__points">
+            <li><ShieldCheckIcon /><span>{COUNTRY.regulator} based<br />160 rules</span></li>
+            <li><GlobeIcon /><span>Multiple<br />languages</span></li>
+            <li><BoltIcon /><span>Results in<br />about a minute</span></li>
+            <li><LockIcon /><span>Private audit<br />history</span></li>
+          </ul>
           <span className="lcta__art" aria-hidden="true">
             <Landmark className="lcta__landmark" />
             <svg className="lcta__swoosh" viewBox="0 0 200 160" preserveAspectRatio="none">
@@ -383,7 +408,7 @@ export default function Landing() {
       </main>
 
       <footer className="lfoot">
-        <div className="lfoot__brand"><ShieldLogo /><span>NextComply AI</span></div>
+        <div className="lfoot__brand"><ShieldLogo /><span>NextComply AI<small>{COUNTRY.regulator} compliance made simple</small></span></div>
         <nav aria-label="Footer">
           <a href="#features">Features</a>
           <a href="#pricing">Pricing</a>
