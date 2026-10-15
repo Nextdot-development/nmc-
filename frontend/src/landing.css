@@ -46,7 +46,7 @@
 .balance__credits { font-size: 18px; }
 .balance__credits b { font-size: 34px; font-weight: 800; margin-right: 4px; }
 
-.plans { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; align-items: stretch; }
+.plans { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); max-width: 1080px; margin: 0 auto; gap: 16px; align-items: stretch; }
 .plan { position: relative; display: flex; flex-direction: column; gap: 16px; padding: 24px 20px 22px; border-radius: 20px; border: 1px solid var(--line); background: var(--panel); box-shadow: var(--shadow); transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s; animation: rise 0.5s ease both; animation-delay: calc(var(--i, 0) * 0.07s); }
 .plan:hover { transform: translateY(-4px); box-shadow: 0 22px 40px -22px rgba(26, 58, 143, 0.45); border-color: #c9d4f2; }
 .plan--popular { border: 2px solid var(--navy); background: linear-gradient(180deg, #f3f6ff 0%, #ffffff 40%); box-shadow: 0 24px 48px -24px rgba(26, 58, 143, 0.55); }
