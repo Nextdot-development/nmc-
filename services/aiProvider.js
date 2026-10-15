@@ -97,9 +97,11 @@ const bindToRulePack = (violations, rules = []) => {
 
 const finalizeResult = (result, rules = []) => {
   if (!result || typeof result !== 'object') return result;
-  const bound = bindToRulePack(Array.isArray(result.violations) ? result.violations : [], rules);
+  const raw = Array.isArray(result.violations) ? result.violations : [];
+  const bound = bindToRulePack(raw, rules);
   result.ruleCheck = { kept: bound.violations.length, dropped: bound.dropped.length };
   result.violations = dedupeViolations(bound.violations);
+  console.log('[AI] Findings', JSON.stringify({ raw: raw.length, bound: bound.violations.length, dropped: bound.dropped.length, final: result.violations.length }));
   // Fill the line-level fix fields from the older ones when a model omits them
   result.violations = result.violations.map((v) => ({
     ...v,
