@@ -154,3 +154,25 @@
 .hv__score em { background: #f6ebe9; color: #9a3b31; }
 .lang, .lang--en, .lang--hi, .lang--hg, .lang--mr { background: #f7f4ee; border: 1px solid var(--l-line); }
 .lang b, .lang--en b, .lang--hi b, .lang--hg b, .lang--mr b { color: var(--l-navy); border: 1px solid var(--l-line); }
+
+/* male doctor photo (3:2): cards sit at the edges, clear of his face and hand */
+.hv { aspect-ratio: 3 / 2; }
+.hv__photo { border-radius: 1.6cqw; -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 8%); mask-image: linear-gradient(90deg, transparent 0, #000 8%); object-position: center; }
+.hv__ad { left: 1.5%; top: 6%; width: 33.5%; height: auto; padding: 1.5cqw; gap: 0.8cqw; }
+.hv__label { font-size: 1.8cqw; }
+.hv__thumb { height: 8.6cqw; }
+.hv__thumb b { font-size: 2cqw; }
+.hv__ad li { font-size: 1.7cqw; gap: 1cqw; }
+.hv__ad li i { width: 2.4cqw; height: 2.4cqw; font-size: 1.2cqw; }
+.hv__ad .lsev { font-size: 0.8em; }
+.hv__fix { left: auto; right: 1.5%; top: 6%; width: 35%; height: auto; padding: 1.5cqw 1.7cqw; }
+.hv__fixhead { font-size: 1.9cqw; margin-bottom: 0.8cqw; }
+.hv__fixhead svg { width: 2.5cqw; height: 2.5cqw; }
+.hv__fixbody strong { font-size: 1.95cqw; }
+.hv__fixbody small { font-size: 1.5cqw; }
+.hv__fixbody img { width: 9.5cqw; height: 12.5cqw; object-position: top; }
+.hv__score { left: auto; right: 1.5%; top: auto; bottom: 5%; width: 39%; height: auto; padding: 1.4cqw 1.8cqw; gap: 1.8cqw; }
+.hv .lring { --size: 10.5cqw; }
+.hv__score strong { font-size: 1.85cqw; }
+.hv__score em { font-size: 1.8cqw; padding: 0.4cqw 1.3cqw; }
+.hv__score small { font-size: 1.5cqw; }

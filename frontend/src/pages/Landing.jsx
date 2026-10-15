@@ -87,7 +87,7 @@ const HeroVisual = () => {
   const score = useScore(cycle, 100, 40, 2600);
   return (
     <div className="hv" key={cycle} role="img" aria-label="Example: a clinic ad checked against NMC rules, scored 40 and given a compliant version">
-      <img src="/landing/hero-doctor.jpg" alt="" className="hv__photo" width="554" height="492" />
+      <img src="/landing/hero-doctor.jpg" alt="" className="hv__photo" width="1500" height="1000" />
 
       <div className="hv__card hv__ad">
         <p className="hv__label">Ad Audit Result</p>
