@@ -90,8 +90,10 @@ export default function Billing() {
           <div className="balance__main">
             <span className="balance__icon"><WalletIcon width={26} height={26} /></span>
             <div>
-              <span className="kicker">{account.planName.toUpperCase()} PLAN</span>
-              <strong className="balance__credits"><b>{account.credits}</b> credits left</strong>
+              <span className="kicker">{account.unlimited ? 'TESTING ACCOUNT' : `${account.planName.toUpperCase()} PLAN`}</span>
+              {account.unlimited
+                ? <strong className="balance__credits"><b>Unlimited</b></strong>
+                : <strong className="balance__credits"><b>{account.credits}</b> credits left</strong>}
               <small className="muted">
                 {account.extraCredits > 0 && <>{account.planCredits} plan + {account.extraCredits} top-up · </>}
                 {renews ? `Plan valid till ${renews}` : account.plan === 'free' ? 'Free credits never expire' : ''}

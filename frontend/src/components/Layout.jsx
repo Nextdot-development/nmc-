@@ -133,10 +133,10 @@ export default function Layout() {
 
         {account && (
           <NavLink to="/billing" className="credits-card" title="Plans & Credits">
-            <span className="credits-card__plan">{account.planName} plan</span>
-            <strong><span>{account.credits}</span> credits left</strong>
-            <span className="credits-card__bar"><i style={{ width: `${Math.min(100, (account.credits / Math.max(account.credits, account.plan === 'premium' ? 50 : account.plan === 'starter' ? 22 : 3)) * 100)}%` }} /></span>
-            {account.plan !== 'enterprise' && <span className="credits-card__cta">{account.plan === 'premium' ? 'Buy top-up' : 'Upgrade'} →</span>}
+            <span className="credits-card__plan">{account.unlimited ? account.planName : `${account.planName} plan`}</span>
+            {account.unlimited ? <strong>No credits charged</strong> : <strong><span>{account.credits}</span> credits left</strong>}
+            {!account.unlimited && <span className="credits-card__bar"><i style={{ width: `${Math.min(100, (account.credits / Math.max(account.credits, account.plan === 'premium' ? 50 : account.plan === 'starter' ? 22 : 3)) * 100)}%` }} /></span>}
+            {account.plan !== 'enterprise' && !account.unlimited && <span className="credits-card__cta">{account.plan === 'premium' ? 'Buy top-up' : 'Upgrade'} →</span>}
           </NavLink>
         )}
 
@@ -186,7 +186,7 @@ export default function Layout() {
             </label>
             {account && (
               <NavLink to="/billing" className="credit-pill" title="Credits left">
-                <WalletIcon width={18} height={18} /> <b>{account.credits}</b> <span>credits</span>
+                <WalletIcon width={18} height={18} /> {account.unlimited ? <b>Unlimited</b> : <><b>{account.credits}</b> <span>credits</span></>}
               </NavLink>
             )}
             <Notifications />

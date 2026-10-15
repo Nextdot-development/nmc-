@@ -19,6 +19,11 @@ export class BillingError extends Error {
 
 const total = (acc) => (acc?.planCredits || 0) + (acc?.extraCredits || 0);
 
+// Internal testing accounts (env UNLIMITED_EMAILS, comma-separated): no credits charged, every feature on
+export const isUnlimited = (email = '') => (process.env.UNLIMITED_EMAILS || '')
+  .split(',').map((s) => s.trim().toLowerCase()).filter(Boolean)
+  .includes(String(email).toLowerCase());
+
 /* ===============================
    ACCOUNT
 ================================ */
@@ -54,7 +59,20 @@ export const getAccount = async (userId, email = '') => {
   return expireIfDue(acc);
 };
 
-export const describeAccount = (acc) => {
+export const describeAccount = (acc, email = '') => {
+  if (isUnlimited(email || acc.email)) {
+    const ent = PLANS.enterprise;
+    return {
+      plan: 'enterprise',
+      planName: 'Unlimited (testing)',
+      unlimited: true,
+      credits: total(acc),
+      planCredits: acc.planCredits,
+      extraCredits: acc.extraCredits,
+      periodEnd: null,
+      features: { formats: ent.formats, maxMediaMinutes: ent.maxMediaMinutes, fixPreviewLines: null, compliantVersion: true, pdf: true, historyDays: null, seats: null, topup: null },
+    };
+  }
   const plan = getPlan(acc.plan);
   return {
     plan: plan.id,

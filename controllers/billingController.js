@@ -23,7 +23,7 @@ export const listPlans = (req, res) => {
 export const getMe = async (req, res) => {
   try {
     const acc = await getAccount(req.user.id, req.user.email);
-    res.json({ ...describeAccount(acc), payments: razorpayConfigured() });
+    res.json({ ...describeAccount(acc, req.user.email), payments: razorpayConfigured() });
   } catch (error) {
     fail(res, error, 'Account');
   }

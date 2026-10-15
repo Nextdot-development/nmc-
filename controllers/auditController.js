@@ -1,7 +1,7 @@
 import AuditRecord from '../models/AuditRecord.js';
 import { detectContentType, processContent } from '../services/contentProcessor.js';
 import {
-  BillingError, gateResult, getAccount, historySince, quoteAudit, refundCredits, spendCredits,
+  BillingError, gateResult, getAccount, historySince, isUnlimited, quoteAudit, refundCredits, spendCredits,
 } from '../services/billingService.js';
 
 const FORMAT_LABEL = { text: 'Text', url: 'Website', image: 'Image', video: 'Video', audio: 'Audio', document: 'Document' };
@@ -42,9 +42,14 @@ export const createAudit = async (req, res) => {
     
     // Credits: check the plan allows this format, then charge before the audit runs
     const account = await getAccount(req.user.id, req.user.email);
-    const quote = await quoteAudit(input, detectContentType(input), account.plan);
+    const unlimited = isUnlimited(req.user.email);
+    const planId = unlimited ? 'enterprise' : account.plan;
+    const quote = await quoteAudit(input, detectContentType(input), planId);
     const label = `${FORMAT_LABEL[quote.format] || 'Content'} audit${quote.minutes ? ` (${quote.minutes} min)` : ''}`;
-    const charge = await spendCredits(req.user.id, quote.credits, label);
+    // Testing accounts are never charged
+    const charge = unlimited
+      ? { credits: 0, planUsed: 0, extraUsed: 0, balance: account.planCredits + account.extraCredits }
+      : await spendCredits(req.user.id, quote.credits, label);
 
     let auditResult;
     try {
@@ -64,12 +69,12 @@ export const createAudit = async (req, res) => {
     // Identical content returns the earlier result, which costs nothing
     let charged = charge.credits;
     let balance = charge.balance;
-    if (auditResult?.reused) {
+    if (auditResult?.reused && charge.credits) {
       balance = await refundCredits(req.user.id, charge, 'Same content as an earlier audit');
       charged = 0;
     }
 
-    return res.status(201).json({ ...gateResult(auditResult, account.plan), billing: { charged, balance, minutes: quote.minutes } });
+    return res.status(201).json({ ...gateResult(auditResult, planId), billing: { charged, balance, minutes: quote.minutes, unlimited } });
   } catch (error) {
     if (error instanceof BillingError) {
       return res.status(error.status).json({ error: error.message, code: error.code, ...error.extra });
@@ -91,7 +96,8 @@ export const getAuditHistory = async (req, res) => {
 
     // History length depends on the plan
     const account = await getAccount(req.user.id, req.user.email);
-    const since = historySince(account.plan);
+    const planId = isUnlimited(req.user.email) ? 'enterprise' : account.plan;
+    const since = historySince(planId);
     const query = { userId: req.user?.id, ...(since ? { createdAt: { $gte: since } } : {}) };
     const audits = await AuditRecord.find(query)
       .sort({ createdAt: -1 })
@@ -102,7 +108,7 @@ export const getAuditHistory = async (req, res) => {
 
     // Keep the audit result shape; add record metadata alongside it
     const results = audits.map((record) => ({
-      ...gateResult(record.auditResult, account.plan),
+      ...gateResult(record.auditResult, planId),
       _id: record._id,
       contentType: record.contentType,
       originalInput: record.originalInput,
@@ -136,7 +142,7 @@ export const getAuditById = async (req, res) => {
     }
 
     const account = await getAccount(req.user.id, req.user.email);
-    return res.json(gateResult(audit.auditResult, account.plan));
+    return res.json(gateResult(audit.auditResult, isUnlimited(req.user.email) ? 'enterprise' : account.plan));
   } catch (error) {
     console.error('[Audit Controller] Get by ID error:', error);
     if (error.name === 'CastError') {

@@ -237,7 +237,9 @@ export default function Auditor() {
         </button>
         {account && !locked && (
           <p className="run-cost">
-            Uses <b>{creditHint(format, url)}</b> · {account.credits} credit{account.credits === 1 ? '' : 's'} left · same content again is free
+            {account.unlimited
+              ? <>Testing account · <b>no credits charged</b></>
+              : <>Uses <b>{creditHint(format, url)}</b> · {account.credits} credit{account.credits === 1 ? '' : 's'} left · same content again is free</>}
           </p>
         )}
 
