@@ -92,6 +92,6 @@ export const api = {
   ledger: () => request('/api/billing/ledger'),
   createOrder: (kind, planId) => request('/api/billing/order', { method: 'POST', body: { kind, planId } }),
   verifyPayment: (payload) => request('/api/billing/verify', { method: 'POST', body: payload }),
-  tryAudit: (text) => request('/api/try-audit', { method: 'POST', body: { text }, auth: false }),
+  tryAudit: (payload) => request('/api/try-audit', { method: 'POST', body: payload, auth: false }),
   enterpriseLead: (form) => request('/api/billing/enterprise', { method: 'POST', body: form, auth: false }),
 };

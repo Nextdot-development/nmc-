@@ -24,6 +24,17 @@ const MAX_CHARS = 2000;
 const PER_IP_PER_DAY = 1;
 const DAILY_LIMIT = () => Number(process.env.GUEST_DAILY_LIMIT) || 100;
 
+const PUBLISHERS = ['Doctor (Registered Practitioner)', 'Hospital / Clinic', 'Healthcare marketing agency', 'Pharma / Wellness brand'];
+const CHANNELS = ['Instagram Reel / Feed Ad', 'YouTube video', 'Facebook / Google ad', 'Website / Landing page', 'WhatsApp / SMS', 'Print / Hoarding'];
+
+// Who publishes and where, from fixed lists only
+const contextFrom = ({ publisher, channel }) => {
+  const parts = [];
+  if (PUBLISHERS.includes(publisher)) parts.push(`Published by: ${publisher}.`);
+  if (CHANNELS.includes(channel)) parts.push(`Where it will appear: ${channel}.`);
+  return parts.join(' ');
+};
+
 const inFlight = new Set();
 
 const clientIp = (req) => req.headers['x-real-ip'] || req.socket?.remoteAddress || '';
@@ -59,6 +70,7 @@ export const tryAudit = async (req, res) => {
       analysisMode: 'Standard',
       country: 'India',
       reuseOnly: limited,
+      context: contextFrom(req.body || {}),
     });
 
     if (!result) {

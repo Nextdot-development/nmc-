@@ -378,7 +378,7 @@ const saveAuditRecord = async ({
   return record;
 };
 
-const processText = async ({ text, category, analysisMode, country, region, rules }) => {
+const processText = async ({ text, category, analysisMode, country, region, rules, contentContext }) => {
   validateInputSize(text, 'text');
   const truncatedText = truncateForAI(text);
 
@@ -389,7 +389,8 @@ const processText = async ({ text, category, analysisMode, country, region, rule
     analysisMode,
     country,
     region,
-    rules
+    rules,
+    ...(contentContext ? { contentContext } : {})
   });
 
   return {
@@ -711,9 +712,10 @@ const PROMPT_VERSION = 'p9';
 const URL_CACHE_DAYS = 7;
 
 // Same content + same rule pack + same prompt => same fingerprint
-const fingerprintContent = (input, contentType, { category, rules }) => {
+const fingerprintContent = (input, contentType, { category, rules, context }) => {
   const hash = crypto.createHash('sha256');
   hash.update(`${PROMPT_VERSION}|${contentType}|${category || ''}|`);
+  if (context) hash.update(`ctx|${context}|`);
   hash.update(crypto.createHash('sha256').update(JSON.stringify(rules || [])).digest('hex'));
   if (input.text) hash.update(`text|${String(input.text).replace(/\s+/g, ' ').trim()}`);
   else if (input.url) hash.update(`url|${String(input.url).trim()}`);
@@ -722,7 +724,8 @@ const fingerprintContent = (input, contentType, { category, rules }) => {
 };
 
 export const processContent = async (input, options = {}) => {
-  const { userId, category, analysisMode, country, region, fresh = false, reuseOnly = false } = options;
+  // context: optional note on who publishes the text and where (guest try only)
+  const { userId, category, analysisMode, country, region, fresh = false, reuseOnly = false, context = '' } = options;
 
   if (!userId) {
     throw new Error('Authentication required');
@@ -730,7 +733,7 @@ export const processContent = async (input, options = {}) => {
 
   const contentType = detectContentType(input);
   const rules = getRulesForSelection({ country, region, category });
-  const contentHash = fingerprintContent(input, contentType, { category, rules });
+  const contentHash = fingerprintContent(input, contentType, { category, rules, context });
 
   // Consistency: return the earlier result for identical content unless a fresh audit is requested
   if (!fresh) {
@@ -759,7 +762,7 @@ export const processContent = async (input, options = {}) => {
   let processingResult;
 
   if (contentType === 'text') {
-    processingResult = await processText({ text: input.text, category, analysisMode, country, region, rules });
+    processingResult = await processText({ text: input.text, category, analysisMode, country, region, rules, contentContext: context });
   } else if (contentType === 'url') {
     processingResult = await processUrl({ url: input.url, category, analysisMode, country, region, rules });
   } else if (contentType === 'video' || contentType === 'audio') {
