@@ -7,8 +7,8 @@ import { Landmark, ShieldLogo } from '../components/Graphics.jsx';
 import PlanCards from '../components/PlanCards.jsx';
 import EnterpriseForm from '../components/EnterpriseForm.jsx';
 import {
-  ArrowRightIcon, CheckCircleIcon, DocIcon, GlobeIcon, ImageIcon, LanguageIcon, LayersIcon, LinkIcon, MicIcon,
-  RefreshIcon, ShieldCheckIcon, SparkIcon, TextIcon, UploadIcon, UsersIcon, VideoIcon, XCircleIcon,
+  ArrowRightIcon, BoltIcon, CheckCircleIcon, ChevronRightIcon, DocIcon, GlobeIcon, ImageIcon, ShieldCheckIcon, TextIcon,
+  UploadIcon, VideoIcon,
 } from '../components/Icons.jsx';
 
 const reducedMotion = () => typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
@@ -34,116 +34,168 @@ const useReveal = (deps = []) => {
   }, deps);
 };
 
-const CountUp = ({ to, suffix = '' }) => {
-  const ref = useRef(null);
-  const [value, setValue] = useState(reducedMotion() ? to : 0);
+// Replays the hero animation every few seconds
+const useCycle = (ms) => {
+  const [cycle, setCycle] = useState(0);
   useEffect(() => {
-    if (reducedMotion() || !('IntersectionObserver' in window)) { setValue(to); return undefined; }
+    if (reducedMotion()) return undefined;
+    const t = setInterval(() => setCycle((c) => c + 1), ms);
+    return () => clearInterval(t);
+  }, [ms]);
+  return cycle;
+};
+
+const useScore = (cycle, from, to, delay) => {
+  const [score, setScore] = useState(reducedMotion() ? to : from);
+  useEffect(() => {
+    if (reducedMotion()) return undefined;
+    setScore(from);
     let raf;
-    const io = new IntersectionObserver(([e]) => {
-      if (!e.isIntersecting) return;
-      io.disconnect();
+    const t = setTimeout(() => {
       const start = performance.now();
-      const tick = (t) => {
-        const k = Math.min(1, (t - start) / 1400);
-        setValue(Math.round(to * (1 - (1 - k) ** 3)));
+      const tick = (now) => {
+        const k = Math.min(1, (now - start) / 1300);
+        setScore(Math.round(from + (to - from) * (1 - (1 - k) ** 3)));
         if (k < 1) raf = requestAnimationFrame(tick);
       };
       raf = requestAnimationFrame(tick);
-    }, { threshold: 0.5 });
-    io.observe(ref.current);
-    return () => { io.disconnect(); cancelAnimationFrame(raf); };
-  }, [to]);
-  return <span ref={ref}>{value.toLocaleString('en-IN')}{suffix}</span>;
+    }, delay);
+    return () => { clearTimeout(t); cancelAnimationFrame(raf); };
+  }, [cycle]);
+  return score;
 };
 
-/* ---------- Hero demo: an ad being audited, replays every few seconds ---------- */
-const AD_LINES = [
-  { text: 'Delhi ka No.1 hair clinic', sev: 'high' },
-  { text: '100% guaranteed hair regrowth in 30 days!', sev: 'critical' },
-  { text: 'Flat 50% off this Diwali — book now', sev: 'high' },
-  { text: 'Consultation by Dr. A. Sharma, MBBS, MD (Dermatology)', sev: null },
-];
-
-const HeroDemo = () => {
-  const [cycle, setCycle] = useState(0);
-  const [score, setScore] = useState(100);
-
-  useEffect(() => {
-    if (reducedMotion()) { setScore(40); return undefined; }
-    const t = setInterval(() => setCycle((c) => c + 1), 9000);
-    return () => clearInterval(t);
-  }, []);
-
-  useEffect(() => {
-    if (reducedMotion()) return undefined;
-    setScore(100);
-    const steps = [[1500, 85], [2400, 55], [3300, 40]];
-    const timers = steps.map(([ms, v]) => setTimeout(() => setScore(v), ms));
-    return () => timers.forEach(clearTimeout);
-  }, [cycle]);
-
+const ScoreRing = ({ score, size }) => {
   const r = 34;
   const c = 2 * Math.PI * r;
-  const tone = score >= 80 ? 'ok' : score >= 50 ? 'warn' : 'bad';
-
   return (
-    <div className="demo" key={cycle} aria-label="Example: an ad being checked against NMC rules" role="img">
-      <div className="demo__ad">
-        <div className="demo__bar"><i /><i /><i /><span>clinic-ad.png</span></div>
-        <div className="demo__lines">
-          {AD_LINES.map((l, i) => (
-            <p key={l.text} className={`demo__line ${l.sev ? `demo__line--${l.sev}` : 'demo__line--ok'}`} style={{ '--d': `${0.9 + i * 0.9}s` }}>
-              {l.text}
-              {l.sev && <em>{l.sev === 'critical' ? 'Critical' : 'High'}</em>}
-            </p>
+    <span className={`lring ${score > 50 ? 'lring--checking' : ''}`} style={{ '--s': size }}>
+      <svg viewBox="0 0 80 80" aria-hidden="true">
+        <circle cx="40" cy="40" r={r} className="lring__track" />
+        <circle cx="40" cy="40" r={r} className="lring__value" strokeDasharray={c} strokeDashoffset={c * (1 - score / 100)} />
+      </svg>
+      <b>{score}</b>
+    </span>
+  );
+};
+
+/* ---------- Hero visual: doctor photo with the audit cards placed over it ---------- */
+const AD_ISSUES = [['Misleading claim', 'High'], ['Prohibited superlative', 'High'], ['Before/after image', 'Critical'], ['Lack of disclaimer', 'Medium']];
+
+const HeroVisual = () => {
+  const cycle = useCycle(10000);
+  const score = useScore(cycle, 100, 40, 2600);
+  return (
+    <div className="hv" key={cycle} role="img" aria-label="Example: a clinic ad checked against NMC rules, scored 40 and given a compliant version">
+      <img src="/landing/hero-doctor.jpg" alt="" className="hv__photo" width="554" height="492" />
+
+      <div className="hv__card hv__ad">
+        <span className="hv__thumb">
+          <img src="/landing/ad-thumb.jpg" alt="" />
+          <b>Delhi ka No.1<br />hair clinic</b>
+        </span>
+        <ul>
+          {AD_ISSUES.map(([label, sev], i) => (
+            <li key={label} style={{ '--d': `${0.5 + i * 0.45}s` }}>
+              <i>✕</i> {label} <em className={`lsev lsev--${sev.toLowerCase()}`}>{sev}</em>
+            </li>
           ))}
-          <span className="demo__scan" />
+        </ul>
+      </div>
+
+      <div className="hv__card hv__fix">
+        <p className="hv__fixhead"><CheckCircleIcon /> Compliant version</p>
+        <div className="hv__fixbody">
+          <span>
+            <strong>Hair-loss treatment by Dr. A. Sharma</strong>
+            <small>Consult a dermatologist to know if it is suitable for you.</small>
+          </span>
+          <img src="/landing/doctor-thumb.jpg" alt="" />
         </div>
       </div>
 
-      <div className="demo__report">
-        <div className={`demo__score demo__score--${tone}`}>
-          <svg viewBox="0 0 80 80" width="84" height="84">
-            <circle cx="40" cy="40" r={r} className="demo__track" />
-            <circle cx="40" cy="40" r={r} className="demo__value" strokeDasharray={c} strokeDashoffset={c * (1 - score / 100)} />
-          </svg>
-          <strong>{score}</strong>
-        </div>
-        <div className="demo__verdict">
-          <span className="kicker">NMC AUDIT</span>
-          <b className={`status status--${tone}`}>{score >= 80 ? 'Checking…' : 'Non-Compliant'}</b>
+      <div className="hv__card hv__score">
+        <ScoreRing score={score} size="1" />
+        <span>
+          <strong>NMC Audit</strong>
+          <em className={score > 50 ? 'is-checking' : ''}>{score > 50 ? 'Checking…' : 'Non-Compliant'}</em>
           <small>3 issues · 160 rules checked</small>
-        </div>
-      </div>
-
-      <div className="demo__fix">
-        <p className="demo__fixrow demo__fixrow--bad"><XCircleIcon width={16} height={16} /> 100% guaranteed hair regrowth in 30 days!</p>
-        <p className="demo__fixrow demo__fixrow--good"><CheckCircleIcon width={16} height={16} /> Hair-loss treatment planned after a consultation with our dermatologist.</p>
-        <small>NMC Ethical Advertising Guidelines 2026 · no guaranteed outcomes</small>
+        </span>
       </div>
     </div>
   );
 };
 
-const FEATURES = [
-  [SparkIcon, 'A fix for every line', 'Each flagged line comes with a compliant rewrite you can copy straight into your post.'],
-  [LanguageIcon, 'Speaks your ad’s language', 'Hindi, Hinglish, Marathi or English — the whole report comes back in the language of your content.'],
-  [UploadIcon, 'Every format', 'Text, posters, PDFs, videos, audio, websites and YouTube. You always see the full transcript we checked.'],
-  [ShieldCheckIcon, 'Bound to the NMC rule pack', 'Every finding cites the exact rule, with a link to the official NMC source. No made-up rules.'],
-  [RefreshIcon, 'Same content, same result', 'Scores follow a fixed formula, so a re-check of the same ad gives the same answer — and costs nothing.'],
-  [LayersIcon, 'Built from 1,014 NMC notices', 'Ethical Advertising Guidelines 2026, IMC Regulations 2002, Telemedicine Guidelines and NMC advisories.'],
+/* ---------- Audience line icons ---------- */
+const svg = (children) => (
+  <svg viewBox="0 0 40 40" width="38" height="38" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{children}</svg>
+);
+const AUDIENCE = [
+  ['Clinics & Hospitals', svg(<><path d="M8 34V12h24v22" /><path d="M14 34v-7h12v7M4 34h32" /><path d="M20 15v8M16 19h8" /><path d="M14 6h12v6H14z" /></>)],
+  ['Dermatology & Skin Care', svg(<><path d="M6 34h28" /><path d="M10 34c0-6 2-9 4-12M30 34c0-6-2-9-4-12" /><path d="M14 22c1.5-2 3.5-3 6-3s4.5 1 6 3" /><path d="M20 6v9M15 9l1.5 5M25 9l-1.5 5M11 13l3 3M29 13l-3 3" /><path d="M16 28h8" /></>)],
+  ['Fertility & IVF', svg(<><path d="M20 33S7 25 7 15.5A6.5 6.5 0 0120 12a6.5 6.5 0 0113 3.5C33 25 20 33 20 33z" /><circle cx="20" cy="20" r="4.5" /><circle cx="20" cy="20" r="1.4" /></>)],
+  ['Dental Clinics', svg(<path d="M13 6c-4 0-7 3-7 7.5 0 4 1.5 6 2.5 9 1 3 1.5 11 4.5 11 2.5 0 2.5-8 7-8s4.5 8 7 8c3 0 3.5-8 4.5-11 1-3 2.5-5 2.5-9C34 9 31 6 27 6c-3 0-4.5 2-7 2s-4-2-7-2z" />)],
+  ['Wellness & Aesthetics', svg(<><path d="M20 32c-4-3-6-7-6-11s2-8 6-11c4 3 6 7 6 11s-2 8-6 11z" /><path d="M20 32c-5 0-11-2-14-8 3-2 7-2 9 0M20 32c5 0 11-2 14-8-3-2-7-2-9 0" /><path d="M8 35h24" /></>)],
+  ['Pharma & Healthcare Brands', svg(<><rect x="6" y="14" width="28" height="12" rx="6" transform="rotate(-40 20 20)" /><path d="M15.5 13.5l9 13" /></>)],
 ];
+
+const WHY_POINTS = [
+  'Checks against 160 NMC rules',
+  'Shows exact line to change',
+  'Explains in simple language',
+  'Supports Hindi, Hinglish, Marathi & English',
+  'Ideal for doctors, clinics and healthcare brands',
+];
+
+const DEMO_RESULTS = [
+  ['Misleading claim', 'High', '“Delhi ka No.1” is a prohibited superlative under NMC guidelines.'],
+  ['Before/after image', 'Critical', 'Before/after images are not allowed in medical advertisements.'],
+  ['Lack of disclaimer', 'Medium', 'Add the treating doctor’s name, qualification and registration number.'],
+];
+
+const AuditMock = () => {
+  const score = useScore(0, 100, 40, 600);
+  return (
+    <div className="amock reveal" aria-label="Example of the NextComply auditor" role="img">
+      <div className="amock__left">
+        <div className="amock__tabs">
+          <span><TextIcon /> Text</span>
+          <span className="is-on"><ImageIcon /> Image</span>
+          <span><VideoIcon /> Video</span>
+          <span><GlobeIcon /> Website</span>
+        </div>
+        <div className="amock__drop">
+          <span className="amock__up"><UploadIcon /></span>
+          <strong>Upload your ad, post or creative</strong>
+          <small>PNG, JPG or PDF</small>
+          <span className="amock__btn">Upload file</span>
+        </div>
+      </div>
+      <div className="amock__right">
+        <h4>Audit Results</h4>
+        <div className="amock__score">
+          <ScoreRing score={score} size="1.05" />
+          <span><em>Non-Compliant</em><small>3 issues found</small></span>
+        </div>
+        <ul>
+          {DEMO_RESULTS.map(([title, sev, body], i) => (
+            <li key={title} style={{ '--i': i }}>
+              <b>{i + 1}</b>
+              <span><strong>{title} <em className={`lsev lsev--${sev.toLowerCase()}`}>{sev}</em></strong><small>{body}</small></span>
+              <ChevronRightIcon width={16} height={16} />
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+};
 
 const STEPS = [
-  [UploadIcon, 'Add your content', 'Paste a caption, upload a poster or video, or drop a website link.'],
-  [ShieldCheckIcon, 'We check 160 rules', 'AI reads every line and matches it against the NMC rule pack.'],
-  [CheckCircleIcon, 'Fix and publish', 'Copy the suggested lines or the full corrected version, then post with confidence.'],
+  [UploadIcon, 'Upload your content', 'Add your post, poster, video or website link.'],
+  [DocIcon, 'Get instant audit', 'We check it against 160 NMC rules in about a minute.'],
+  [CheckCircleIcon, 'See exact changes', 'Get clear suggestions in your language.'],
 ];
-
-const FORMATS = [[TextIcon, 'Text'], [ImageIcon, 'Posters'], [DocIcon, 'PDF & Word'], [VideoIcon, 'Video'], [MicIcon, 'Audio'], [LinkIcon, 'Websites'], [GlobeIcon, 'YouTube']];
-
-const AUDIENCE = ['Doctors', 'Clinics', 'Hospitals', 'Diagnostic labs', 'Pharma brands', 'Healthcare agencies'];
 
 const FAQ = [
   ['What is a credit?', 'Credits pay for audits. A text, PDF or image audit uses 1 credit, a website page 2, a video or audio file 2 per 5 minutes, and a YouTube video 4. Checking the exact same content again is free.'],
@@ -190,14 +242,8 @@ export default function Landing() {
 
   return (
     <div className="landing">
-      <div className="landing__bg" aria-hidden="true">
-        <span className="orb orb--navy" />
-        <span className="orb orb--green" />
-        <span className="landing__grid" />
-      </div>
-
       <header className={`lnav ${scrolled ? 'lnav--scrolled' : ''}`}>
-        <Link to="/" className="lnav__brand"><ShieldLogo /><span>NextComply <b>AI</b></span></Link>
+        <Link to="/" className="lnav__brand"><ShieldLogo /><span>NextComply AI</span></Link>
         <nav className="lnav__links" aria-label="Sections">
           <a href="#features">Features</a>
           <a href="#how">How it works</a>
@@ -206,122 +252,76 @@ export default function Landing() {
         </nav>
         <div className="lnav__actions">
           {user ? (
-            <Link to="/app" className="run-btn run-btn--sm">Open dashboard <ArrowRightIcon width={18} height={18} /></Link>
+            <Link to="/app" className="lbtn lbtn--navy">Open dashboard <ArrowRightIcon width={18} height={18} /></Link>
           ) : (
             <>
               <Link to="/login" className="lnav__signin">Sign in</Link>
-              <Link to="/login?mode=signup" className="run-btn run-btn--sm">Start free</Link>
+              <Link to="/login?mode=signup" className="lbtn lbtn--navy">Start free <ArrowRightIcon width={18} height={18} /></Link>
             </>
           )}
         </div>
       </header>
 
       <main>
-        <section className="hero">
-          <div className="hero__copy">
-            <span className="badge-live hero__badge"><i /> {COUNTRY.regulator} EDITION · 160 RULES</span>
-            <h1>
-              Publish healthcare ads
-              <span className="hero__accent"> without {COUNTRY.regulator} worries.</span>
-            </h1>
-            <p className="hero__lead">
-              NextComply AI checks your posts, posters, videos and websites against {COUNTRY.regulator} rules — and shows exactly which line to change, in the language of your ad.
+        <section className="lhero">
+          <div className="lhero__copy">
+            <span className="lbadge"><i /> {COUNTRY.regulator} COMPLIANCE · 160 RULES</span>
+            <h1>Publish healthcare ads without <em>{COUNTRY.regulator} worries.</em></h1>
+            <p className="lhero__lead">
+              NextComply AI checks your posts, posters, videos and websites against {COUNTRY.regulator} rules — and shows exactly which line to change, in simple language.
             </p>
-            <div className="hero__ctas">
-              <Link to={startHref} className="run-btn hero__primary"><SparkIcon width={20} height={20} /> {user ? 'Open dashboard' : 'Start free — 3 audits'}</Link>
-              <a href="#pricing" className="ghost-btn hero__secondary">See pricing</a>
+            <div className="lhero__ctas">
+              <Link to={startHref} className="lbtn lbtn--navy lbtn--lg">Check your content now <ArrowRightIcon width={20} height={20} /></Link>
+              <a href="#pricing" className="lbtn lbtn--ghost lbtn--lg">See pricing</a>
             </div>
-            <ul className="hero__trust">
-              <li><CheckCircleIcon width={17} height={17} /> No card needed</li>
-              <li><CheckCircleIcon width={17} height={17} /> Hindi, Hinglish, Marathi &amp; English</li>
-              <li><CheckCircleIcon width={17} height={17} /> Results in about a minute</li>
+            <ul className="lhero__facts">
+              <li><BoltIcon /> <span>Results in<br />about a minute</span></li>
+              <li><GlobeIcon /> <span>Hindi, Hinglish,<br />Marathi &amp; English</span></li>
+              <li><ShieldCheckIcon /> <span>No card<br />needed to try</span></li>
             </ul>
           </div>
-          <div className="hero__visual">
-            <HeroDemo />
-            <Landmark className="hero__landmark" />
+          <div className="lhero__visual">
+            <HeroVisual />
           </div>
         </section>
 
-        <section className="formats reveal" aria-label="Supported formats">
-          <div className="formats__track">
-            {[...FORMATS, ...FORMATS].map(([Icon, label], i) => (
-              <span key={i} className="formats__chip"><Icon width={18} height={18} /> {label}</span>
+        <section className="audience">
+          <p>Built for healthcare professionals, clinics and healthcare brands across {COUNTRY.name}</p>
+          <ul>
+            {AUDIENCE.map(([label, icon], i) => (
+              <li key={label} className="reveal" style={{ '--i': i }}>{icon}<span>{label}</span></li>
             ))}
-          </div>
+          </ul>
         </section>
 
-        <section className="stats reveal">
-          <div><strong><CountUp to={160} /></strong><span>{COUNTRY.regulator} &amp; IMC rules</span></div>
-          <div><strong><CountUp to={1014} /></strong><span>{COUNTRY.regulator} notices reviewed</span></div>
-          <div><strong><CountUp to={7} /></strong><span>content formats</span></div>
-          <div><strong><CountUp to={100} suffix="%" /></strong><span>findings tied to a real rule</span></div>
+        <section id="features" className="lwhy">
+          <div className="lwhy__copy reveal">
+            <span className="lkicker">WHY NEXTCOMPLY AI</span>
+            <h2>Stay compliant.<br />Build trust. Grow safely.</h2>
+            <p>{COUNTRY.regulator} guidelines are strict — one wrong claim can lead to complaints, penalties or loss of trust. NextComply AI helps you catch issues before you publish.</p>
+            <ul>
+              {WHY_POINTS.map((t) => <li key={t}><CheckCircleIcon /> {t}</li>)}
+            </ul>
+          </div>
+          <AuditMock />
         </section>
 
-        <section id="features" className="lsection">
-          <div className="lsection__head reveal">
-            <span className="kicker">WHY NEXTCOMPLY</span>
-            <h2>Everything you need to publish with confidence</h2>
-          </div>
-          <div className="features">
-            {FEATURES.map(([Icon, title, body], i) => (
-              <article key={title} className="feature panel reveal" style={{ '--i': i }}>
-                <span className="feature__icon"><Icon width={24} height={24} /></span>
-                <h3>{title}</h3>
-                <p>{body}</p>
-              </article>
-            ))}
-          </div>
-        </section>
-
-        <section id="how" className="lsection">
-          <div className="lsection__head reveal">
-            <span className="kicker">HOW IT WORKS</span>
-            <h2>Three steps, about a minute</h2>
-          </div>
-          <ol className="steps">
+        <section id="how" className="lhow">
+          <span className="lkicker">HOW IT WORKS</span>
+          <h2>From upload to compliant ad — in 3 simple steps</h2>
+          <ol>
             {STEPS.map(([Icon, title, body], i) => (
-              <li key={title} className="step reveal" style={{ '--i': i }}>
-                <span className="step__num">{i + 1}</span>
-                <span className="step__icon"><Icon width={26} height={26} /></span>
-                <h3>{title}</h3>
-                <p>{body}</p>
+              <li key={title} className="reveal" style={{ '--i': i }}>
+                <span className="lhow__icon"><b>{i + 1}</b><Icon /></span>
+                <span><strong>{title}</strong><small>{body}</small></span>
               </li>
             ))}
           </ol>
         </section>
 
-        <section className="showcase lsection">
-          <div className="showcase__copy reveal">
-            <span className="kicker">SEE A REAL FIX</span>
-            <h2>It tells you what to write instead</h2>
-            <p>Not just “this breaks a rule”. You get the exact line, why it fails, and a compliant line in the same language — Hinglish stays Hinglish.</p>
-            <ul className="showcase__audience">
-              {AUDIENCE.map((a) => <li key={a}><UsersIcon width={15} height={15} /> {a}</li>)}
-            </ul>
-          </div>
-          <div className="showcase__card panel reveal">
-            <div className="violation__head">
-              <span className="violation__num">01</span>
-              <span className="sev sev--critical">Critical</span>
-              <h4>NMC Ethical Advertising Guidelines 2026 — Guaranteed outcomes</h4>
-            </div>
-            <div className="linefix">
-              <div className="linefix__row linefix__row--bad">
-                <span className="linefix__tag">✕ Ye line</span>
-                <p>“Sirf 3 sitting mein pakka result, 100% guarantee!”</p>
-              </div>
-              <div className="linefix__row linefix__row--good">
-                <span className="linefix__tag">✓ Iski jagah likhein</span>
-                <p>“Har patient ka result alag hota hai — doctor se consult karke apna treatment plan banwayein.”</p>
-              </div>
-            </div>
-          </div>
-        </section>
-
         <section id="pricing" className="lsection">
           <div className="lsection__head reveal">
-            <span className="kicker">PRICING</span>
+            <span className="lkicker">PRICING</span>
             <h2>Simple plans, pay only for what you audit</h2>
             <p>Prices include GST. 1 credit = one text, PDF or image audit.</p>
           </div>
@@ -332,7 +332,7 @@ export default function Landing() {
 
         <section id="faq" className="lsection faq">
           <div className="lsection__head reveal">
-            <span className="kicker">FAQ</span>
+            <span className="lkicker">FAQ</span>
             <h2>Questions, answered</h2>
           </div>
           <div className="faq__list">
@@ -349,22 +349,35 @@ export default function Landing() {
 
         <section className="lsection enterprise-band" ref={enterpriseRef} id="enterprise">
           <div className="enterprise-band__copy reveal">
-            <span className="kicker">ENTERPRISE</span>
+            <span className="lkicker">ENTERPRISE</span>
             <h2>Running a hospital chain, pharma brand or agency?</h2>
-            <p>Volume credits at {'₹'}20 each, unlimited history, team access, API and invoicing. Tell us what you need.</p>
+            <p>Volume credits at ₹20 each, unlimited history, team access, API and invoicing. Tell us what you need.</p>
           </div>
           <div className="panel reveal enterprise-band__form"><EnterpriseForm user={user} title="Get a custom plan" /></div>
         </section>
 
-        <section className="cta reveal">
-          <h2>Check your next ad before it goes live.</h2>
-          <p>3 free audits. No card needed.</p>
-          <Link to={startHref} className="run-btn cta__btn"><SparkIcon width={20} height={20} /> {user ? 'Open dashboard' : 'Start free'}</Link>
+        <section className="lcta reveal">
+          <div>
+            <h2>Be compliant. Communicate responsibly.<br />Focus on what you do best — patient care.</h2>
+            <p>Join NextComply AI and publish with confidence.</p>
+          </div>
+          <div className="lcta__action">
+            <Link to={startHref} className="lbtn lbtn--white lbtn--lg">{user ? 'Open dashboard' : 'Get started free'} <ArrowRightIcon width={20} height={20} /></Link>
+            <small>No card needed · 3 free audits</small>
+          </div>
+          <span className="lcta__art" aria-hidden="true">
+            <Landmark className="lcta__landmark" />
+            <svg className="lcta__swoosh" viewBox="0 0 200 160" preserveAspectRatio="none">
+              <path d="M200 0 C160 40 120 90 40 160 L80 160 C140 100 175 60 200 30 Z" fill="#ff9933" />
+              <path d="M200 30 C175 60 140 100 80 160 L120 160 C165 110 185 85 200 62 Z" fill="#ffffff" />
+              <path d="M200 62 C185 85 165 110 120 160 L200 160 Z" fill="#138808" />
+            </svg>
+          </span>
         </section>
       </main>
 
       <footer className="lfoot">
-        <div className="lfoot__brand"><ShieldLogo /><span>NextComply <b>AI</b></span></div>
+        <div className="lfoot__brand"><ShieldLogo /><span>NextComply AI</span></div>
         <nav aria-label="Footer">
           <a href="#features">Features</a>
           <a href="#pricing">Pricing</a>
