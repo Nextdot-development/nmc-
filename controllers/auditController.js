@@ -44,7 +44,7 @@ export const createAudit = async (req, res) => {
     if (file) input.file = file;
     
     // Social apps show posts only after login, so a link cannot be read; stop before charging
-    if (input.url && /(^|\/\/|\.)(instagram\.com|facebook\.com|fb\.watch|tiktok\.com|threads\.net)/i.test(input.url)) {
+    if (input.url && /(^|\/\/|\.)(instagram\.com|facebook\.com|fb\.watch|tiktok\.com|threads\.net)/i.test(input.url)) {
       return res.status(400).json({
         code: 'SOCIAL_LINK_UNREADABLE',
         error: 'Instagram, Facebook and TikTok posts can only be seen after login, so they cannot be read from a link. Upload the video or image file, or paste the caption or script as text. No credits were used.'
