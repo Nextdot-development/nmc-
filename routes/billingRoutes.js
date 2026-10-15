@@ -3,11 +3,14 @@ import { authMiddleware } from '../middleware/authMiddleware.js';
 import {
   getLedger, getMe, listPlans, postEnterpriseLead, postGrant, postOrder, postVerify, postWebhook,
 } from '../controllers/billingController.js';
+import { tryAudit } from '../controllers/guestController.js';
 
 const router = express.Router();
 
 router.get('/billing/plans', listPlans);
 router.post('/billing/enterprise', postEnterpriseLead);
+// Landing page: one free text audit without an account
+router.post('/try-audit', tryAudit);
 // Raw body is attached in server.js so the Razorpay signature can be checked
 router.post('/billing/webhook', postWebhook);
 

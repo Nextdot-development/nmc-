@@ -722,7 +722,7 @@ const fingerprintContent = (input, contentType, { category, rules }) => {
 };
 
 export const processContent = async (input, options = {}) => {
-  const { userId, category, analysisMode, country, region, fresh = false } = options;
+  const { userId, category, analysisMode, country, region, fresh = false, reuseOnly = false } = options;
 
   if (!userId) {
     throw new Error('Authentication required');
@@ -752,6 +752,9 @@ export const processContent = async (input, options = {}) => {
       return reused;
     }
   }
+
+  // Callers over their limit may only get an earlier result for identical content
+  if (reuseOnly) return null;
 
   let processingResult;
 

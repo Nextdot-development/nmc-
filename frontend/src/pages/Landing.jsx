@@ -6,6 +6,7 @@ import { COUNTRY } from '../country.js';
 import { Landmark, ShieldLogo } from '../components/Graphics.jsx';
 import PlanCards from '../components/PlanCards.jsx';
 import EnterpriseForm from '../components/EnterpriseForm.jsx';
+import TryAudit from '../components/TryAudit.jsx';
 import {
   ArrowRightIcon, BoltIcon, CheckCircleIcon, ChevronRightIcon, DocIcon, GlobeIcon, ImageIcon, ShieldCheckIcon, TextIcon,
   UploadIcon, VideoIcon,
@@ -245,6 +246,7 @@ export default function Landing() {
       <header className={`lnav ${scrolled ? 'lnav--scrolled' : ''}`}>
         <Link to="/" className="lnav__brand"><ShieldLogo /><span>NextComply AI</span></Link>
         <nav className="lnav__links" aria-label="Sections">
+          <a href="#try">Try free</a>
           <a href="#features">Features</a>
           <a href="#how">How it works</a>
           <a href="#pricing">Pricing</a>
@@ -271,7 +273,9 @@ export default function Landing() {
               NextComply AI checks your posts, posters, videos and websites against {COUNTRY.regulator} rules — and shows exactly which line to change, in simple language.
             </p>
             <div className="lhero__ctas">
-              <Link to={startHref} className="lbtn lbtn--navy lbtn--lg">Check your content now <ArrowRightIcon width={20} height={20} /></Link>
+              {user
+                ? <Link to="/app" className="lbtn lbtn--navy lbtn--lg">Check your content now <ArrowRightIcon width={20} height={20} /></Link>
+                : <a href="#try" className="lbtn lbtn--navy lbtn--lg">Check your content now <ArrowRightIcon width={20} height={20} /></a>}
               <a href="#pricing" className="lbtn lbtn--ghost lbtn--lg">See pricing</a>
             </div>
             <ul className="lhero__facts">
@@ -293,6 +297,8 @@ export default function Landing() {
             ))}
           </ul>
         </section>
+
+        <TryAudit signupHref="/login?mode=signup" />
 
         <section id="features" className="lwhy">
           <div className="lwhy__copy reveal">
