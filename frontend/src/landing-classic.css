@@ -141,3 +141,16 @@
   .lguide__langs { padding: 22px 18px; }
   .lguide__langs ul { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
+
+/* calmer hero cards and language tiles */
+.hv__thumb img { filter: saturate(0.45) brightness(1.02); }
+.hv__thumb { background: #d9cfc4; }
+.hv__ad li i { background: transparent; color: #b4473b; border: 1.4px solid #d8a49d; font-size: 1.4cqw; }
+.hv__ad .lsev { background: #f4f1ec; color: #5b6170; font-weight: 600; }
+.hv__ad .lsev--critical { background: #f6ebe9; color: #9a3b31; }
+.hv__fixhead svg { background: var(--l-navy); }
+.lring__value { stroke: #b4473b; }
+.lring--checking .lring__value { stroke: var(--l-navy-2); }
+.hv__score em { background: #f6ebe9; color: #9a3b31; }
+.lang, .lang--en, .lang--hi, .lang--hg, .lang--mr { background: #f7f4ee; border: 1px solid var(--l-line); }
+.lang b, .lang--en b, .lang--hi b, .lang--hg b, .lang--mr b { color: var(--l-navy); border: 1px solid var(--l-line); }
