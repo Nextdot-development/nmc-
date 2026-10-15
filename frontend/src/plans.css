@@ -53,3 +53,12 @@
   .pc-free__cta { grid-column: 1 / -1; align-items: flex-start; }
   .pc-grid { grid-template-columns: 1fr; max-width: 520px; margin: 0 auto; row-gap: 34px; }
 }
+
+/* Premium (best value) stands out */
+.pc-grid > .pc-card:nth-child(2) { border: 2px solid #a67c3d; transform: translateY(-10px); box-shadow: 0 2px 4px rgba(15, 23, 42, 0.05), 0 30px 60px -30px rgba(166, 124, 61, 0.55); }
+.pc-grid > .pc-card:nth-child(2) .pc-card__ribbon { background: #a67c3d; color: #fff; }
+.pc-grid > .pc-card:nth-child(2) .pc-card__price { background: #f6efe2; }
+.pc-grid > .pc-card:nth-child(2) .pc-card__cta { background: #a67c3d; }
+.pc-grid > .pc-card:nth-child(2) .pc-card__cta:hover:not(:disabled) { background: #8a6530; }
+.pc-grid > .pc-card:nth-child(2) li svg { color: #a67c3d; }
+@media (max-width: 1000px) { .pc-grid > .pc-card:nth-child(2) { transform: none; } }
