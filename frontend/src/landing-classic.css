@@ -81,9 +81,10 @@
 .lguide__langs { padding: 34px; border: 1px solid var(--l-line); border-left: 0; border-radius: 0 14px 14px 0; background: #fff; }
 .lguide__langs h3 { margin: 0; font-family: var(--serif); font-size: 24px; color: var(--l-navy); }
 .lguide__langs > p { margin: 6px 0 20px; color: #4b5563; font-size: 14px; }
-.lguide__langs ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.lang { display: flex; align-items: center; gap: 12px; padding: 14px; border-radius: 10px; font-weight: 600; color: var(--text); }
-.lang b { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 50%; background: #fff; font-family: var(--serif); font-size: 20px; }
+.lguide__langs ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.lguide__more { display: block; margin-top: 12px; color: #6b7280; font-size: 12.5px; }
+.lang { display: flex; align-items: center; gap: 8px; padding: 7px 9px; border-radius: 9px; font-weight: 600; font-size: 13px; color: var(--text); }
+.lang b { display: grid; place-items: center; width: 28px; height: 28px; flex-shrink: 0; border-radius: 50%; background: #fff; font-family: var(--serif); font-size: 15px; }
 .lang--en { background: #eef3fc; }
 .lang--en b { color: var(--l-navy-2); }
 .lang--hi { background: #fbf1e6; }
@@ -120,7 +121,7 @@
 .reveal { transform: translateY(12px); transition-duration: 0.6s; }
 
 @media (max-width: 1080px) {
-  .lguide { grid-template-columns: 1fr; }
+  .lguide { grid-template-columns: minmax(0, 1fr); }
   .lguide__panel { border-radius: 14px 14px 0 0; }
   .lguide__langs { border-left: 1px solid var(--l-line); border-top: 0; border-radius: 0 0 14px 14px; }
   .lcta { flex-wrap: wrap; }
@@ -133,4 +134,10 @@
   .lcta__points { grid-template-columns: 1fr 1fr; row-gap: 16px; }
   .lcta__points li:nth-child(3) { border-left: 0; }
   .lguide__panel { padding: 28px; min-height: 260px; }
+}
+
+.lguide > * { min-width: 0; }
+@media (max-width: 620px) {
+  .lguide__langs { padding: 22px 18px; }
+  .lguide__langs ul { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }

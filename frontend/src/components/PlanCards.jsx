@@ -26,7 +26,7 @@ const bullets = (p) => {
     'Text, PDF, Word & poster/image audits',
     `Video & audio audits up to ${p.maxMediaMinutes} min, with full transcript`,
     'Line-by-line compliant rewrite for every issue',
-    'Report in your ad’s language — Hindi, Hinglish, Marathi, English',
+    'Report in your ad’s language — every Indian language',
     'PDF reports with NMC clause citations',
     `${historyText(p.historyDays)} audit history`,
     `Top-up: ${p.topup.credits} credits for ${inr(p.topup.price)}`,

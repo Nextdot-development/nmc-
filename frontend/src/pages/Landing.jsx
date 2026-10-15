@@ -140,11 +140,18 @@ const AUDIENCE = [
   ['Pharma & Healthcare Brands', svg(<><rect x="6" y="14" width="28" height="12" rx="6" transform="rotate(-40 20 20)" /><path d="M15.5 13.5l9 13" /></>)],
 ];
 
+const LANGUAGES = [
+  ['A', 'English'], ['अ', 'Hindi'], ['Aa', 'Hinglish'], ['म', 'Marathi'],
+  ['অ', 'Bengali'], ['அ', 'Tamil'], ['అ', 'Telugu'], ['ಅ', 'Kannada'],
+  ['അ', 'Malayalam'], ['અ', 'Gujarati'], ['ਅ', 'Punjabi'], ['ଅ', 'Odia'],
+  ['ا', 'Urdu'], ['অ', 'Assamese'],
+];
+
 const WHY_POINTS = [
   'Checks against 160 NMC rules',
   'Shows exact line to change',
   'Explains in simple language',
-  'Supports Hindi, Hinglish, Marathi & English',
+  'Works in every Indian language — report in the same language',
   'Ideal for doctors, clinics and healthcare brands',
 ];
 
@@ -199,7 +206,7 @@ const STEPS = [
 
 const FAQ = [
   ['What is a credit?', 'Credits pay for audits. A text, PDF or image audit uses 1 credit, a website page 2, a video or audio file 2 per 5 minutes, and a YouTube video 4. Checking the exact same content again is free.'],
-  ['Which languages does it understand?', 'English, Hindi, Hinglish and Marathi are tested regularly, and other Indian languages work too. The report — findings, explanations and fixes — comes back in the language of your content.'],
+  ['Which languages does it understand?', 'Any language your ad is written in: English, Hindi, Hinglish, Marathi, Bengali, Tamil, Telugu, Kannada, Malayalam, Gujarati, Punjabi, Odia, Urdu and more. The whole report — findings, explanations and line fixes — comes back in that same language and script.'],
   ['Which rules do you check against?', `160 rules built from all 1,014 notices on the ${COUNTRY.regulator} website: the Ethical Advertising Guidelines 2026, IMC Professional Conduct Regulations 2002, Telemedicine Practice Guidelines 2020, clinical advisories and registration rules.`],
   ['Do plans renew automatically?', 'No. Starter and Premium are prepaid for 30 days. Renew whenever you like — unused Premium credits carry over one month.'],
   ['What happens if an audit fails?', 'Credits are returned automatically if an audit cannot finish.'],
@@ -279,7 +286,7 @@ export default function Landing() {
             </div>
             <ul className="lhero__facts">
               <li><BoltIcon /> <span>Results in<br />about a minute</span></li>
-              <li><GlobeIcon /> <span>Hindi, Hinglish,<br />Marathi &amp; English</span></li>
+              <li><GlobeIcon /> <span>Every Indian<br />language</span></li>
               <li><ShieldCheckIcon /> <span>No card<br />needed to try</span></li>
             </ul>
           </div>
@@ -334,13 +341,14 @@ export default function Landing() {
             </div>
           </div>
           <div className="lguide__langs reveal">
-            <h3>Supports Indian Languages</h3>
-            <p>Get results in the same language as your content.</p>
+            <h3>Works in every Indian language</h3>
+            <p>Write your ad in any language — the report and every fix come back in the same language and script.</p>
             <ul>
-              {[['A', 'English', 'en'], ['अ', 'Hindi', 'hi'], ['अ', 'Hinglish', 'hg'], ['अ', 'Marathi', 'mr']].map(([g, name, k]) => (
-                <li key={k} className={`lang lang--${k}`}><b>{g}</b>{name}</li>
+              {LANGUAGES.map(([g, name], i) => (
+                <li key={name} className={`lang lang--${['en', 'hi', 'hg', 'mr'][i % 4]}`}><b>{g}</b>{name}</li>
               ))}
             </ul>
+            <small className="lguide__more">…and more, including mixed-language ads like Hinglish.</small>
           </div>
         </section>
 
