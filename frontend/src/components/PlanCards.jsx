@@ -10,8 +10,8 @@ const EXAMPLES = {
 };
 
 const formatList = (formats) => {
-  const names = formats.map((f) => FORMAT_NAMES[f]);
-  return names.length > 4 ? 'All formats incl. websites & YouTube' : names.join(', ');
+  if (formats.includes('url') && formats.length >= 6) return 'All formats incl. websites & YouTube';
+  return formats.map((f) => FORMAT_NAMES[f]).join(', ');
 };
 
 export const planFeatures = (p) => [

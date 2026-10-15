@@ -56,7 +56,7 @@
 
 /* hero */
 .dl-hero { position: relative; display: grid; grid-template-columns: 1fr 1fr; gap: clamp(24px, 4vw, 64px); align-items: start; padding: clamp(36px, 6vw, 64px) clamp(16px, 4vw, 48px) clamp(48px, 7vw, 90px); background: var(--tint-2); overflow: hidden; }
-.dl-hero > * { position: relative; max-width: 620px; }
+.dl-hero > * { position: relative; max-width: 620px; min-width: 0; }
 .dl-hero__copy { justify-self: end; width: 100%; animation: dlRise 0.7s ease both; }
 .dl-hero__scanner { justify-self: start; width: 100%; max-width: 560px; animation: dlRise 0.8s 0.1s ease both; }
 .dl-hero__glow { position: absolute !important; right: -10%; top: -30%; width: 60%; height: 120%; max-width: none !important; background: radial-gradient(closest-side, rgba(99, 132, 230, 0.22), transparent); animation: dlFloat 14s ease-in-out infinite; pointer-events: none; }
@@ -118,7 +118,7 @@
 .report { max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; padding: 24px; border-radius: 18px; background: var(--tint-2); animation: dlRise 0.5s ease both; }
 .report__top { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
 .report__score { display: flex; align-items: center; gap: 14px; padding: 14px 18px; border-radius: 14px; background: #fff; }
-.report__score > span { display: flex; flex-direction: column; gap: 2px; }
+.report__score > span:not(.dial) { display: flex; flex-direction: column; gap: 2px; }
 .report__score strong { font: 700 17px var(--jakarta); }
 .report__score small { color: var(--body); font-size: 13px; }
 .tone-bad { color: var(--red); }
@@ -138,7 +138,7 @@
 .report__cta strong { font: 700 16.5px var(--jakarta); }
 .report__cta > span:not(.report__lock) { color: var(--body); font-size: 14px; }
 .report__cta .dbtn { margin-top: 8px; }
-.report__lock { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: var(--navy); color: #fff; }
+.report__lock { flex-shrink: 0; display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: var(--navy); color: #fff; }
 
 .dial { position: relative; display: grid; place-items: center; width: 64px; height: 64px; flex-shrink: 0; }
 .dial svg { position: absolute; inset: 0; transform: rotate(-90deg); }
@@ -233,7 +233,7 @@
 .dl-demo__fileicon { display: grid; place-items: center; width: 40px; height: 40px; flex-shrink: 0; border-radius: 10px; background: #dfe7fb; color: var(--navy); }
 .dl-demo__score { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
 .dl-demo__dial { display: flex; align-items: center; gap: 14px; padding: 14px 18px; border-radius: 14px; background: #fff; }
-.dl-demo__dial > span { display: flex; flex-direction: column; }
+.dl-demo__dial > span:not(.dial) { display: flex; flex-direction: column; }
 .dl-demo__dial strong { color: var(--red); font: 600 16px var(--jakarta); }
 .dl-demo__dial small { color: var(--body); font-size: 13px; }
 .dl-demo__locked { position: relative; overflow: hidden; min-height: 150px; border-radius: 14px; background: #fff; }
@@ -355,7 +355,7 @@
 
 /* responsive */
 @media (max-width: 1100px) {
-  .dl-hero { grid-template-columns: 1fr; }
+  .dl-hero { grid-template-columns: minmax(0, 1fr); }
   .dl-hero__copy, .dl-hero__scanner { justify-self: center; max-width: 680px; }
   .dl-plans, .dl-who { grid-template-columns: repeat(2, 1fr); row-gap: 30px; }
   .dl-demo { grid-template-columns: 1fr; }
@@ -370,6 +370,8 @@
 }
 @media (max-width: 620px) {
   .dl-plans, .dl-who { grid-template-columns: 1fr; }
+  .dl-hero h1 { font-size: 36px; }
+  .dl-hero__facts { gap: 12px 22px; }
   .scan { padding: 18px; }
   .scan__row, .scan__notes { grid-template-columns: 1fr; }
   .dl-nav { gap: 10px; }
