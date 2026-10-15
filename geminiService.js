@@ -179,7 +179,7 @@ ${rulesBlock}
 CRITICAL OUTPUT RULES:
 - Return ONLY valid JSON matching the schema below.
 - Go through the content line by line, in order, and check every line against every rule above. Be exhaustive and consistent: the same content must always produce the same findings.
-- Report each problematic line ONCE, under the single most specific rule. Never repeat a line.
+- Report each problematic line ONCE, under the single most specific rule. Never repeat a line. When the NMC Ethical Advertising Guidelines 2026 and an older rule (e.g. IMC Regulations 2002) both cover a line, cite the 2026 guideline clause.
 - Do NOT flag content that a rule expressly permits (e.g. factual name, address, departments, facilities, accreditation, timings or a factual fee disclosure).
 
 LANGUAGE RULES (VERY IMPORTANT):
