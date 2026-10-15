@@ -121,11 +121,11 @@
 .lnav .run-btn--sm { padding: 10px 18px; }
 
 .landing main { position: relative; z-index: 1; }
-.hero { display: grid; grid-template-columns: 1.05fr 1fr; gap: clamp(24px, 4vw, 64px); align-items: center; padding: clamp(28px, 6vw, 72px) clamp(16px, 5vw, 64px) 40px; max-width: 1320px; margin: 0 auto; }
+.hero { display: grid; grid-template-columns: 1.1fr 1fr; gap: clamp(24px, 4vw, 64px); align-items: center; padding: clamp(20px, 4vw, 56px) clamp(16px, 5vw, 64px) 40px; max-width: 1320px; margin: 0 auto; }
 .hero__copy { animation: rise 0.7s ease both; }
 .hero__badge { background: #eef2ff; color: var(--navy); }
 .hero__badge i { background: var(--green); animation: ping 2.4s ease-out infinite; }
-.hero h1 { margin: 20px 0 18px; font-size: clamp(36px, 5.2vw, 64px); font-weight: 800; letter-spacing: -0.03em; line-height: 1.04; color: var(--text); }
+.hero h1 { margin: 18px 0 16px; font-size: clamp(34px, 4.1vw, 58px); font-weight: 800; letter-spacing: -0.03em; line-height: 1.04; color: var(--text); }
 .hero__accent { display: block; background: linear-gradient(90deg, var(--navy) 0%, #2c55c9 45%, var(--green) 100%); -webkit-background-clip: text; background-clip: text; color: transparent; background-size: 200% 100%; animation: shimmer 8s ease-in-out infinite; }
 .hero__lead { margin: 0; max-width: 560px; color: var(--text-2); font-size: clamp(16px, 1.4vw, 18.5px); line-height: 1.65; }
 .hero__ctas { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 28px; }
@@ -186,7 +186,7 @@
 .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; max-width: 1180px; margin: 24px auto 0; padding: 0 clamp(16px, 5vw, 64px); }
 .stats > div { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 22px 12px; border-radius: 18px; border: 1px solid var(--line); background: #fff; box-shadow: var(--shadow); text-align: center; }
 .stats strong { font-size: clamp(30px, 3.4vw, 42px); font-weight: 800; letter-spacing: -0.02em; color: var(--navy); }
-.stats span { color: var(--text-2); font-size: 14px; font-weight: 600; }
+.stats > div > span { color: var(--text-2); font-size: 14px; font-weight: 600; }
 
 .lsection { max-width: 1240px; margin: 0 auto; padding: clamp(56px, 8vw, 96px) clamp(16px, 5vw, 64px) 0; }
 .lsection__head { text-align: center; max-width: 720px; margin: 0 auto 36px; }
@@ -277,3 +277,6 @@
   .demo__line--critical { background: #fde0dd; }
   .demo__line--high { background: #fdebe9; }
 }
+
+/* short laptop screens: keep the credit card, drop the sidebar artwork */
+@media (min-width: 861px) and (max-height: 760px) { .credits-card ~ .promo { display: none; } }

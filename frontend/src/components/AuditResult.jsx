@@ -298,7 +298,7 @@ export default function AuditResult({ result, onReset, onFresh, meta }) {
         <Link to="/billing" className="panel compliant-version compliant-version--locked">
           <LockIcon width={22} height={22} />
           <span>
-            <strong>{L.compliantVersion} is ready</strong>
+            <strong>{L.compliantVersion}</strong>
             <small>The full corrected copy, ready to paste, comes with the Premium plan.</small>
           </span>
           <span className="run-btn run-btn--sm">Unlock</span>
