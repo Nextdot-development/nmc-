@@ -190,6 +190,7 @@ LANGUAGE RULES (VERY IMPORTANT):
 - englishTranslation: English meaning of originalLine (repeat it if already English).
 - problematicContent: same text as originalLine.
 - Write the WHOLE report in the content's language and script: summary, every violation's description, suggestion and solution, financialPenalty.description and ethicalMarketing.assessment. Hindi (Devanagari) content -> Hindi in Devanagari; Hinglish -> Hinglish in Roman script; Marathi, Tamil, Bengali, Gujarati, Punjabi etc. -> that language in its own script; English -> English.
+- Hinglish means Hindi written in Roman letters. For Hinglish content the explanations must ALSO be Hinglish, not English. Example description: "Ye line 'Best dermatologist' ka daava karti hai jo verify nahi ho sakta; NMC niyam ke hisaab se aise superlative claims mana hain." Example summary: "Is ad mein kai gambhir galtiyan hain: guarantee, discount offer aur 'best doctor' jaise daave."
 - Keep in English only: the "regulation" field (official rule name and section) and "englishTranslation".
 - compliantVersion: REQUIRED (never empty) when the content is shorter than 3000 characters: the full content rewritten with every violation fixed, in its original language and script, ready to publish. For longer content return "".
 

@@ -702,7 +702,7 @@ const processDocumentBuffer = async ({ buffer, mimetype, originalInput, category
 };
 
 // Bump when the prompt or output shape changes so old cached results are not reused
-const PROMPT_VERSION = 'p6';
+const PROMPT_VERSION = 'p7';
 const URL_CACHE_DAYS = 7;
 
 // Same content + same rule pack + same prompt => same fingerprint
