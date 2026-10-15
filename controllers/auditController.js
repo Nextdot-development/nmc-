@@ -1,5 +1,10 @@
 import AuditRecord from '../models/AuditRecord.js';
-import { processContent } from '../services/contentProcessor.js';
+import { detectContentType, processContent } from '../services/contentProcessor.js';
+import {
+  BillingError, gateResult, getAccount, historySince, quoteAudit, refundCredits, spendCredits,
+} from '../services/billingService.js';
+
+const FORMAT_LABEL = { text: 'Text', url: 'Website', image: 'Image', video: 'Video', audio: 'Audio', document: 'Document' };
 
 /**
  * Audit Controller
@@ -35,21 +40,40 @@ export const createAudit = async (req, res) => {
     if (url) input.url = url;
     if (file) input.file = file;
     
-    console.log(`[Audit Controller] Creating audit - Smart AI Model Router will select optimal model`);
-    
-    // Process content through Smart AI Model Router pipeline
-    // Router automatically selects model based on content type, size, and complexity
-    const auditResult = await processContent(input, {
-      userId: req.user?.id,
-      fresh: req.body.fresh === 'true' || req.body.fresh === true,
-      category,
-      analysisMode,
-      country,
-      region
-    });
+    // Credits: check the plan allows this format, then charge before the audit runs
+    const account = await getAccount(req.user.id, req.user.email);
+    const quote = await quoteAudit(input, detectContentType(input), account.plan);
+    const label = `${FORMAT_LABEL[quote.format] || 'Content'} audit${quote.minutes ? ` (${quote.minutes} min)` : ''}`;
+    const charge = await spendCredits(req.user.id, quote.credits, label);
 
-    return res.status(201).json(auditResult);
+    let auditResult;
+    try {
+      auditResult = await processContent(input, {
+        userId: req.user?.id,
+        fresh: req.body.fresh === 'true' || req.body.fresh === true,
+        category,
+        analysisMode,
+        country,
+        region
+      });
+    } catch (error) {
+      await refundCredits(req.user.id, charge, `${label} failed`);
+      throw error;
+    }
+
+    // Identical content returns the earlier result, which costs nothing
+    let charged = charge.credits;
+    let balance = charge.balance;
+    if (auditResult?.reused) {
+      balance = await refundCredits(req.user.id, charge, 'Same content as an earlier audit');
+      charged = 0;
+    }
+
+    return res.status(201).json({ ...gateResult(auditResult, account.plan), billing: { charged, balance, minutes: quote.minutes } });
   } catch (error) {
+    if (error instanceof BillingError) {
+      return res.status(error.status).json({ error: error.message, code: error.code, ...error.extra });
+    }
     console.error('[Audit Controller] Error:', error);
     return res.status(500).json({
       error: error.message || error.error || 'Failed to create audit'
@@ -65,7 +89,10 @@ export const getAuditHistory = async (req, res) => {
   try {
     const { limit = 50, skip = 0 } = req.query;
 
-    const query = { userId: req.user?.id };
+    // History length depends on the plan
+    const account = await getAccount(req.user.id, req.user.email);
+    const since = historySince(account.plan);
+    const query = { userId: req.user?.id, ...(since ? { createdAt: { $gte: since } } : {}) };
     const audits = await AuditRecord.find(query)
       .sort({ createdAt: -1 })
       .limit(parseInt(limit))
@@ -75,7 +102,7 @@ export const getAuditHistory = async (req, res) => {
 
     // Keep the audit result shape; add record metadata alongside it
     const results = audits.map((record) => ({
-      ...record.auditResult,
+      ...gateResult(record.auditResult, account.plan),
       _id: record._id,
       contentType: record.contentType,
       originalInput: record.originalInput,
@@ -108,7 +135,8 @@ export const getAuditById = async (req, res) => {
       });
     }
 
-    return res.json(audit.auditResult);
+    const account = await getAccount(req.user.id, req.user.email);
+    return res.json(gateResult(audit.auditResult, account.plan));
   } catch (error) {
     console.error('[Audit Controller] Get by ID error:', error);
     if (error.name === 'CastError') {

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../api.js';
 import { useAuth } from '../App.jsx';
 import { BoltIcon, ChartIcon, ShieldCheckIcon, SparkIcon } from '../components/Icons.jsx';
@@ -12,7 +12,8 @@ const highlights = [
 ];
 
 export default function Login() {
-  const [mode, setMode] = useState('login');
+  const [params] = useSearchParams();
+  const [mode, setMode] = useState(params.get('mode') === 'signup' ? 'signup' : 'login');
   const [form, setForm] = useState({ name: '', email: '', password: '' });
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
@@ -31,7 +32,7 @@ export default function Login() {
         ? await api.login(form.email.trim(), form.password)
         : await api.signup(form.name.trim(), form.email.trim(), form.password);
       signIn(res.token, res.user);
-      navigate(location.state?.from || '/', { replace: true });
+      navigate(location.state?.from || '/app', { replace: true });
     } catch (err) {
       setError(err.message);
     } finally {
@@ -42,7 +43,7 @@ export default function Login() {
   return (
     <div className="auth">
       <section className="auth__story">
-        <div className="auth__brand"><ShieldLogo /> <span>NextComply <b className="lime">AI</b></span></div>
+        <Link to="/" className="auth__brand"><ShieldLogo /> <span>NextComply <b className="lime">AI</b></span></Link>
         <Landmark className="auth__gate" />
         <div>
           <span className="badge-live"><i /> NMC EDITION</span>
@@ -63,7 +64,7 @@ export default function Login() {
       <section className="auth__panel">
         <form className="panel panel--glow auth__form" onSubmit={submit}>
           <h2>{mode === 'login' ? 'Welcome back' : 'Create your account'}</h2>
-          <p className="muted">{mode === 'login' ? 'Sign in to your AI audit workspace.' : 'Start auditing in under a minute.'}</p>
+          <p className="muted">{mode === 'login' ? 'Sign in to your AI audit workspace.' : '3 free audit credits — no card needed.'}</p>
 
           {mode === 'signup' && (
             <label className="field"><span>Full name</span>

@@ -6,7 +6,8 @@ import path from 'path';
 import { connectDB } from './config/database.js';
 import auditRoutes from './routes/auditRoutes.js';
 import rulesRoutes from './routes/rulesRoutes.js';
-import urlAuditRoutes from './routes/urlAudit.route.ts';
+import billingRoutes from './routes/billingRoutes.js';
+// import urlAuditRoutes from './routes/urlAudit.route.ts';
 
 // Import auth routes
 console.log('[Server] Importing auth routes...');
@@ -62,6 +63,10 @@ if (missingEnv.length > 0) {
   process.exit(1);
 }
 
+if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+  console.warn('[Server] Razorpay keys not set - plans can be viewed but not bought online');
+}
+
 if (!process.env.ANTHROPIC_API_KEY) {
   console.warn('[Server] ANTHROPIC_API_KEY not set - audits will run on Gemini only');
 }
@@ -85,6 +90,9 @@ app.use(cors({
   credentials: true,
   optionsSuccessStatus: 200
 }));
+
+// Razorpay webhook needs the raw body to check its signature
+app.use('/api/billing/webhook', express.raw({ type: 'application/json', limit: '1mb' }));
 
 // Body parsing middleware
 app.use(express.json({ limit: '50mb' }));
@@ -118,7 +126,9 @@ try {
 
 app.use('/api', auditRoutes);
 app.use('/api', rulesRoutes);
-app.use('/api', urlAuditRoutes);
+app.use('/api', billingRoutes);
+// /api/url-audit is off: it ran audits without charging credits (use /api/audit with a url)
+// app.use('/api', urlAuditRoutes);
 
 // 404 handler for undefined routes
 app.use((req, res, next) => {

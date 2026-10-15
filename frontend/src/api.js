@@ -30,9 +30,11 @@ export const session = {
 };
 
 export class ApiError extends Error {
-  constructor(message, status) {
+  constructor(message, status, data = null) {
     super(message);
     this.status = status;
+    this.code = data?.code || '';
+    this.data = data;
   }
 }
 
@@ -60,7 +62,7 @@ const request = async (path, { method = 'GET', body, form, auth = true } = {}) =
       session.clear();
       window.dispatchEvent(new Event('nc-logout'));
     }
-    throw new ApiError(data?.error || data?.message || `Request failed (${response.status})`, response.status);
+    throw new ApiError(data?.error || data?.message || `Request failed (${response.status})`, response.status, data);
   }
   return data;
 };
@@ -84,4 +86,11 @@ export const api = {
   history: () => request('/api/audit/history?limit=50'),
   auditById: (id) => request(`/api/audit/${id}`),
   rulePack: () => request('/api/rules/pack?country=india', { auth: false }),
+
+  plans: () => request('/api/billing/plans', { auth: false }),
+  account: () => request('/api/billing/me'),
+  ledger: () => request('/api/billing/ledger'),
+  createOrder: (kind, planId) => request('/api/billing/order', { method: 'POST', body: { kind, planId } }),
+  verifyPayment: (payload) => request('/api/billing/verify', { method: 'POST', body: payload }),
+  enterpriseLead: (form) => request('/api/billing/enterprise', { method: 'POST', body: form, auth: false }),
 };

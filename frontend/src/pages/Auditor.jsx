@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
+import { useAuth } from '../App.jsx';
+import { FORMAT_NAMES, creditHint } from '../billing.js';
 import { api } from '../api.js';
 import AuditResult from '../components/AuditResult.jsx';
 import { BannerArt } from '../components/Graphics.jsx';
 import { COUNTRY } from '../country.js';
 import {
-  ArrowRightIcon, CheckCircleIcon, ChevronDownIcon, DocIcon, GlobeIcon, ImageIcon, LayersIcon, LinkIcon, MicIcon,
+  ArrowRightIcon, CheckCircleIcon, ChevronDownIcon, DocIcon, GlobeIcon, ImageIcon, LayersIcon, LinkIcon, LockIcon, MicIcon,
   ShieldCheckIcon, SparkIcon, TextIcon, UploadIcon, VideoIcon,
 } from '../components/Icons.jsx';
 
@@ -39,7 +41,9 @@ export default function Auditor() {
   const [busy, setBusy] = useState(false);
   const [step, setStep] = useState(0);
   const [error, setError] = useState('');
+  const [upsell, setUpsell] = useState(false);
   const [result, setResult] = useState(null);
+  const { account, setBalance, refreshAccount } = useAuth();
   const fileInput = useRef(null);
   const resultRef = useRef(null);
   const location = useLocation();
@@ -59,6 +63,8 @@ export default function Auditor() {
   const fmt = FORMATS.find((f) => f.id === format);
   const isFile = Boolean(fmt.accept);
   const activePack = RULE_PACKS.find((p) => p.id === pack);
+  const allowed = (id) => !account || account.features.formats.includes(id);
+  const locked = !allowed(format);
 
   useEffect(() => {
     if (!busy) return undefined;
@@ -87,14 +93,15 @@ export default function Auditor() {
     setFile(f);
   };
 
-  const ready = (format === 'text' && text.trim().length > 10)
+  const ready = !locked && ((format === 'text' && text.trim().length > 10)
     || (format === 'url' && /^https?:\/\/\S+\.\S+/.test(url.trim()))
-    || (isFile && file);
+    || (isFile && file));
 
   const submit = async (e, { fresh = false } = {}) => {
     e?.preventDefault();
     if (!ready || busy) return;
     setError('');
+    setUpsell(false);
     setResult(null);
     setBusy(true);
     try {
@@ -106,8 +113,13 @@ export default function Auditor() {
         fresh,
       });
       setResult(res);
+      if (res?.billing) setBalance(res.billing.balance);
     } catch (err) {
       setError(err.message);
+      if (['INSUFFICIENT_CREDITS', 'FORMAT_NOT_IN_PLAN', 'MEDIA_TOO_LONG'].includes(err.code)) {
+        setUpsell(true);
+        refreshAccount();
+      }
     } finally {
       setBusy(false);
     }
@@ -139,8 +151,9 @@ export default function Auditor() {
             <div className="pills" role="radiogroup" aria-label="Content format">
               {FORMATS.map(({ id, label, Icon }) => (
                 <button key={id} type="button" role="radio" aria-checked={format === id}
-                  className={`pill-btn ${format === id ? 'pill-btn--active' : ''}`} onClick={() => chooseFormat(id)}>
-                  <Icon width={17} height={17} /> {label}
+                  className={`pill-btn ${format === id ? 'pill-btn--active' : ''} ${allowed(id) ? '' : 'pill-btn--locked'}`} onClick={() => chooseFormat(id)}
+                  title={allowed(id) ? undefined : 'Not in your plan'}>
+                  <Icon width={17} height={17} /> {label}{!allowed(id) && <LockIcon width={13} height={13} className="pill-lock" />}
                 </button>
               ))}
             </div>
@@ -173,19 +186,29 @@ export default function Auditor() {
           </div>
         </div>
 
-        {format === 'text' && (
+        {locked && (
+          <div className="upsell">
+            <LockIcon width={22} height={22} />
+            <div>
+              <strong>{FORMAT_NAMES[format]} audits are not in the {account?.planName} plan</strong>
+              <span>{format === 'url' ? 'Website and YouTube audits come with Premium.' : 'Starter and above can audit PDFs, Word files, videos and audio.'}</span>
+            </div>
+            <Link to="/billing" className="run-btn run-btn--sm">See plans</Link>
+          </div>
+        )}
+        {!locked && format === 'text' && (
           <div className="inputbox">
             <textarea value={text} onChange={(e) => setText(e.target.value.slice(0, MAX_TEXT))} rows={3}
               placeholder="Paste marketing copy or script here..." aria-label="Content to audit" />
             <div className="inputbox__bar"><span className="counter">{text.length} / {MAX_TEXT}</span></div>
           </div>
         )}
-        {format === 'url' && (
+        {!locked && format === 'url' && (
           <div className="inputbox">
             <input type="url" value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://clinic-website.in/offers" aria-label="URL to audit" />
           </div>
         )}
-        {isFile && (
+        {!locked && isFile && (
           <div className={`dropzone ${dragging ? 'dropzone--active' : ''}`}
             onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
             onDragLeave={() => setDragging(false)}
@@ -212,6 +235,11 @@ export default function Auditor() {
         <button className="run-btn" disabled={!ready || busy}>
           <SparkIcon width={20} height={20} /> {busy ? 'Auditing…' : 'Run audit'} {!busy && <ArrowRightIcon width={20} height={20} />}
         </button>
+        {account && !locked && (
+          <p className="run-cost">
+            Uses <b>{creditHint(format, url)}</b> · {account.credits} credit{account.credits === 1 ? '' : 's'} left · same content again is free
+          </p>
+        )}
 
         {busy && (
           <div className="progress" aria-live="polite">
@@ -222,7 +250,11 @@ export default function Auditor() {
             )}
           </div>
         )}
-        {error && <p className="alert" role="alert">{error}</p>}
+        {error && (
+          <p className="alert" role="alert">
+            {error} {upsell && <Link to="/billing" className="alert__link">View plans →</Link>}
+          </p>
+        )}
       </form>
 
       <div ref={resultRef}>

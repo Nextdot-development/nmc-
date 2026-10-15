@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { PrintIcon, SparkIcon } from './Icons.jsx';
+import { Link, useNavigate } from 'react-router-dom';
+import { LockIcon, PrintIcon, SparkIcon } from './Icons.jsx';
+import { useAuth } from '../App.jsx';
 import { StatusPill, statusTone } from '../pages/History.jsx';
 import { labelsFor } from '../reportLabels.js';
 
@@ -67,6 +68,12 @@ const Violation = ({ v, index, L }) => {
             <p>“{original}”</p>
             {translation && <small>{L.english}: {translation}</small>}
           </div>
+          {v.locked && (
+            <Link to="/billing" className="linefix__row linefix__row--locked">
+              <LockIcon width={16} height={16} />
+              <span><b>Compliant rewrite for this line is locked.</b> Upgrade to Starter to see every fix.</span>
+            </Link>
+          )}
           {v.compliantLine && (
             <div className="linefix__row linefix__row--good">
               <span className="linefix__tag">{removeOnly ? L.fix : L.replaceWith}</span>
@@ -189,7 +196,7 @@ const SourceText = ({ data, violations = [] }) => {
           <button type="button" className="ghost-btn ghost-btn--sm" onClick={copy}>{copied ? 'Copied ✓' : 'Copy'}</button>
           <button type="button" className="ghost-btn ghost-btn--sm" onClick={download}>Download .txt</button>
           <button type="button" className="ghost-btn ghost-btn--sm ghost-btn--primary"
-            onClick={() => navigate('/', { state: { prefill: data.text, nonce: Date.now() } })}>Audit this text again</button>
+            onClick={() => navigate('/app', { state: { prefill: data.text, nonce: Date.now() } })}>Audit this text again</button>
         </div>
       </div>
       {highlighted.count > 0 && (
@@ -202,6 +209,8 @@ const SourceText = ({ data, violations = [] }) => {
 
 export default function AuditResult({ result, onReset, onFresh, meta }) {
   const [showText, setShowText] = useState(false);
+  const { account } = useAuth() || {};
+  const canPdf = !account || account.features.pdf;
   const violations = [...(result?.violations || [])].sort(
     (a, b) => SEVERITY_ORDER.indexOf(a.severity) - SEVERITY_ORDER.indexOf(b.severity)
   );
@@ -246,7 +255,9 @@ export default function AuditResult({ result, onReset, onFresh, meta }) {
           </div>
         </div>
         <div className="result__actions no-print">
-          <button type="button" className="ghost-btn" onClick={() => window.print()}><PrintIcon width={18} height={18} /> Save as PDF</button>
+          {canPdf
+            ? <button type="button" className="ghost-btn" onClick={() => window.print()}><PrintIcon width={18} height={18} /> Save as PDF</button>
+            : <Link to="/billing" className="ghost-btn" title="PDF reports come with Starter and above"><LockIcon width={16} height={16} /> Save as PDF</Link>}
           {onReset && <button type="button" className="run-btn run-btn--sm" onClick={onReset}>New audit</button>}
         </div>
       </div>
@@ -281,6 +292,17 @@ export default function AuditResult({ result, onReset, onFresh, meta }) {
           </div>
           <div className="compliant-version__text">{result.compliantVersion}</div>
         </div>
+      )}
+
+      {result?.planGate?.compliantVersionLocked && violations.length > 0 && (
+        <Link to="/billing" className="panel compliant-version compliant-version--locked">
+          <LockIcon width={22} height={22} />
+          <span>
+            <strong>{L.compliantVersion} is ready</strong>
+            <small>The full corrected copy, ready to paste, comes with the Premium plan.</small>
+          </span>
+          <span className="run-btn run-btn--sm">Unlock</span>
+        </Link>
       )}
 
       {source && <SourceText data={source} violations={violations} />}

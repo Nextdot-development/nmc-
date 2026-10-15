@@ -40,6 +40,11 @@ export const AlertIcon = icon(<><circle cx="12" cy="12" r="9" /><path d="M12 7v6
 export const XCircleIcon = icon(<><circle cx="12" cy="12" r="9" /><path d="M9 9l6 6M15 9l-6 6" /></>);
 export const UploadIcon = icon(<><path d="M12 16V4M7 9l5-5 5 5" /><path d="M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3" /></>);
 export const RefreshIcon = icon(<><path d="M20 11a8 8 0 00-14.9-3M4 4v4h4" /><path d="M4 13a8 8 0 0014.9 3M20 20v-4h-4" /></>);
+export const WalletIcon = icon(<><path d="M20 7H5a2 2 0 010-4h13v4" /><path d="M3 5v14a2 2 0 002 2h15V7" /><path d="M16 14h.01" /></>);
+export const LockIcon = icon(<><rect x="5" y="11" width="14" height="10" rx="2" /><path d="M8 11V7a4 4 0 018 0v4" /></>);
+export const StarIcon = icon(<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9L12 3z" />);
+export const UsersIcon = icon(<><circle cx="9" cy="8" r="3.5" /><path d="M2.5 20a6.5 6.5 0 0113 0" /><path d="M16 4.5a3.5 3.5 0 010 7M18 14a6 6 0 013.5 6" /></>);
+export const LanguageIcon = icon(<><path d="M4 5h9M8.5 3v2M6 5c.5 3 2.5 6 6 8M11 5c-.5 3-3 6.5-7 8" /><path d="M13 21l4-9 4 9M14.5 18h5" /></>);
 export const UserIcon = icon(<><circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0116 0" /></>);
 
 // Four-point star logo mark

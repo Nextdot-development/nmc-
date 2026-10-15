@@ -5,13 +5,14 @@ import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../App.jsx';
 import {
   BellIcon, LayersIcon, ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon, ClockIcon, CogIcon,
-  HomeIcon, LogoutIcon, MenuIcon, SearchIcon,
+  HomeIcon, LogoutIcon, MenuIcon, SearchIcon, WalletIcon,
 } from './Icons.jsx';
 
 const NAV = [
-  { to: '/', label: 'Auditor', Icon: HomeIcon, end: true },
+  { to: '/app', label: 'Auditor', Icon: HomeIcon, end: true },
   { to: '/rules', label: 'Rule Packs', Icon: LayersIcon },
   { to: '/history', label: 'Audit History', Icon: ClockIcon },
+  { to: '/billing', label: 'Plans & Credits', Icon: WalletIcon },
   { to: '/settings', label: 'Settings', Icon: CogIcon },
 ];
 
@@ -82,7 +83,7 @@ const Notifications = () => {
 };
 
 export default function Layout() {
-  const { user, signOut } = useAuth();
+  const { user, account, signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
@@ -113,7 +114,7 @@ export default function Layout() {
     <div className={`app ${collapsed ? 'app--collapsed' : ''} ${drawer ? 'app--drawer' : ''}`}>
       <aside className="sidebar">
         <div className="sidebar__top">
-          <NavLink to="/" className="sidebar__logo" aria-label="NextComply AI home"><ShieldLogo /><span>NextComply <b>AI</b></span></NavLink>
+          <NavLink to="/app" className="sidebar__logo" aria-label="NextComply AI home"><ShieldLogo /><span>NextComply <b>AI</b></span></NavLink>
           <button type="button" className="square-btn sidebar__collapse" onClick={() => setCollapsed(!collapsed)}
             aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}>
             {collapsed ? <ChevronRightIcon /> : <ChevronLeftIcon />}
@@ -129,6 +130,15 @@ export default function Layout() {
         </nav>
 
         <div className="sidebar__spacer" />
+
+        {account && (
+          <NavLink to="/billing" className="credits-card" title="Plans & Credits">
+            <span className="credits-card__plan">{account.planName} plan</span>
+            <strong><span>{account.credits}</span> credits left</strong>
+            <span className="credits-card__bar"><i style={{ width: `${Math.min(100, (account.credits / Math.max(account.credits, account.plan === 'premium' ? 50 : account.plan === 'starter' ? 22 : 3)) * 100)}%` }} /></span>
+            {account.plan !== 'enterprise' && <span className="credits-card__cta">{account.plan === 'premium' ? 'Buy top-up' : 'Upgrade'} →</span>}
+          </NavLink>
+        )}
 
         <div className="promo">
           <SidebarArt />
@@ -174,6 +184,11 @@ export default function Layout() {
               </select>
               <ChevronDownIcon width={18} height={18} />
             </label>
+            {account && (
+              <NavLink to="/billing" className="credit-pill" title="Credits left">
+                <WalletIcon width={18} height={18} /> <b>{account.credits}</b> <span>credits</span>
+              </NavLink>
+            )}
             <Notifications />
             {user && <NavLink to="/settings" aria-label="Account"><Avatar user={user} size="xl" /></NavLink>}
           </div>

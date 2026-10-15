@@ -49,7 +49,7 @@ export default function History() {
       {error && <p className="alert">{error}</p>}
       {!items && !error && <div className="panel skeleton">Loading…</div>}
       {items && items.length === 0 && (
-        <div className="panel empty"><EmptyArt /><p>No audits yet. <Link to="/">Run your first audit →</Link></p></div>
+        <div className="panel empty"><EmptyArt /><p>No audits yet. <Link to="/app">Run your first audit →</Link></p></div>
       )}
 
       {items && items.length > 0 && (
