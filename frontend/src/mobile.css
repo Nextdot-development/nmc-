@@ -1,0 +1,92 @@
+/* =====================================================================
+   Phone layout (loaded last). Desktop is unaffected.
+   ===================================================================== */
+.topbar__brand, .tabbar { display: none; }
+
+@media (max-width: 860px) {
+  /* inputs at 16px so iOS does not zoom on focus */
+  input, textarea, select { font-size: 16px !important; }
+
+  /* top bar: menu, logo, credits, bell */
+  .topbar { gap: 8px; padding: 8px 12px; padding-top: max(8px, env(safe-area-inset-top)); }
+  .topbar__brand { display: inline-flex; align-items: center; gap: 8px; min-width: 0; font-family: var(--serif); font-weight: 700; font-size: 17px; color: var(--navy); white-space: nowrap; }
+  .topsearch { display: none; }
+  .topbar__right { gap: 8px; }
+  .topbar__right > a[aria-label="Account"] { display: none; }
+  .credit-pill { height: 36px; padding: 0 10px; font-size: 13px; }
+  .credit-pill span { display: none; }
+  .square-btn { width: 38px; height: 38px; }
+
+  /* bottom tab bar */
+  .tabbar {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 35;
+    padding: 6px 6px max(6px, env(safe-area-inset-bottom));
+    background: rgba(255, 255, 255, 0.97); border-top: 1px solid var(--line);
+    box-shadow: 0 -6px 20px -16px rgba(15, 42, 92, 0.5);
+  }
+  .tabbar__link { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 6px 2px; border-radius: 10px; color: var(--muted); font-size: 11.5px; font-weight: 600; }
+  .tabbar__link.active { color: var(--navy); background: var(--gold-soft); }
+  .tabbar__link.active svg { color: var(--navy); }
+  .content { padding: 14px 12px calc(84px + env(safe-area-inset-bottom)); }
+  .app--drawer .tabbar { display: none; }
+
+  /* page headers: compact */
+  .banner, .page-head.banner { padding: 16px 18px !important; margin-bottom: 14px; }
+  .banner h1, .page-head.banner h1 { font-size: 22px !important; }
+  .banner p { margin-left: 0; }
+  .simple__titleicon { width: 32px; height: 32px; }
+
+  /* auditor */
+  .simple { padding: 16px 14px; gap: 16px; }
+  .simple__row--info { display: none; }
+  .simple__row, .simple > .simple__row:first-of-type { grid-template-columns: minmax(0, 1fr); }
+  .simple__row > * { min-width: 0; }
+  .pills { flex-wrap: nowrap; overflow-x: auto; margin: 0 -14px; padding: 2px 14px 6px; scrollbar-width: none; }
+  .pills::-webkit-scrollbar { display: none; }
+  .pill-btn { flex-shrink: 0; padding: 9px 13px; }
+  .inputbox textarea { min-height: 140px; }
+  .dropzone { min-height: 130px; }
+  .run-btn { padding: 15px 20px; }
+  .upsell { flex-wrap: wrap; }
+  .upsell .run-btn { width: 100%; }
+
+  /* report */
+  .result__hero { padding: 18px 16px; gap: 14px; }
+  .ring { width: 110px; height: 110px; }
+  .ring svg { width: 110px; height: 110px; }
+  .ring__label strong { font-size: 32px; }
+  .result__actions { width: 100%; }
+  .result__actions > * { flex: 1; justify-content: center; }
+  .violation { padding: 14px; }
+  .violation__head h4 { flex-basis: 100%; font-size: 14px; }
+  .linefix__row--good { padding-right: 14px; }
+  .linefix__row .ghost-btn { position: static; margin-top: 8px; }
+  .transcript-box, .compliant-version { padding: 14px; }
+  .transcript-box__actions { margin-left: 0; width: 100%; }
+  .compliant-version--locked { flex-wrap: wrap; }
+
+  /* lists, billing */
+  .history__item { padding: 12px; gap: 10px; }
+  .balance { padding: 16px; }
+  .balance .ghost-btn { width: 100%; justify-content: center; }
+  .billing__grid > .panel, .billing__enterprise { padding: 16px; }
+  .rule-group__head { padding: 14px; }
+  .card-pack__icon { width: 44px; height: 44px; }
+  .notify__menu { position: fixed; left: 12px; right: 12px; top: 60px; width: auto; }
+
+  /* login: form first, short intro */
+  .auth { display: flex; flex-direction: column; min-height: 100dvh; }
+  .auth__story { flex: 1; }
+  .auth__panel { order: -1; padding: 20px 14px 8px; }
+  .auth__form { padding: 22px 18px; }
+  .auth__story { padding: 18px 16px 28px; gap: 14px; border-right: 0; border-top: 1px solid var(--line); }
+  .auth__story h1 { font-size: 26px; margin: 8px 0; }
+  .auth__story p { font-size: 14.5px; }
+  .auth__brand { display: none; }
+  .auth__stats { display: none; }
+}
+
+@media (max-width: 380px) {
+  .topbar__brand span { display: none; }
+}

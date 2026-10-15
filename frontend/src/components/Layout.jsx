@@ -170,6 +170,7 @@ export default function Layout() {
       <div className="workspace">
         <header className="topbar">
           <button type="button" className="square-btn topbar__menu" onClick={() => setDrawer(true)} aria-label="Open menu"><MenuIcon /></button>
+          <NavLink to="/app" className="topbar__brand" aria-label="NextComply AI home"><ShieldLogo width="26" height="29" /><span>NextComply AI</span></NavLink>
           <form className="topsearch" onSubmit={search} role="search">
             <SearchIcon width={22} height={22} />
             <input ref={searchRef} value={query} onChange={(e) => setQuery(e.target.value)}
@@ -198,6 +199,15 @@ export default function Layout() {
           <Outlet />
         </main>
       </div>
+
+      {/* Phone: bottom tab bar */}
+      <nav className="tabbar" aria-label="Main">
+        {NAV.filter((n) => n.to !== '/settings').map(({ to, label, Icon, end }) => (
+          <NavLink key={to} to={to} end={end} className="tabbar__link">
+            <Icon width={22} height={22} /><span>{{ '/app': 'Audit', '/rules': 'Rules', '/history': 'History', '/billing': 'Plans' }[to] || label}</span>
+          </NavLink>
+        ))}
+      </nav>
     </div>
   );
 }

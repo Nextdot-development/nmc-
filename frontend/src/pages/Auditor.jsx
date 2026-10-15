@@ -172,7 +172,7 @@ export default function Auditor() {
           </section>
         </div>
 
-        <div className="simple__row">
+        <div className="simple__row simple__row--info">
           <div className="info-card">
             <h4><GlobeIcon width={18} height={18} /> GEOGRAPHY</h4>
             <p className="info-card__value"><i className="ring-dot ring-dot--green" /> India</p>

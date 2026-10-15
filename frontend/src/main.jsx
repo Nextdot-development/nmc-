@@ -8,6 +8,7 @@ import './landing-page.css';
 import './landing-classic.css';
 import './app-classic.css';
 import './plans.css';
+import './mobile.css';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
