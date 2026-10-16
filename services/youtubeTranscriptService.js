@@ -399,8 +399,8 @@ const fetchSubtitlesWithYtDlp = async (videoUrl) => {
 export const isTranscriptUnavailable = (text = '') => /^YouTube (video )?transcript unavailable/i.test(text);
 
 // Gemini sometimes stalls on one request while the same video works at once on the next.
-// Start a backup request if the first is slow; the first transcript to arrive wins.
-const GEMINI_HEDGE_AFTER_MS = [0, 40000, 110000];
+// Start a backup request if the first is slow (short ads come back in ~5s); the first transcript to arrive wins.
+const GEMINI_HEDGE_AFTER_MS = [0, 20000, 60000];
 // Spoken part of a Gemini transcript (before the ON-SCREEN TEXT list)
 const spokenPart = (text = '') => text.split(/\n\s*ON-SCREEN TEXT:/i)[0].trim();
 const MIN_SPOKEN_CHARS = 25;
