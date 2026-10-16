@@ -101,16 +101,25 @@ const fetchYtDlpMetadata = async (videoUrl) => {
   }), AUDIO_TIMEOUT_MS, 'yt-dlp metadata timed out');
 };
 
+// Always the plain watch URL: share and tracking parameters (pp=, si=, feature=) make
+// Vertex AI refuse the link ("URL_ROBOTED") and are not needed by any downloader
 const normalizeUrl = (videoUrl) => {
+  let parsed;
   try {
-    const parsed = new URL(videoUrl);
-    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
-      throw new Error('URL must start with http or https');
-    }
-    return parsed.toString();
-  } catch (error) {
+    parsed = new URL(videoUrl);
+  } catch {
     throw new Error('Invalid YouTube URL');
   }
+  if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+    throw new Error('URL must start with http or https');
+  }
+  const host = parsed.hostname.replace(/^(www\.|m\.|music\.)/, '');
+  let id = '';
+  if (host === 'youtu.be') id = parsed.pathname.slice(1).split('/')[0];
+  else if (host.endsWith('youtube.com')) {
+    id = parsed.searchParams.get('v') || (parsed.pathname.match(/^\/(shorts|live|embed)\/([^/?#]+)/) || [])[2] || '';
+  }
+  return /^[\w-]{6,}$/.test(id) ? `https://www.youtube.com/watch?v=${id}` : parsed.toString();
 };
 
 const getYtDlpCommand = () => process.env.YTDL_PATH || 'yt-dlp';
@@ -392,10 +401,34 @@ export const isTranscriptUnavailable = (text = '') => /^YouTube (video )?transcr
 // Gemini sometimes stalls on one request while the same video works at once on the next.
 // Start a backup request if the first is slow; the first transcript to arrive wins.
 const GEMINI_HEDGE_AFTER_MS = [0, 40000, 110000];
-const hedgedGeminiTranscript = (url) => new Promise((resolve, reject) => {
+// Spoken part of a Gemini transcript (before the ON-SCREEN TEXT list)
+const spokenPart = (text = '') => text.split(/\n\s*ON-SCREEN TEXT:/i)[0].trim();
+const MIN_SPOKEN_CHARS = 25;
+const looseKey = (s = '') => String(s).toLowerCase().replace(/[^\p{L}\p{N}]+/gu, '');
+
+// Public video title (no login needed); used to spot a "transcript" that is only the title
+const fetchVideoTitle = async (url) => {
+  try {
+    const r = await fetch(`https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`, { signal: AbortSignal.timeout(5000) });
+    return r.ok ? (await r.json()).title || '' : '';
+  } catch {
+    return '';
+  }
+};
+
+// Speech was actually heard: not near-empty, and not just the video title read back
+const hasRealSpeech = (text, title) => {
+  const spoken = spokenPart(text);
+  if (spoken.length < MIN_SPOKEN_CHARS) return false;
+  return !(title && looseKey(spoken) === looseKey(title));
+};
+
+const hedgedGeminiTranscript = (url, title = '') => new Promise((resolve, reject) => {
   let settled = false;
   let started = 0;
-  let failures = 0;
+  let finished = 0;
+  let best = '';
+  let lastError = null;
   const timers = [];
   const finish = (fn, value) => {
     if (settled) return;
@@ -411,12 +444,24 @@ const hedgedGeminiTranscript = (url) => new Promise((resolve, reject) => {
       stage('Still listening to the video — trying again in parallel…');
     }
     transcribeYouTubeWithGemini(url)
-      .then((text) => finish(resolve, text))
+      .then((text) => {
+        // A transcript with almost no speech usually means the audio was skipped: ask again,
+        // and keep the fullest one in case the video really has no voice-over
+        if (hasRealSpeech(text, title)) return finish(resolve, text);
+        console.warn(`[YouTube Transcript] Gemini request ${n} returned no real speech (${spokenPart(text).length} chars)`);
+        if (text.length > best.length) best = text;
+      })
       .catch((error) => {
-        failures += 1;
+        lastError = error;
         console.warn(`[YouTube Transcript] Gemini request ${n} failed:`, error.message);
-        if (failures === GEMINI_HEDGE_AFTER_MS.length) finish(reject, error);
-        else start(); // a quick failure should not wait for the next timer
+      })
+      .finally(() => {
+        finished += 1;
+        if (settled) return;
+        if (finished === GEMINI_HEDGE_AFTER_MS.length || (started === GEMINI_HEDGE_AFTER_MS.length && finished === started)) {
+          return best ? finish(resolve, best) : finish(reject, lastError || new Error('Gemini returned no transcript'));
+        }
+        start(); // a quick failure or a near-empty transcript should not wait for the next timer
       });
   };
   GEMINI_HEDGE_AFTER_MS.forEach((delay) => timers.push(setTimeout(start, delay)));
@@ -468,7 +513,7 @@ export const getYoutubeTranscript = async (videoUrl) => {
     try {
       console.log('[YouTube Transcript] Transcribing with Gemini...');
       stage('YouTube blocked the download — our AI is listening to the video instead (about 1–2 minutes)…');
-      return await hedgedGeminiTranscript(normalized);
+      return await hedgedGeminiTranscript(normalized, await fetchVideoTitle(normalized));
     } catch (error) {
       console.warn('[YouTube Transcript] Gemini transcription failed:', error.message);
     }
