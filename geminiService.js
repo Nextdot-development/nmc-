@@ -331,12 +331,33 @@ export const analyzeWithGemini = async ({
    YOUTUBE TRANSCRIPT (Gemini reads the public video by URL)
    Used when YouTube blocks caption downloads from the server.
 ================================ */
-export const transcribeYouTubeWithGemini = async (videoUrl) => {
+// Gemini sometimes withholds a verbatim transcript of branded content (finishReason
+// RECITATION) at random. Each attempt asks a little differently so one of them gets through.
+const YOUTUBE_TRANSCRIPT_VARIANTS = [
+  {
+    temperature: 0,
+    prompt: 'Transcribe everything spoken in this video verbatim, in its original language (keep Hindi/Hinglish as spoken). '
+      + 'After the transcript, add a new line starting with "ON-SCREEN TEXT:" listing any promotional or medical text shown on screen. '
+      + 'Plain text only, no timestamps, no commentary.',
+  },
+  {
+    temperature: 0,
+    prompt: 'Transcribe everything spoken in this video verbatim, in its original language. Plain text only.',
+  },
+  {
+    temperature: 0.5,
+    prompt: 'Write down the dialogue of this video line by line in the language it is spoken in (Hindi stays in Devanagari, Hinglish stays in Roman letters). '
+      + 'Then add a line starting with "ON-SCREEN TEXT:" with the claims shown on screen. Plain text only.',
+  },
+];
+
+export const transcribeYouTubeWithGemini = async (videoUrl, attempt = 0) => {
+  const variant = YOUTUBE_TRANSCRIPT_VARIANTS[attempt % YOUTUBE_TRANSCRIPT_VARIANTS.length];
   const vertexAI = getVertexAIClient();
   const model = vertexAI.getGenerativeModel({
     model: MODEL_NAME,
     generationConfig: {
-      temperature: 0.0,
+      temperature: variant.temperature,
       maxOutputTokens: 32768,
       // Low-resolution frames cut video tokens ~4x; enough to read on-screen text
       mediaResolution: 'MEDIA_RESOLUTION_LOW',
@@ -344,27 +365,25 @@ export const transcribeYouTubeWithGemini = async (videoUrl) => {
     }
   });
 
-  const prompt = 'Transcribe everything spoken in this video verbatim, in its original language (keep Hindi/Hinglish as spoken). '
-    + 'After the transcript, add a new line starting with "ON-SCREEN TEXT:" listing any promotional or medical text shown on screen. '
-    + 'Plain text only, no timestamps, no commentary.';
-
   const result = await withRateLimitRetry(() => withTimeout(
     model.generateContent({
       contents: [{ role: 'user', parts: [
         { fileData: { fileUri: videoUrl, mimeType: 'video/*' } },
-        { text: prompt }
+        { text: variant.prompt }
       ] }]
     }),
     Number(process.env.YOUTUBE_GEMINI_TIMEOUT_MS) || 240000,
     'Gemini YouTube transcription timed out'
   ));
 
-  const text = (result?.response?.candidates?.[0]?.content?.parts || [])
+  const candidate = result?.response?.candidates?.[0];
+  const text = (candidate?.content?.parts || [])
     .map((part) => part.text || '')
     .join('')
     .trim();
-  console.log('[Gemini] YouTube transcription', JSON.stringify({ chars: text.length, usage: result?.response?.usageMetadata?.totalTokenCount }));
-  if (!text) throw new Error('Gemini returned an empty transcript');
+  const finishReason = candidate?.finishReason || result?.response?.promptFeedback?.blockReason || '';
+  console.log('[Gemini] YouTube transcription', JSON.stringify({ attempt, chars: text.length, finishReason, usage: result?.response?.usageMetadata?.totalTokenCount }));
+  if (!text) throw new Error(`Gemini returned an empty transcript (${finishReason || 'no reason'})`);
   return text;
 };
 

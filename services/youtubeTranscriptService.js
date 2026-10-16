@@ -282,7 +282,7 @@ const validateYoutubeUrl = async (videoUrl) => {
 
 export const downloadYoutubeAudio = async (videoUrl, outputPath) => {
   console.log('[YouTube Transcript] Downloading audio...');
-  stage('No captions found — downloading the video’s audio…');
+  stage('Downloading the video’s audio…');
   try {
     await validateYoutubeUrl(videoUrl);
   } catch (error) {
@@ -443,7 +443,7 @@ const hedgedGeminiTranscript = (url, title = '') => new Promise((resolve, reject
       console.log('[YouTube Transcript] Starting backup Gemini request', n);
       stage('Still listening to the video — trying again in parallel…');
     }
-    transcribeYouTubeWithGemini(url)
+    transcribeYouTubeWithGemini(url, n - 1)
       .then((text) => {
         // A transcript with almost no speech usually means the audio was skipped: ask again,
         // and keep the fullest one in case the video really has no voice-over
@@ -467,23 +467,13 @@ const hedgedGeminiTranscript = (url, title = '') => new Promise((resolve, reject
   GEMINI_HEDGE_AFTER_MS.forEach((delay) => timers.push(setTimeout(start, delay)));
 });
 
-export const getYoutubeTranscript = async (videoUrl) => {
-  const normalized = normalizeUrl(videoUrl);
-
-  try {
-    await validateYoutubeUrl(normalized);
-  } catch (error) {
-    console.warn('[YouTube Transcript] URL validation failed:', error.message);
-  }
-
+// Captions, then downloaded audio + OpenAI. Throws when neither gives a transcript.
+const transcriptFromYoutube = async (normalized) => {
   console.log('[YouTube Transcript] Trying captions...');
-  stage('Looking for the video’s captions…');
   try {
     const transcriptItems = await retryWithBackoff(() => YoutubeTranscript.fetchTranscript(normalized), MAX_RETRIES, 'Captions fetch');
     const transcript = transcriptItems.map((item) => item.text).join(' ').replace(/\s+/g, ' ').trim();
-    if (transcript) {
-      return transcript;
-    }
+    if (transcript) return transcript;
   } catch (error) {
     console.warn('[YouTube Transcript] Captions failed:', error.message);
   }
@@ -507,16 +497,35 @@ export const getYoutubeTranscript = async (videoUrl) => {
       fs.unlink(tempFile, () => undefined);
     }
   }
+  throw new Error('No captions or downloadable audio');
+};
 
-  // YouTube often blocks cloud servers; Gemini can read public videos by URL
+// First of several promises to resolve; rejects only when all reject
+const firstSuccess = (promises) => new Promise((resolve, reject) => {
+  let failed = 0;
+  let lastError;
+  promises.forEach((p) => p.then(resolve, (error) => {
+    lastError = error;
+    failed += 1;
+    if (failed === promises.length) reject(lastError);
+  }));
+});
+
+export const getYoutubeTranscript = async (videoUrl) => {
+  const normalized = normalizeUrl(videoUrl);
+  stage('Getting the video transcript — checking captions and listening to the video…');
+
+  // YouTube usually blocks downloads from cloud servers, so Gemini (which reads the
+  // public video by URL) runs at the same time instead of after the other routes fail
+  const routes = [transcriptFromYoutube(normalized)];
   if (process.env.ENABLE_GEMINI_YOUTUBE !== 'false') {
-    try {
-      console.log('[YouTube Transcript] Transcribing with Gemini...');
-      stage('YouTube blocked the download — our AI is listening to the video instead (about 1–2 minutes)…');
-      return await hedgedGeminiTranscript(normalized, await fetchVideoTitle(normalized));
-    } catch (error) {
-      console.warn('[YouTube Transcript] Gemini transcription failed:', error.message);
-    }
+    console.log('[YouTube Transcript] Transcribing with Gemini (in parallel)...');
+    routes.push(fetchVideoTitle(normalized).then((title) => hedgedGeminiTranscript(normalized, title)));
+  }
+  try {
+    return await firstSuccess(routes);
+  } catch (error) {
+    console.warn('[YouTube Transcript] All transcript routes failed:', error.message);
   }
 
   console.log('[YouTube Transcript] Captions unavailable. Fetching metadata...');
