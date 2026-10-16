@@ -5,7 +5,7 @@ import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../App.jsx';
 import {
   BellIcon, LayersIcon, ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon, ClockIcon, CogIcon,
-  HomeIcon, LogoutIcon, MenuIcon, SearchIcon, WalletIcon,
+  AlertIcon, HomeIcon, LogoutIcon, MenuIcon, SearchIcon, WalletIcon,
 } from './Icons.jsx';
 
 const NAV = [
@@ -127,6 +127,11 @@ export default function Layout() {
               <Icon width={22} height={22} /><span>{label}</span>
             </NavLink>
           ))}
+          {account?.admin && (
+            <NavLink to="/admin/issues" className="sidenav__link" title="Audit problems">
+              <AlertIcon width={22} height={22} /><span>Audit problems</span>
+            </NavLink>
+          )}
         </nav>
 
         <div className="sidebar__spacer" />

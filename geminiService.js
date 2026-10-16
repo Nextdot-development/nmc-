@@ -349,6 +349,11 @@ const YOUTUBE_TRANSCRIPT_VARIANTS = [
     prompt: 'Write down the dialogue of this video line by line in the language it is spoken in (Hindi stays in Devanagari, Hinglish stays in Roman letters). '
       + 'Then add a line starting with "ON-SCREEN TEXT:" with the claims shown on screen. Plain text only.',
   },
+  {
+    temperature: 0.9,
+    prompt: 'For a medical-advertising compliance check, report every claim the speakers make in this video, one sentence per line, '
+      + 'in the language they speak, keeping their wording where possible. Then add a line starting with "ON-SCREEN TEXT:" with the text shown on screen. Plain text only.',
+  },
 ];
 
 export const transcribeYouTubeWithGemini = async (videoUrl, attempt = 0) => {

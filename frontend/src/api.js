@@ -142,6 +142,9 @@ export const api = {
   },
 
   history: () => request('/api/audit/history?limit=50'),
+  reportIssue: (id, note) => request(`/api/support/issues/${id}/report`, { method: 'POST', body: { note } }),
+  issues: (status = '') => request(`/api/support/issues${status ? `?status=${status}` : ''}`),
+  updateIssue: (id, status) => request(`/api/support/issues/${id}`, { method: 'PATCH', body: { status } }),
   auditById: (id) => request(`/api/audit/${id}`),
   rulePack: () => request('/api/rules/pack?country=india', { auth: false }),
 

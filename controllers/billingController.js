@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { isAdmin } from './supportController.js';
 import User from '../models/User.js';
 import { Ledger, Lead } from '../models/Billing.js';
 import { CREDIT_COST, PLANS } from '../config/plans.js';
@@ -23,7 +24,7 @@ export const listPlans = (req, res) => {
 export const getMe = async (req, res) => {
   try {
     const acc = await getAccount(req.user.id, req.user.email);
-    res.json({ ...describeAccount(acc, req.user.email), payments: razorpayConfigured() });
+    res.json({ ...describeAccount(acc, req.user.email), payments: razorpayConfigured(), admin: isAdmin(req.user.email) });
   } catch (error) {
     fail(res, error, 'Account');
   }

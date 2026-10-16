@@ -188,3 +188,28 @@
 .live__timertext small { margin-left: auto; color: var(--muted); font-size: 12.5px; font-variant-numeric: tabular-nums; }
 .live__timerbar { display: block; height: 5px; border-radius: 5px; background: #e9dfcb; overflow: hidden; }
 .live__timerbar i { display: block; height: 100%; border-radius: 5px; background: var(--navy); transition: width 1s linear; }
+
+/* Audit Doctor: problem box and team page */
+.issue { padding: 16px 18px; display: flex; flex-direction: column; gap: 10px; border-left: 4px solid #c27a0e; background: #fffaf0; }
+.issue__head { display: flex; gap: 12px; align-items: flex-start; }
+.issue__icon { display: grid; place-items: center; width: 36px; height: 36px; flex-shrink: 0; border-radius: 10px; background: #fdf0d8; color: #a35a00; }
+.issue__head strong { color: var(--navy); font-size: 15.5px; }
+.issue__head p { margin: 3px 0 0; color: var(--text-2); font-size: 14px; }
+.issue__tips { margin: 0; padding-left: 66px; color: var(--text-2); font-size: 14px; }
+.issue__tips li + li { margin-top: 3px; }
+.issue__contact { display: flex; flex-direction: column; gap: 8px; padding-left: 48px; }
+.issue__contact textarea { min-height: 60px; font-size: 14px; background: #fff; }
+.issue__actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.issue__actions small { color: var(--muted); }
+.issue__sent { display: flex; align-items: center; gap: 6px; margin: 0; padding-left: 48px; color: #15803d; font-weight: 600; font-size: 14px; }
+.issues { list-style: none; margin: 16px 0 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.issues__item { padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; }
+.issues__top { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.issues__top small { margin-left: auto; color: var(--muted); }
+.issues__code { padding: 2px 8px; border-radius: 6px; background: var(--gold-soft); color: var(--gold); font-size: 11.5px; font-weight: 700; }
+.issues__meta { margin: 0; color: var(--text-2); font-size: 13px; word-break: break-all; }
+.issues__note { margin: 0; padding: 8px 10px; border-radius: 8px; background: #f7f4ee; font-size: 14px; }
+.issues__item details { font-size: 13px; color: var(--text-2); }
+.issues__item details li { margin-top: 4px; word-break: break-word; }
+.issues__item .ghost-btn { align-self: flex-start; }
+@media (max-width: 860px) { .issue__tips, .issue__contact, .issue__sent { padding-left: 0; } }

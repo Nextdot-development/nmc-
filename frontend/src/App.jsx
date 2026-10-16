@@ -10,6 +10,7 @@ import History from './pages/History.jsx';
 import HistoryDetail from './pages/HistoryDetail.jsx';
 import Settings from './pages/Settings.jsx';
 import Billing from './pages/Billing.jsx';
+import AdminIssues from './pages/AdminIssues.jsx';
 
 const AuthContext = createContext(null);
 export const useAuth = () => useContext(AuthContext);
@@ -77,6 +78,7 @@ export default function App() {
           <Route path="/history/:id" element={<RequireAuth><HistoryDetail /></RequireAuth>} />
           <Route path="/billing" element={<RequireAuth><Billing /></RequireAuth>} />
           <Route path="/settings" element={<RequireAuth><Settings /></RequireAuth>} />
+          <Route path="/admin/issues" element={<RequireAuth><AdminIssues /></RequireAuth>} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

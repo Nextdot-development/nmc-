@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { LockIcon, PrintIcon, SparkIcon } from './Icons.jsx';
 import { useAuth } from '../App.jsx';
+import IssueBox from './IssueBox.jsx';
 import { StatusPill, statusTone } from '../pages/History.jsx';
 import { labelsFor } from '../reportLabels.js';
 
@@ -262,6 +263,8 @@ export default function AuditResult({ result, onReset, onFresh, meta, hideSource
           {onReset && <button type="button" className="run-btn run-btn--sm" onClick={onReset}>New audit</button>}
         </div>
       </div>
+
+      {result?.issue && <IssueBox issue={result.issue} />}
 
       <div className="result__grid">
         <div className="panel stat">

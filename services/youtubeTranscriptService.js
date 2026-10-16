@@ -8,6 +8,7 @@ import { YoutubeTranscript } from 'youtube-transcript';
 import { spawn } from 'child_process';
 import { transcribeYouTubeWithGemini } from '../geminiService.js';
 import { stage } from './progress.js';
+import { note } from './auditDoctor.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -423,7 +424,7 @@ const hasRealSpeech = (text, title) => {
   return !(title && looseKey(spoken) === looseKey(title));
 };
 
-const hedgedGeminiTranscript = (url, title = '') => new Promise((resolve, reject) => {
+const hedgedGeminiTranscript = (url, title = '', offset = 0) => new Promise((resolve, reject) => {
   let settled = false;
   let started = 0;
   let finished = 0;
@@ -443,17 +444,19 @@ const hedgedGeminiTranscript = (url, title = '') => new Promise((resolve, reject
       console.log('[YouTube Transcript] Starting backup Gemini request', n);
       stage('Still listening to the video — trying again in parallel…');
     }
-    transcribeYouTubeWithGemini(url, n - 1)
+    transcribeYouTubeWithGemini(url, offset + n - 1)
       .then((text) => {
         // A transcript with almost no speech usually means the audio was skipped: ask again,
         // and keep the fullest one in case the video really has no voice-over
         if (hasRealSpeech(text, title)) return finish(resolve, text);
         console.warn(`[YouTube Transcript] Gemini request ${n} returned no real speech (${spokenPart(text).length} chars)`);
+        note('Gemini transcript', `no real speech (${spokenPart(text).length} chars)`);
         if (text.length > best.length) best = text;
       })
       .catch((error) => {
         lastError = error;
         console.warn(`[YouTube Transcript] Gemini request ${n} failed:`, error.message);
+        note('Gemini transcript', error);
       })
       .finally(() => {
         finished += 1;
@@ -476,6 +479,7 @@ const transcriptFromYoutube = async (normalized) => {
     if (transcript) return transcript;
   } catch (error) {
     console.warn('[YouTube Transcript] Captions failed:', error.message);
+    note('YouTube captions', error);
   }
 
   try {
@@ -483,6 +487,7 @@ const transcriptFromYoutube = async (normalized) => {
     if (subtitles) return subtitles;
   } catch (error) {
     console.warn('[YouTube Transcript] yt-dlp subtitles failed:', error.message);
+    note('YouTube subtitles', error);
   }
 
   // Audio download + OpenAI speech-to-text (gpt-4o-transcribe, Whisper fallback)
@@ -493,6 +498,7 @@ const transcriptFromYoutube = async (normalized) => {
       return await transcribeAudioWithOpenAI(tempFile);
     } catch (error) {
       console.warn('[YouTube Transcript] Audio + OpenAI transcription failed:', error.message.slice(0, 200));
+      note('YouTube audio download', error);
     } finally {
       fs.unlink(tempFile, () => undefined);
     }
@@ -526,6 +532,25 @@ export const getYoutubeTranscript = async (videoUrl) => {
     return await firstSuccess(routes);
   } catch (error) {
     console.warn('[YouTube Transcript] All transcript routes failed:', error.message);
+  }
+
+  // Audit Doctor repair round: most failures (withheld or stalled transcripts) are random,
+  // so ask again with fresh variants after a short pause. Not worth it for private videos.
+  if (process.env.ENABLE_GEMINI_YOUTUBE !== 'false') {
+    const title = await fetchVideoTitle(normalized);
+    if (title) {
+      stage('Something went wrong — fixing it automatically and trying again…');
+      await new Promise((r) => setTimeout(r, 3000));
+      try {
+        console.log('[YouTube Transcript] Audit Doctor repair round');
+        return await hedgedGeminiTranscript(normalized, title, 1);
+      } catch (error) {
+        console.warn('[YouTube Transcript] Repair round failed:', error.message);
+      }
+    } else {
+      // oEmbed refuses private, removed and members-only videos
+      note('YouTube video', 'Video unavailable: private, removed or restricted');
+    }
   }
 
   console.log('[YouTube Transcript] Captions unavailable. Fetching metadata...');

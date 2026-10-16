@@ -5,6 +5,7 @@ import { FORMAT_NAMES, creditHint } from '../billing.js';
 import { api } from '../api.js';
 import AuditResult from '../components/AuditResult.jsx';
 import LivePanel from '../components/LivePanel.jsx';
+import IssueBox from '../components/IssueBox.jsx';
 import { BannerArt } from '../components/Graphics.jsx';
 import { COUNTRY } from '../country.js';
 import {
@@ -58,6 +59,7 @@ export default function Auditor() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [upsell, setUpsell] = useState(false);
+  const [issue, setIssue] = useState(null);
   const [result, setResult] = useState(null);
   const [live, setLive] = useState(null);
   const liveRef = useRef(null);
@@ -125,6 +127,7 @@ export default function Auditor() {
     e?.preventDefault();
     if (!ready || busy) return;
     setError('');
+    setIssue(null);
     setUpsell(false);
     setResult(null);
     setBusy(true);
@@ -153,7 +156,8 @@ export default function Auditor() {
       if (res?.billing) setBalance(res.billing.balance);
     } catch (err) {
       setLive(null);
-      setError(err.message);
+      if (err.data?.issue) setIssue(err.data.issue);
+      else setError(err.message);
       if (['INSUFFICIENT_CREDITS', 'FORMAT_NOT_IN_PLAN', 'MEDIA_TOO_LONG'].includes(err.code)) {
         setUpsell(true);
         refreshAccount();
@@ -291,6 +295,7 @@ export default function Auditor() {
             {error} {upsell && <Link to="/billing" className="alert__link">View plans →</Link>}
           </p>
         )}
+        {issue && <IssueBox issue={issue} />}
       </form>
 
       <div ref={liveRef} className="live-anchor">

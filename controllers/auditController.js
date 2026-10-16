@@ -5,6 +5,7 @@ import {
 } from '../services/billingService.js';
 import { getPlan } from '../config/plans.js';
 import { withProgress } from '../services/progress.js';
+import { fileIssue, withDiagnosis } from '../services/auditDoctor.js';
 
 const FORMAT_LABEL = { text: 'Text', url: 'Website', image: 'Image', video: 'Video', audio: 'Audio', document: 'Document' };
 
@@ -75,18 +76,27 @@ const runAuditRequest = async (req) => {
       : await spendCredits(req.user.id, quote.credits, label);
 
     let auditResult;
+    let notes = [];
     try {
-      auditResult = await processContent(input, {
+      ({ value: auditResult, notes } = await withDiagnosis(() => processContent(input, {
         userId: req.user?.id,
         fresh: req.body.fresh === 'true' || req.body.fresh === true,
         category,
         analysisMode,
         country,
         region
-      });
+      })));
     } catch (error) {
       await refundCredits(req.user.id, charge, `${label} failed`);
-      throw error;
+      // Audit Doctor: name the cause and give the user a ticket to send to the team
+      const issue = await fileIssue({ user: req.user, input, contentType: quote.format, notes: [...(error.diagnosisNotes || []), { where: 'Audit', code: 'OTHER', message: String(error.message || '').slice(0, 300), at: new Date() }] });
+      console.error('[Audit Controller] Error:', error);
+      return reply(500, { error: `${issue.title}. No credits were used.`, code: 'AUDIT_FAILED', issue });
+    }
+
+    // Content could not be read even after the automatic repair: explain why, offer a ticket
+    if (auditResult?.incomplete) {
+      auditResult = { ...auditResult, issue: await fileIssue({ user: req.user, input, contentType: quote.format, notes, fallback: auditResult.incomplete.reason }) };
     }
 
     // Identical content returns the earlier result, which costs nothing

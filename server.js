@@ -7,6 +7,7 @@ import { connectDB } from './config/database.js';
 import auditRoutes from './routes/auditRoutes.js';
 import rulesRoutes from './routes/rulesRoutes.js';
 import billingRoutes from './routes/billingRoutes.js';
+import supportRoutes from './routes/supportRoutes.js';
 // import urlAuditRoutes from './routes/urlAudit.route.ts';
 
 // Import auth routes
@@ -86,7 +87,7 @@ app.use(cors({
     // Extra origins for new deployments, comma-separated
     ...(process.env.CORS_ORIGINS || '').split(',').map((o) => o.trim()).filter(Boolean)
   ],
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
   credentials: true,
   optionsSuccessStatus: 200
 }));
@@ -127,6 +128,7 @@ try {
 app.use('/api', auditRoutes);
 app.use('/api', rulesRoutes);
 app.use('/api', billingRoutes);
+app.use('/api', supportRoutes);
 // /api/url-audit is off: it ran audits without charging credits (use /api/audit with a url)
 // app.use('/api', urlAuditRoutes);
 
