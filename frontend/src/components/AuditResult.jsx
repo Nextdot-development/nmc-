@@ -266,7 +266,7 @@ export default function AuditResult({ result, onReset, onFresh, meta, hideSource
 
       {result?.issue && <IssueBox issue={result.issue} />}
 
-      <div className="result__grid">
+      {!result?.incomplete && <div className="result__grid">
         <div className="panel stat">
           <h3 className="kicker">{L.penalty}</h3>
           <span className={`status status--${{ High: 'bad', Medium: 'warn', Low: 'ok', None: 'ok' }[risk] || 'warn'}`}>{risk || '—'}</span>
@@ -277,13 +277,15 @@ export default function AuditResult({ result, onReset, onFresh, meta, hideSource
           <span className={`status status--${scoreTone(result?.ethicalMarketing?.score ?? 0)}`}>{result?.ethicalMarketing?.score ?? '—'} / 100</span>
           <p>{result?.ethicalMarketing?.assessment}</p>
         </div>
-      </div>
+      </div>}
 
-      <div className="section-head">
-        <h3>{violations.length ? L.issuesFound(violations.length) : L.noViolations}</h3>
-        {violations.length > 0 && <p className="muted small">{L.sorted}</p>}
-      </div>
-      {violations.length === 0 && <div className="panel empty">This content did not break any rule in the NMC rule pack.</div>}
+      {!result?.incomplete && (
+        <div className="section-head">
+          <h3>{violations.length ? L.issuesFound(violations.length) : L.noViolations}</h3>
+          {violations.length > 0 && <p className="muted small">{L.sorted}</p>}
+        </div>
+      )}
+      {violations.length === 0 && !result?.incomplete && <div className="panel empty">This content did not break any rule in the NMC rule pack.</div>}
       <div className="violations">
         {violations.map((v, i) => <Violation key={i} v={v} index={i} L={L} />)}
       </div>

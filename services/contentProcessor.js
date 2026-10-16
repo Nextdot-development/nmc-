@@ -472,18 +472,27 @@ const processUrl = async ({ url, category, analysisMode, country, region, rules 
     const hasTranscript = Boolean(transcriptText) && !isTranscriptUnavailable(transcriptText)
       && !/transcript unavailable/i.test(transcriptText.slice(0, 80));
 
-    const auditResult = await analyzeCompliance({
-      content: truncatedTranscript,
-      inputType: 'video',
-      category,
-      analysisMode,
-      country,
-      region,
-      rules,
-      contentContext: hasTranscript
-        ? 'Input is the spoken transcript of a YouTube video (from its captions).'
-        : 'No transcript was available; input is only the video title and description. Say so in the summary.'
-    });
+    // Without a transcript there is nothing real to audit: skip the AI and explain instead
+    // (the Audit Doctor names the cause; credits are refunded by the controller)
+    const auditResult = hasTranscript
+      ? await analyzeCompliance({
+        content: truncatedTranscript,
+        inputType: 'video',
+        category,
+        analysisMode,
+        country,
+        region,
+        rules,
+        contentContext: 'Input is the spoken transcript of a YouTube video.'
+      })
+      : {
+        score: null,
+        status: 'Needs Review',
+        summary: '',
+        violations: [],
+        financialPenalty: { riskLevel: 'None', description: 'Not assessed — the video could not be read.' },
+        ethicalMarketing: { score: null, assessment: 'Not assessed — the video could not be read.' },
+      };
 
     auditResult.videoTranscript = {
       available: hasTranscript,
@@ -876,7 +885,7 @@ export const processContent = async (input, options = {}) => {
       ar.score = null;
       ar.status = 'Needs Review';
       ar.summary = youtube && !youtube.available
-        ? 'The video could not be transcribed, so only its title and description were checked. This is not a full audit. Try again later, or upload the video file or paste its script as text.'
+        ? 'The video could not be transcribed, so it was not audited and no credits were used. See the reason below — uploading the video file or pasting its script always works.'
         : 'This page could not be read (it may need a login or load with JavaScript), so only its title and description were checked. This is not a full audit. Paste the page text into the Text option instead.';
     }
   }

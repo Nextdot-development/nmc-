@@ -392,6 +392,30 @@ export const transcribeYouTubeWithGemini = async (videoUrl, attempt = 0) => {
   return text;
 };
 
+// Transcribe an uploaded audio file (MP3 bytes) - backup when OpenAI cannot
+export const transcribeAudioWithGemini = async (audioBuffer, mimeType = 'audio/mpeg') => {
+  const vertexAI = getVertexAIClient();
+  const model = vertexAI.getGenerativeModel({
+    model: MODEL_NAME,
+    generationConfig: { temperature: 0, maxOutputTokens: 32768, thinkingConfig: { thinkingBudget: 0 } }
+  });
+  const result = await withRateLimitRetry(() => withTimeout(
+    model.generateContent({
+      contents: [{ role: 'user', parts: [
+        { inlineData: { data: audioBuffer.toString('base64'), mimeType } },
+        { text: 'Transcribe everything spoken in this audio, in the language it is spoken in (Hindi stays in Devanagari, Hinglish in Roman letters). Plain text only, no timestamps.' }
+      ] }]
+    }),
+    Number(process.env.YOUTUBE_GEMINI_TIMEOUT_MS) || 240000,
+    'Gemini audio transcription timed out'
+  ));
+  const candidate = result?.response?.candidates?.[0];
+  const text = (candidate?.content?.parts || []).map((part) => part.text || '').join('').trim();
+  console.log('[Gemini] Audio transcription', JSON.stringify({ chars: text.length, finishReason: candidate?.finishReason || '' }));
+  if (!text) throw new Error(`Gemini returned an empty transcript (${candidate?.finishReason || 'no reason'})`);
+  return text;
+};
+
 export const generateAudioSummary = async (text) => {
   const vertexAI = getVertexAIClient();
 
