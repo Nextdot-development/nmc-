@@ -408,14 +408,18 @@ const MIN_SPOKEN_CHARS = 25;
 const looseKey = (s = '') => String(s).toLowerCase().replace(/[^\p{L}\p{N}]+/gu, '');
 
 // Public video title (no login needed); used to spot a "transcript" that is only the title
-const fetchVideoTitle = async (url) => {
+// YouTube's public oEmbed: 200 for a watchable video, 400/401/403/404 for missing,
+// private or removed ones. A network failure is "unknown", never "missing".
+const lookupVideo = async (url) => {
   try {
     const r = await fetch(`https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`, { signal: AbortSignal.timeout(5000) });
-    return r.ok ? (await r.json()).title || '' : '';
+    if (r.ok) return { title: (await r.json()).title || '', missing: false };
+    return { title: '', missing: [400, 401, 403, 404].includes(r.status) };
   } catch {
-    return '';
+    return { title: '', missing: false };
   }
 };
+const fetchVideoTitle = async (url) => (await lookupVideo(url)).title;
 
 // Speech was actually heard: not near-empty, and not just the video title read back
 const hasRealSpeech = (text, title) => {
@@ -519,6 +523,14 @@ const firstSuccess = (promises) => new Promise((resolve, reject) => {
 
 export const getYoutubeTranscript = async (videoUrl) => {
   const normalized = normalizeUrl(videoUrl);
+
+  // A missing, private or removed video cannot be read by any route: say so at once
+  const lookup = await lookupVideo(normalized);
+  if (lookup.missing) {
+    console.warn('[YouTube Transcript] Video not available:', normalized);
+    note('YouTube video', 'Video unavailable: private, removed or restricted');
+    return `YouTube transcript unavailable. Video URL: ${normalized}.`;
+  }
   stage('Getting the video transcript — checking captions and listening to the video…');
 
   // YouTube usually blocks downloads from cloud servers, so Gemini (which reads the
