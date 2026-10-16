@@ -1,14 +1,42 @@
+import { useEffect, useState } from 'react';
 import { HighlightedText, SOURCE_LABEL, SourceText } from './AuditResult.jsx';
 import { CheckCircleIcon, LockIcon } from './Icons.jsx';
 
 const SEVERITY_ORDER = ['Critical', 'High', 'Medium', 'Low'];
+
+const clock = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+
+// Counts down to the estimated finish; past it, says it is taking longer
+const Countdown = ({ deadline, startedAt }) => {
+  const [now, setNow] = useState(Date.now());
+  useEffect(() => {
+    const t = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, []);
+  if (!deadline) return null;
+  const left = Math.ceil((deadline - now) / 1000);
+  const elapsed = Math.max(0, Math.floor((now - startedAt) / 1000));
+  const total = Math.max(1, (deadline - startedAt) / 1000);
+  const pct = Math.min(100, Math.round((elapsed / total) * 100));
+  return (
+    <div className="live__timer" role="timer" aria-live="off">
+      <div className="live__timertext">
+        {left > 0
+          ? <><span>About</span> <b>{clock(left)}</b> <span>left</span></>
+          : <span>Almost done — taking a little longer than usual…</span>}
+        <small>{clock(elapsed)} elapsed</small>
+      </div>
+      <span className="live__timerbar"><i style={{ width: `${left > 0 ? pct : 100}%` }} /></span>
+    </div>
+  );
+};
 
 // Shown under the audit box: steps, the full text being audited with flagged lines
 // highlighted as they are found, and each finding as it arrives.
 export default function LivePanel({ live, result, format }) {
   if (!live) return null;
   const done = Boolean(result);
-  const label = SOURCE_LABEL[format === 'url' ? 'url' : format] || 'AUDITED TEXT';
+  const label = SOURCE_LABEL[format === 'url' ? (/youtu.?be/i.test(live.url || '') ? 'video' : 'url') : format] || 'AUDITED TEXT';
 
   // Once finished, show the saved full text with the final findings (numbers match the report)
   if (done) {
@@ -30,6 +58,7 @@ export default function LivePanel({ live, result, format }) {
         <strong>{live.stage || 'Starting…'}</strong>
         {findings.length > 0 && <span className="live__count">{findings.length} issue{findings.length === 1 ? '' : 's'} so far</span>}
       </div>
+      <Countdown deadline={live.deadline} startedAt={live.startedAt} />
       {live.done.length > 0 && (
         <ol className="live__steps">
           {live.done.map((s, i) => <li key={i}><CheckCircleIcon width={14} height={14} /> {s.replace(/…$/, '')}</li>)}

@@ -1,5 +1,5 @@
 import AuditRecord from '../models/AuditRecord.js';
-import { detectContentType, processContent } from '../services/contentProcessor.js';
+import { detectContentType, normalizeUrlKey, processContent } from '../services/contentProcessor.js';
 import {
   BillingError, gateResult, getAccount, historySince, isUnlimited, quoteAudit, refundCredits, spendCredits,
 } from '../services/billingService.js';
@@ -52,6 +52,14 @@ const runAuditRequest = async (req) => {
       return reply(400, {
         code: 'SOCIAL_LINK_UNREADABLE',
         error: 'Instagram, Facebook and TikTok posts can only be seen after login, so they cannot be read from a link. Upload the video or image file, or paste the caption or script as text. No credits were used.'
+      });
+    }
+
+    // A YouTube search, channel or home page is not one video and cannot be transcribed
+    if (input.url && /(^|\/\/|\.)(youtube\.com|youtu\.be)/i.test(input.url) && !normalizeUrlKey(input.url).startsWith('yt:')) {
+      return reply(400, {
+        code: 'NOT_A_VIDEO',
+        error: 'This is a YouTube search or channel page, not a single video. Open the video and copy its link (it looks like youtube.com/watch?v=… or youtu.be/…). No credits were used.'
       });
     }
 

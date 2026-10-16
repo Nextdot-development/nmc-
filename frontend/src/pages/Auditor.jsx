@@ -29,6 +29,23 @@ const RULE_PACKS = [
 const MAX_TEXT = 60000;
 const MAX_MB = 100;
 
+// Rough time an audit takes, in seconds, shown as a countdown
+const estimateSeconds = (format, url, file) => {
+  if (format === 'url') return /youtu\.?be/i.test(url) ? 90 : 60;
+  if (format === 'video' || format === 'audio') {
+    const minutes = file ? file.size / (1024 * 1024) / (format === 'audio' ? 1 : 5) : 3;
+    return Math.round(50 + Math.min(minutes, 60) * 15);
+  }
+  if (format === 'image') return 50;
+  if (format === 'document') return 60;
+  return 45;
+};
+// Time left once the text is known: the rules check takes ~30s plus a little per 1,000 characters
+const auditSecondsFor = (chars) => Math.round(30 + Math.min(60, chars / 150));
+
+// youtube.com/watch?v=…, youtu.be/…, /shorts/…, /live/…
+const isYoutubeVideo = (u) => /youtu\.be\/[\w-]+|youtube\.com\/(watch\?(.*&)?v=|shorts\/|live\/|embed\/)[\w-]+/i.test(u);
+
 const formatBytes = (n) => (n > 1024 * 1024 ? `${(n / 1024 / 1024).toFixed(1)} MB` : `${Math.max(1, Math.round(n / 1024))} KB`);
 
 export default function Auditor() {
@@ -74,7 +91,11 @@ export default function Auditor() {
       if (ev.message === l.stage) return l;
       return { ...l, done: l.started ? [...l.done, l.stage] : l.done, stage: ev.message, started: true };
     }
-    if (ev.type === 'source') return { ...l, source: ev.text || '' };
+    if (ev.type === 'source') {
+      // The text is in: re-estimate from its length (never extend a countdown that is already shorter)
+      const deadline = Date.now() + auditSecondsFor((ev.text || '').length) * 1000;
+      return { ...l, source: ev.text || '', deadline: Math.min(Math.max(deadline, Date.now() + 15000), Math.max(l.deadline, deadline)) };
+    }
     if (ev.type === 'finding') return { ...l, findings: [...l.findings, ev.finding] };
     return l;
   });
@@ -95,8 +116,9 @@ export default function Auditor() {
     setFile(f);
   };
 
+  const youtubeNotVideo = format === 'url' && /youtu\.?be/i.test(url) && !isYoutubeVideo(url.trim());
   const ready = !locked && ((format === 'text' && text.trim().length > 10)
-    || (format === 'url' && /^https?:\/\/\S+\.\S+/.test(url.trim()))
+    || (format === 'url' && /^https?:\/\/\S+\.\S+/.test(url.trim()) && !youtubeNotVideo)
     || (isFile && file));
 
   const submit = async (e, { fresh = false } = {}) => {
@@ -106,7 +128,10 @@ export default function Auditor() {
     setUpsell(false);
     setResult(null);
     setBusy(true);
-    setLive({ stage: 'Starting…', started: false, done: [], source: '', findings: [], url: format === 'url' ? url.trim() : '' });
+    setLive({
+      stage: 'Starting…', started: false, done: [], source: '', findings: [], url: format === 'url' ? url.trim() : '',
+      startedAt: Date.now(), deadline: Date.now() + estimateSeconds(format, url.trim(), isFile ? file : null) * 1000,
+    });
     setTimeout(() => liveRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
     const params = {
       category: pack,
@@ -221,6 +246,9 @@ export default function Auditor() {
           <div className="inputbox">
             <input type="url" value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://clinic-website.in/offers" aria-label="URL to audit" />
           </div>
+        )}
+        {youtubeNotVideo && (
+          <p className="alert" role="alert">This is a YouTube search or channel page. Open one video and copy its link (youtube.com/watch?v=… or youtu.be/…).</p>
         )}
         {!locked && isFile && (
           <div className={`dropzone ${dragging ? 'dropzone--active' : ''}`}

@@ -180,3 +180,11 @@
 @keyframes liveShine { to { background-position: -200% 0; } }
 @keyframes liveIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { .live__spinner, .live__waiting span, .live__finding { animation: none !important; } }
+
+/* live countdown */
+.live__timer { display: flex; flex-direction: column; gap: 6px; padding: 10px 14px; border-radius: 10px; background: var(--gold-soft); }
+.live__timertext { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; color: var(--text-2); font-size: 14px; }
+.live__timertext b { font-size: 22px; font-weight: 800; color: var(--navy); font-variant-numeric: tabular-nums; }
+.live__timertext small { margin-left: auto; color: var(--muted); font-size: 12.5px; font-variant-numeric: tabular-nums; }
+.live__timerbar { display: block; height: 5px; border-radius: 5px; background: #e9dfcb; overflow: hidden; }
+.live__timerbar i { display: block; height: 100%; border-radius: 5px; background: var(--navy); transition: width 1s linear; }
