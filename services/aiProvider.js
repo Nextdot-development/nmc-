@@ -145,6 +145,8 @@ const RED_FLAGS = [
 ];
 
 const MAX_SECOND_PASS_LINES = 40;
+// Above this, the safety net checks only the missed lines instead of the whole content
+const SAFETY_NET_FULL_MAX_CHARS = 3000;
 
 const splitLines = (text = '') => String(text)
   .split(/\n+|(?<=[.!?।])\s+/)
@@ -190,15 +192,21 @@ export const analyzeCompliance = async (params) => {
   console.log('[AI] Safety net: second pass for uncovered lines', JSON.stringify({ count: missed.length }));
   stage(`Double-checking ${missed.length} line${missed.length > 1 ? 's' : ''} that may break the rules…`);
   try {
-    const focus = `QUALITY CHECK: a first review did not report the lines below, although they contain wording that commonly breaks NMC rules. Audit the full content again and examine each of these lines carefully; report every one that breaks a listed rule, using the exact line as originalLine.\n${missed.map((l) => `- ${l}`).join('\n')}`;
+    // Short ads are re-read in full (cheap, keeps context). For long content only the
+    // missed lines are sent, so one missed line does not cost a second full audit.
+    const linesOnly = String(params.content || '').length > SAFETY_NET_FULL_MAX_CHARS;
+    const focus = linesOnly
+      ? 'QUALITY CHECK: the lines below come from a longer advertisement whose other lines were already reviewed. Audit only these lines; report every one that breaks a listed rule, using the exact line as originalLine.'
+      : `QUALITY CHECK: a first review did not report the lines below, although they contain wording that commonly breaks NMC rules. Audit the full content again and examine each of these lines carefully; report every one that breaks a listed rule, using the exact line as originalLine.\n${missed.map((l) => `- ${l}`).join('\n')}`;
     const second = finalizeResult(await runAudit({
       ...params,
+      ...(linesOnly ? { content: missed.join('\n') } : {}),
       onViolation,
       contentContext: [params.contentContext, focus].filter(Boolean).join('\n\n')
     }), params.rules);
 
-    // Prefer the pass that found more for the narrative fields, then merge findings
-    const base = (second.violations?.length || 0) > (first.violations?.length || 0) ? second : first;
+    // Narrative fields (summary, corrected version) come from a full read; then merge findings
+    const base = linesOnly ? first : ((second.violations?.length || 0) > (first.violations?.length || 0) ? second : first);
     const merged = dedupeViolations([...(first.violations || []), ...(second.violations || [])]);
     const result = { ...base, violations: merged };
     Object.assign(result, scoreFromViolations(merged));
