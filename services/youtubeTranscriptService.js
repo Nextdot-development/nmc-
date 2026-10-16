@@ -389,6 +389,39 @@ const fetchSubtitlesWithYtDlp = async (videoUrl) => {
 
 export const isTranscriptUnavailable = (text = '') => /^YouTube (video )?transcript unavailable/i.test(text);
 
+// Gemini sometimes stalls on one request while the same video works at once on the next.
+// Start a backup request if the first is slow; the first transcript to arrive wins.
+const GEMINI_HEDGE_AFTER_MS = [0, 40000, 110000];
+const hedgedGeminiTranscript = (url) => new Promise((resolve, reject) => {
+  let settled = false;
+  let started = 0;
+  let failures = 0;
+  const timers = [];
+  const finish = (fn, value) => {
+    if (settled) return;
+    settled = true;
+    timers.forEach(clearTimeout);
+    fn(value);
+  };
+  const start = () => {
+    if (settled || started >= GEMINI_HEDGE_AFTER_MS.length) return;
+    const n = ++started;
+    if (n > 1) {
+      console.log('[YouTube Transcript] Starting backup Gemini request', n);
+      stage('Still listening to the video — trying again in parallel…');
+    }
+    transcribeYouTubeWithGemini(url)
+      .then((text) => finish(resolve, text))
+      .catch((error) => {
+        failures += 1;
+        console.warn(`[YouTube Transcript] Gemini request ${n} failed:`, error.message);
+        if (failures === GEMINI_HEDGE_AFTER_MS.length) finish(reject, error);
+        else start(); // a quick failure should not wait for the next timer
+      });
+  };
+  GEMINI_HEDGE_AFTER_MS.forEach((delay) => timers.push(setTimeout(start, delay)));
+});
+
 export const getYoutubeTranscript = async (videoUrl) => {
   const normalized = normalizeUrl(videoUrl);
 
@@ -435,7 +468,7 @@ export const getYoutubeTranscript = async (videoUrl) => {
     try {
       console.log('[YouTube Transcript] Transcribing with Gemini...');
       stage('YouTube blocked the download — our AI is listening to the video instead (about 1–2 minutes)…');
-      return await transcribeYouTubeWithGemini(normalized);
+      return await hedgedGeminiTranscript(normalized);
     } catch (error) {
       console.warn('[YouTube Transcript] Gemini transcription failed:', error.message);
     }
