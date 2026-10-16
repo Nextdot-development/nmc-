@@ -528,7 +528,10 @@ const transcriptFromYoutube = async (normalized) => {
     const tempFile = path.join(os.tmpdir(), `yt-audio-${Date.now()}.mp3`);
     try {
       await downloadYoutubeAudio(normalized, tempFile);
-      return await transcribeAudioWithOpenAI(tempFile);
+      const text = await transcribeAudioWithOpenAI(tempFile);
+      // A clipped download gives a few words; do not let it beat a full Gemini transcript
+      if (text.trim().length < MIN_SPOKEN_CHARS) throw new Error(`OpenAI transcript too short (${text.trim().length} chars)`);
+      return text;
     } catch (error) {
       console.warn('[YouTube Transcript] Audio + OpenAI transcription failed:', error.message.slice(0, 200));
       note('YouTube audio download', error);
