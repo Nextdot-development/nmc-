@@ -36,18 +36,39 @@ const truncateContent = (content) => {
     : content;
 };
 
-// Same shape the Gemini prompt asks for, enforced by structured outputs
+// Same shape the Gemini prompt asks for, enforced by structured outputs.
+// Findings come first so they can be shown live while the rest is written; the
+// content is not echoed back (the server already has it).
 const AUDIT_SCHEMA = {
   type: 'object',
   additionalProperties: false,
-  required: ['score', 'status', 'language', 'summary', 'transcription', 'compliantVersion', 'financialPenalty', 'ethicalMarketing', 'violations'],
+  required: ['language', 'violations', 'score', 'status', 'summary', 'compliantVersion', 'financialPenalty', 'ethicalMarketing'],
   properties: {
-    score: { type: 'number' },
     language: { type: 'string' },
-    compliantVersion: { type: 'string' },
+    violations: {
+      type: 'array',
+      items: {
+        type: 'object',
+        additionalProperties: false,
+        required: ['ruleId', 'originalLine', 'problematicContent', 'severity', 'regulation', 'description', 'compliantLine', 'englishTranslation', 'suggestion', 'solution'],
+        properties: {
+          ruleId: { type: 'string' },
+          originalLine: { type: 'string' },
+          problematicContent: { type: 'string' },
+          severity: { type: 'string', enum: ['Critical', 'High', 'Medium', 'Low'] },
+          regulation: { type: 'string' },
+          description: { type: 'string' },
+          compliantLine: { type: 'string' },
+          englishTranslation: { type: 'string' },
+          suggestion: { type: 'string' },
+          solution: { type: 'string' }
+        }
+      }
+    },
+    score: { type: 'number' },
     status: { type: 'string', enum: ['Compliant', 'Needs Review', 'Non-Compliant'] },
     summary: { type: 'string' },
-    transcription: { type: 'string' },
+    compliantVersion: { type: 'string' },
     financialPenalty: {
       type: 'object',
       additionalProperties: false,
@@ -65,28 +86,51 @@ const AUDIT_SCHEMA = {
         score: { type: 'number' },
         assessment: { type: 'string' }
       }
-    },
-    violations: {
-      type: 'array',
-      items: {
-        type: 'object',
-        additionalProperties: false,
-        required: ['ruleId', 'severity', 'regulation', 'description', 'originalLine', 'compliantLine', 'problematicContent', 'englishTranslation', 'suggestion', 'solution'],
-        properties: {
-          severity: { type: 'string', enum: ['Critical', 'High', 'Medium', 'Low'] },
-          ruleId: { type: 'string' },
-          regulation: { type: 'string' },
-          description: { type: 'string' },
-          originalLine: { type: 'string' },
-          compliantLine: { type: 'string' },
-          problematicContent: { type: 'string' },
-          englishTranslation: { type: 'string' },
-          suggestion: { type: 'string' },
-          solution: { type: 'string' }
-        }
-      }
     }
   }
+};
+
+// Reads complete finding objects out of the JSON while it is still being written
+const createViolationReader = (onViolation) => {
+  let buffer = '';
+  let pos = -1; // index just after the '[' of "violations"
+  let done = false;
+  let depth = 0;
+  let inString = false;
+  let escaped = false;
+  let start = -1;
+  return (delta) => {
+    if (done || !onViolation) return;
+    buffer += delta;
+    if (pos < 0) {
+      const m = /"violations"\s*:\s*\[/.exec(buffer);
+      if (!m) return;
+      pos = m.index + m[0].length;
+    }
+    for (; pos < buffer.length; pos++) {
+      const ch = buffer[pos];
+      if (inString) {
+        if (escaped) escaped = false;
+        else if (ch === '\\') escaped = true;
+        else if (ch === '"') inString = false;
+        continue;
+      }
+      if (ch === '"') { inString = true; continue; }
+      if (ch === '{') {
+        if (depth === 0) start = pos;
+        depth++;
+      } else if (ch === '}') {
+        depth--;
+        if (depth === 0 && start >= 0) {
+          try { onViolation(JSON.parse(buffer.slice(start, pos + 1))); } catch { /* skip a malformed item */ }
+          start = -1;
+        }
+      } else if (ch === ']' && depth === 0) {
+        done = true;
+        return;
+      }
+    }
+  };
 };
 
 const getText = (message) =>
@@ -116,7 +160,8 @@ export const analyzeWithClaude = async ({
   country,
   region,
   rules = [],
-  contentContext = ''
+  contentContext = '',
+  onViolation = null
 }) => {
   const client = getAnthropicClient();
 
@@ -152,6 +197,7 @@ export const analyzeWithClaude = async ({
       system: [{ type: 'text', text: systemPrompt, cache_control: { type: 'ephemeral' } }],
       messages: [{ role: 'user', content: userText }]
     });
+    stream.on('text', createViolationReader(onViolation));
     const message = await stream.finalMessage();
 
     assertUsable(message, 'audit');

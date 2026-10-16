@@ -3,6 +3,8 @@ import { detectContentType, processContent } from '../services/contentProcessor.
 import {
   BillingError, gateResult, getAccount, historySince, isUnlimited, quoteAudit, refundCredits, spendCredits,
 } from '../services/billingService.js';
+import { getPlan } from '../config/plans.js';
+import { withProgress } from '../services/progress.js';
 
 const FORMAT_LABEL = { text: 'Text', url: 'Website', image: 'Image', video: 'Video', audio: 'Audio', document: 'Document' };
 
@@ -17,18 +19,20 @@ const FORMAT_LABEL = { text: 'Text', url: 'Website', image: 'Image', video: 'Vid
  * Handles audit requests and history retrieval
  */
 
+const reply = (status, body) => ({ status, body });
+
 /**
- * Create a new audit
- * POST /audit
+ * Runs one audit request (validation, credits, audit, refunds) and returns the response
+ * status and body. Used by POST /audit and the live POST /audit/stream.
  */
-export const createAudit = async (req, res) => {
+const runAuditRequest = async (req) => {
   try {
     const { text, url, category, analysisMode, country, region } = req.body;
     const file = req.file;
     
     // Validate input
     if (!text && !url && !file) {
-      return res.status(400).json({
+      return reply(400, {
         success: false,
         error: 'At least one of text, url, or file is required'
       });
@@ -45,7 +49,7 @@ export const createAudit = async (req, res) => {
     
     // Social apps show posts only after login, so a link cannot be read; stop before charging
     if (input.url && /(^|\/\/|\.)(instagram\.com|facebook\.com|fb\.watch|tiktok\.com|threads\.net)/i.test(input.url)) {
-      return res.status(400).json({
+      return reply(400, {
         code: 'SOCIAL_LINK_UNREADABLE',
         error: 'Instagram, Facebook and TikTok posts can only be seen after login, so they cannot be read from a link. Upload the video or image file, or paste the caption or script as text. No credits were used.'
       });
@@ -88,15 +92,71 @@ export const createAudit = async (req, res) => {
       charged = 0;
     }
 
-    return res.status(201).json({ ...gateResult(auditResult, planId), billing: { charged, balance, minutes: quote.minutes, unlimited } });
+    return reply(201, { ...gateResult(auditResult, planId), billing: { charged, balance, minutes: quote.minutes, unlimited } });
   } catch (error) {
     if (error instanceof BillingError) {
-      return res.status(error.status).json({ error: error.message, code: error.code, ...error.extra });
+      return reply(error.status, { error: error.message, code: error.code, ...error.extra });
     }
     console.error('[Audit Controller] Error:', error);
-    return res.status(500).json({
+    return reply(500, {
       error: error.message || error.error || 'Failed to create audit'
     });
+  }
+};
+
+/**
+ * Create a new audit
+ * POST /audit
+ */
+export const createAudit = async (req, res) => {
+  const { status, body } = await runAuditRequest(req);
+  return res.status(status).json(body);
+};
+
+/**
+ * Live audit: newline-delimited JSON events while the audit runs
+ * POST /audit/stream
+ * Events: stage {message}, source {text}, finding {finding}, result {status, body}, ping
+ */
+export const streamAudit = async (req, res) => {
+  res.status(200);
+  res.setHeader('Content-Type', 'application/x-ndjson; charset=utf-8');
+  res.setHeader('Cache-Control', 'no-cache, no-transform');
+  res.setHeader('X-Accel-Buffering', 'no'); // tell Nginx not to hold events back
+  res.flushHeaders?.();
+
+  let open = true;
+  // the response closes when the browser goes away; the audit itself still finishes and is saved
+  res.on('close', () => { open = false; });
+  const send = (event) => { if (open) res.write(`${JSON.stringify(event)}\n`); };
+  const ping = setInterval(() => send({ type: 'ping' }), 15000);
+
+  // Fixes beyond the plan's preview stay hidden while streaming, as in the final report
+  let fixPreview = null;
+  try {
+    const account = await getAccount(req.user.id, req.user.email);
+    fixPreview = isUnlimited(req.user.email) ? null : getPlan(account.plan).fixPreviewLines;
+  } catch { /* plan gate is applied again on the final result */ }
+  let findings = 0;
+  const emit = (event) => {
+    if (event.type === 'finding') {
+      findings += 1;
+      if (fixPreview != null && findings > fixPreview) {
+        event = { ...event, finding: { ...event.finding, compliantLine: '', solution: '', locked: true } };
+      }
+    }
+    send(event);
+  };
+
+  try {
+    const outcome = await withProgress(emit, () => runAuditRequest(req));
+    send({ type: 'result', status: outcome.status, body: outcome.body });
+  } catch (error) {
+    console.error('[Audit Stream] Error:', error);
+    send({ type: 'result', status: 500, body: { error: 'Failed to create audit' } });
+  } finally {
+    clearInterval(ping);
+    if (open) res.end();
   }
 };
 
@@ -172,6 +232,7 @@ export const getAuditById = async (req, res) => {
 
 export default {
   createAudit,
+  streamAudit,
   getAuditHistory,
   getAuditById
 };

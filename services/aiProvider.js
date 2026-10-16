@@ -1,6 +1,7 @@
 import { analyzeWithGemini, extractClaimsWithGemini } from '../geminiService.js';
 import { analyzeWithClaude, extractClaimsWithClaude, isClaudeConfigured } from './claudeService.js';
 import { severityFor } from '../config/ruleSeverity.js';
+import { progress, stage } from './progress.js';
 
 /* ===============================
    PROVIDER ROUTING
@@ -69,30 +70,36 @@ export const scoreFromViolations = (violations = []) => {
 ================================ */
 const normalizeRef = (s = '') => String(s).toLowerCase().replace(/[^a-z0-9]+/g, '');
 
+// Ties one finding to its rule: rule text, source link and fixed severity come from the pack
+const bindOne = (v, rules, byId) => {
+  let rule = byId.get(normalizeRef(v.ruleId));
+  if (!rule) {
+    // Fall back to the cited section + title when the ID was mistyped
+    const cited = normalizeRef(v.regulation);
+    rule = rules.find((r) => r.section && r.title && cited.includes(normalizeRef(r.title)) && cited.includes(normalizeRef(r.section)));
+  }
+  if (!rule) return null;
+  return {
+    ...v,
+    // Severity is fixed per rule (not chosen by the model) so results are repeatable
+    severity: severityFor(rule.id, v.originalLine || v.problematicContent || ''),
+    ruleId: rule.id,
+    regulation: `${rule.regulation} - ${rule.title}${rule.section ? ` (Section: ${rule.section})` : ''}`,
+    ruleSource: rule.source || ''
+  };
+};
+
+const rulesById = (rules) => new Map(rules.map((r) => [normalizeRef(r.id), r]));
+
 const bindToRulePack = (violations, rules = []) => {
   if (!rules.length) return { violations, dropped: [] };
-  const byId = new Map(rules.map((r) => [normalizeRef(r.id), r]));
+  const byId = rulesById(rules);
   const kept = [];
   const dropped = [];
   for (const v of violations) {
-    let rule = byId.get(normalizeRef(v.ruleId));
-    if (!rule) {
-      // Fall back to the cited section + title when the ID was mistyped
-      const cited = normalizeRef(v.regulation);
-      rule = rules.find((r) => r.section && r.title && cited.includes(normalizeRef(r.title)) && cited.includes(normalizeRef(r.section)));
-    }
-    if (!rule) {
-      dropped.push({ ruleId: v.ruleId || '', regulation: v.regulation || '', line: v.originalLine || v.problematicContent || '' });
-      continue;
-    }
-    kept.push({
-      ...v,
-      // Severity is fixed per rule (not chosen by the model) so results are repeatable
-      severity: severityFor(rule.id, v.originalLine || v.problematicContent || ''),
-      ruleId: rule.id,
-      regulation: `${rule.regulation} - ${rule.title}${rule.section ? ` (Section: ${rule.section})` : ''}`,
-      ruleSource: rule.source || ''
-    });
+    const bound = bindOne(v, rules, byId);
+    if (bound) kept.push(bound);
+    else dropped.push({ ruleId: v.ruleId || '', regulation: v.regulation || '', line: v.originalLine || v.problematicContent || '' });
   }
   if (dropped.length) console.warn('[AI] Dropped findings without a valid rule', JSON.stringify(dropped));
   return { violations: kept, dropped };
@@ -159,15 +166,34 @@ export const findUncoveredRedFlags = (content, violations) => {
 const runAudit = (params) => withFallback('audit', () => analyzeWithClaude(params), () => analyzeWithGemini(params));
 
 export const analyzeCompliance = async (params) => {
-  const first = finalizeResult(await runAudit(params), params.rules);
+  // Live view: the text being audited, then each finding as soon as it is written
+  progress({ type: 'source', text: params.content || '' });
+  stage('Checking the content against 160 NMC rules…');
+  const rules = params.rules || [];
+  const byId = rulesById(rules);
+  const seen = new Set();
+  const onViolation = (v) => {
+    const bound = rules.length ? bindOne(v, rules, byId) : v;
+    const key = normalizeKey(bound?.originalLine || bound?.problematicContent || '');
+    if (!bound || seen.has(key)) return;
+    seen.add(key);
+    progress({ type: 'finding', finding: bound });
+  };
+
+  const raw = await runAudit({ ...params, onViolation });
+  // The content is not echoed back by the model; keep it on the result
+  if (raw && typeof raw === 'object' && !raw.transcription) raw.transcription = String(params.content || '').slice(0, 300);
+  const first = finalizeResult(raw, params.rules);
   const missed = findUncoveredRedFlags(params.content, first.violations || []);
   if (!missed.length) return first;
 
   console.log('[AI] Safety net: second pass for uncovered lines', JSON.stringify({ count: missed.length }));
+  stage(`Double-checking ${missed.length} line${missed.length > 1 ? 's' : ''} that may break the rules…`);
   try {
     const focus = `QUALITY CHECK: a first review did not report the lines below, although they contain wording that commonly breaks NMC rules. Audit the full content again and examine each of these lines carefully; report every one that breaks a listed rule, using the exact line as originalLine.\n${missed.map((l) => `- ${l}`).join('\n')}`;
     const second = finalizeResult(await runAudit({
       ...params,
+      onViolation,
       contentContext: [params.contentContext, focus].filter(Boolean).join('\n\n')
     }), params.rules);
 

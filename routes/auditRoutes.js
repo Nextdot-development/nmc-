@@ -1,6 +1,6 @@
 import express from 'express';
 import multer from 'multer';
-import { createAudit, getAuditHistory, getAuditById } from '../controllers/auditController.js';
+import { createAudit, getAuditHistory, getAuditById, streamAudit } from '../controllers/auditController.js';
 import { analyzeCompatibility } from '../controllers/compatibilityController.js';
 import { authMiddleware } from '../middleware/authMiddleware.js';
 
@@ -51,6 +51,12 @@ const upload = multer({
  * Create a new compliance audit
  */
 router.post('/audit', authMiddleware, upload.single('file'), createAudit);
+
+/**
+ * POST /audit/stream
+ * Same as /audit, with live progress events (newline-delimited JSON)
+ */
+router.post('/audit/stream', authMiddleware, upload.single('file'), streamAudit);
 
 /**
  * GET /audit/history

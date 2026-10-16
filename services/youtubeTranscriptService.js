@@ -7,6 +7,7 @@ import ytdl from 'ytdl-core';
 import { YoutubeTranscript } from 'youtube-transcript';
 import { spawn } from 'child_process';
 import { transcribeYouTubeWithGemini } from '../geminiService.js';
+import { stage } from './progress.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -272,6 +273,7 @@ const validateYoutubeUrl = async (videoUrl) => {
 
 export const downloadYoutubeAudio = async (videoUrl, outputPath) => {
   console.log('[YouTube Transcript] Downloading audio...');
+  stage('No captions found — downloading the video’s audio…');
   try {
     await validateYoutubeUrl(videoUrl);
   } catch (error) {
@@ -285,6 +287,7 @@ export const downloadYoutubeAudio = async (videoUrl, outputPath) => {
 export const transcribeAudioWithOpenAI = async (filePath) => {
   const client = getOpenAIClient();
   console.log('[YouTube Transcript] Transcribing audio...');
+  stage('Turning the speech into text…');
 
   const extension = path.extname(filePath).toLowerCase().replace('.', '');
   const mimeMap = {
@@ -396,6 +399,7 @@ export const getYoutubeTranscript = async (videoUrl) => {
   }
 
   console.log('[YouTube Transcript] Trying captions...');
+  stage('Looking for the video’s captions…');
   try {
     const transcriptItems = await retryWithBackoff(() => YoutubeTranscript.fetchTranscript(normalized), MAX_RETRIES, 'Captions fetch');
     const transcript = transcriptItems.map((item) => item.text).join(' ').replace(/\s+/g, ' ').trim();
@@ -430,6 +434,7 @@ export const getYoutubeTranscript = async (videoUrl) => {
   if (process.env.ENABLE_GEMINI_YOUTUBE !== 'false') {
     try {
       console.log('[YouTube Transcript] Transcribing with Gemini...');
+      stage('YouTube blocked the download — our AI is listening to the video instead (about 1–2 minutes)…');
       return await transcribeYouTubeWithGemini(normalized);
     } catch (error) {
       console.warn('[YouTube Transcript] Gemini transcription failed:', error.message);

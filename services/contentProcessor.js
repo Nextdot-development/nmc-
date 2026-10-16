@@ -14,6 +14,7 @@ import { getRulesForSelection } from './rulesService.js';
 import AuditRecord from '../models/AuditRecord.js';
 import { extractTextFromImage } from './ocrService.js';
 import { buildAuditInput } from './auditInputBuilder.ts';
+import { stage } from './progress.js';
 
 const MAX_TEXT_LENGTH = 100000;
 const MAX_CONTENT_FOR_AI = Number(process.env.MAX_CONTENT_FOR_AI) || 60000;
@@ -774,6 +775,7 @@ export const processContent = async (input, options = {}) => {
   // Images are keyed by their text, so read it first (and reuse it for the audit)
   let imageText = '';
   if (contentType === 'image') {
+    stage('Reading the text in your image…');
     imageText = await extractTextFromImage(input.file.buffer).catch(() => '');
   }
   const contentHash = fingerprintContent(input, contentType, { category, rules, context, imageText: imageText.trim().length >= 20 ? imageText : '' });
@@ -803,6 +805,14 @@ export const processContent = async (input, options = {}) => {
   if (reuseOnly) return null;
 
   let processingResult;
+  stage({
+    text: 'Reading your text…',
+    url: /youtu\.?be/i.test(input.url || '') ? 'Getting the video transcript…' : 'Reading the web page…',
+    image: 'Reading the text in your image…',
+    video: 'Transcribing the video’s audio…',
+    audio: 'Transcribing the audio…',
+    document: 'Reading the document…',
+  }[contentType] || 'Reading your content…');
 
   if (contentType === 'text') {
     processingResult = await processText({ text: input.text, category, analysisMode, country, region, rules, contentContext: context });
