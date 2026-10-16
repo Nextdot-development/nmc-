@@ -128,6 +128,9 @@ export const getRulesMetadata = () => {
 };
 
 export const getRulesForSelection = ({ country, region, category }) => {
+  // This deployment audits against one country's pack; a request without a country uses it
+  // (an empty pack would let the model invent rule IDs)
+  country = country || process.env.DEFAULT_COUNTRY || 'India';
   const countrySlug = COUNTRY_TO_SLUG[country] || (country || '').toLowerCase();
   const categorySlug = CATEGORY_TO_SLUG[category] || 'pharmaceutical';
 
