@@ -461,10 +461,16 @@ const processUrl = async ({ url, category, analysisMode, country, region, rules,
   if (isYouTubeUrl(url)) {
     let transcriptText = '';
     let videoSeconds = null;
+    let mediaGuardDone = false;
     try {
       console.log('[YouTube] Fetching transcript...');
-      ({ text: transcriptText, seconds: videoSeconds } = await getYoutubeTranscriptWithLength(url));
+      // The plan's minute limit is checked as soon as the length is known, before transcribing
+      let guarded = false;
+      const onLength = mediaGuard ? async (secs) => { guarded = true; await mediaGuard(Math.max(1, Math.ceil(secs / 60))); } : undefined;
+      ({ text: transcriptText, seconds: videoSeconds } = await getYoutubeTranscriptWithLength(url, { onLength }));
+      if (guarded) mediaGuardDone = true;
     } catch (error) {
+      if (error?.code === 'MEDIA_TOO_LONG' || error?.code === 'INSUFFICIENT_CREDITS') throw error;
       console.warn('[YouTube] Fallback to metadata:', error.message);
       transcriptText = await fetchYouTubeFallbackText(url, error.message);
     }
@@ -475,7 +481,7 @@ const processUrl = async ({ url, category, analysisMode, country, region, rules,
 
     // Plan length limit and per-minute credits, now that the video length is known
     // (when it is not, estimate ~750 characters of speech per minute)
-    if (hasTranscript && mediaGuard) {
+    if (hasTranscript && mediaGuard && !mediaGuardDone) {
       const minutes = Math.max(1, Math.ceil(videoSeconds ? videoSeconds / 60 : transcriptText.length / 750));
       await mediaGuard(minutes);
     }

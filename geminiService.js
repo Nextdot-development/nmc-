@@ -331,6 +331,22 @@ export const analyzeWithGemini = async ({
    YOUTUBE TRANSCRIPT (Gemini reads the public video by URL)
    Used when YouTube blocks caption downloads from the server.
 ================================ */
+// Video length in seconds without transcribing (token count only: ~1s, not billed).
+// Gemini counts audio at 25 tokens per second. Returns null when it cannot tell.
+export const countYouTubeSeconds = async (videoUrl) => {
+  try {
+    const model = getVertexAIClient().getGenerativeModel({ model: MODEL_NAME, generationConfig: { mediaResolution: 'MEDIA_RESOLUTION_LOW' } });
+    const r = await withTimeout(model.countTokens({
+      contents: [{ role: 'user', parts: [{ fileData: { fileUri: videoUrl, mimeType: 'video/*' } }, { text: 'x' }] }]
+    }), 15000, 'Token count timed out');
+    const audio = (r?.promptTokensDetails || []).find((d) => d.modality === 'AUDIO')?.tokenCount;
+    return audio ? Math.round(audio / 25) : null;
+  } catch (error) {
+    console.warn('[Gemini] Video length lookup failed:', error.message);
+    return null;
+  }
+};
+
 // Gemini sometimes withholds a verbatim transcript of branded content (finishReason
 // RECITATION) at random. Each attempt asks a little differently so one of them gets through.
 const YOUTUBE_TRANSCRIPT_VARIANTS = [

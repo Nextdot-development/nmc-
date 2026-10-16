@@ -6,7 +6,7 @@ import OpenAI from 'openai';
 import ytdl from 'ytdl-core';
 import { YoutubeTranscript } from 'youtube-transcript';
 import { spawn } from 'child_process';
-import { transcribeYouTubeWithGemini } from '../geminiService.js';
+import { countYouTubeSeconds, transcribeYouTubeWithGemini } from '../geminiService.js';
 import { stage } from './progress.js';
 import { note } from './auditDoctor.js';
 
@@ -430,7 +430,12 @@ export const isTranscriptUnavailable = (text = '') => /^YouTube (video )?transcr
 
 // Gemini sometimes stalls on one request while the same video works at once on the next.
 // Start a backup request if the first is slow (short ads come back in ~5s); the first transcript to arrive wins.
-const GEMINI_HEDGE_AFTER_MS = [0, 20000, 60000];
+// Backup requests start only when a request is clearly late for the video's length
+// (a request on a long video takes minutes; a backup then would only double the cost)
+const hedgeDelays = (seconds) => {
+  const first = Math.max(20000, 20000 + (seconds || 0) * 250);
+  return [0, first, Math.round(first * 2.5)];
+};
 // Spoken part of a Gemini transcript (before the ON-SCREEN TEXT list)
 const spokenPart = (text = '') => text.split(/\n\s*ON-SCREEN TEXT:/i)[0].trim();
 const MIN_SPOKEN_CHARS = 25;
@@ -457,7 +462,8 @@ const hasRealSpeech = (text, title) => {
   return !(title && looseKey(spoken) === looseKey(title));
 };
 
-const hedgedGeminiTranscript = (url, title = '', offset = 0) => new Promise((resolve, reject) => {
+const hedgedGeminiTranscript = (url, title = '', offset = 0, seconds = null) => new Promise((resolve, reject) => {
+  const GEMINI_HEDGE_AFTER_MS = hedgeDelays(seconds);
   let settled = false;
   let started = 0;
   let finished = 0;
@@ -556,8 +562,12 @@ const firstSuccess = (promises) => new Promise((resolve, reject) => {
 });
 
 // Transcript plus the video length in seconds (null when unknown)
-export const getYoutubeTranscriptWithLength = async (videoUrl) => {
+export const getYoutubeTranscriptWithLength = async (videoUrl, { onLength } = {}) => {
   const normalized = normalizeUrl(videoUrl);
+  // Length first (about a second, free): lets the caller stop a video that is too long
+  // for the plan before any transcript is paid for, and sizes the backup timers
+  const knownSeconds = process.env.ENABLE_GEMINI_YOUTUBE !== 'false' ? await countYouTubeSeconds(normalized) : null;
+  if (knownSeconds && onLength) await onLength(knownSeconds);
 
   // A missing, private or removed video cannot be read by any route: say so at once
   const lookup = await lookupVideo(normalized);
@@ -573,10 +583,11 @@ export const getYoutubeTranscriptWithLength = async (videoUrl) => {
   const routes = [transcriptFromYoutube(normalized)];
   if (process.env.ENABLE_GEMINI_YOUTUBE !== 'false') {
     console.log('[YouTube Transcript] Transcribing with Gemini (in parallel)...');
-    routes.push(fetchVideoTitle(normalized).then((title) => hedgedGeminiTranscript(normalized, title)));
+    routes.push(fetchVideoTitle(normalized).then((title) => hedgedGeminiTranscript(normalized, title, 0, knownSeconds)));
   }
   try {
-    return await firstSuccess(routes);
+    const res = await firstSuccess(routes);
+    return { text: res.text, seconds: res.seconds || knownSeconds };
   } catch (error) {
     console.warn('[YouTube Transcript] All transcript routes failed:', error.message);
   }
@@ -590,7 +601,8 @@ export const getYoutubeTranscriptWithLength = async (videoUrl) => {
       await new Promise((r) => setTimeout(r, 3000));
       try {
         console.log('[YouTube Transcript] Audit Doctor repair round');
-        return await hedgedGeminiTranscript(normalized, title, 1);
+        const res = await hedgedGeminiTranscript(normalized, title, 1, knownSeconds);
+        return { text: res.text, seconds: res.seconds || knownSeconds };
       } catch (error) {
         console.warn('[YouTube Transcript] Repair round failed:', error.message);
       }
