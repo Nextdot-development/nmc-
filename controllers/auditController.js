@@ -77,12 +77,13 @@ const runAuditRequest = async (req) => {
 
     // Video links: once the length is known, enforce the plan's minutes and charge the rest
     let videoMinutes = null;
-    const mediaGuard = quote.videoLink ? async (minutes) => {
-      videoMinutes = minutes;
+    const mediaGuard = quote.videoLink ? async (minutes, { limitOnly = false } = {}) => {
       const plan = getPlan(planId);
       if (plan.maxMediaMinutes && minutes > plan.maxMediaMinutes) {
         throw new BillingError(`This video is about ${minutes} minutes. The ${plan.name} plan audits videos up to ${plan.maxMediaMinutes} minutes. No credits were used.`, 403, 'MEDIA_TOO_LONG', { minutes, limit: plan.maxMediaMinutes });
       }
+      if (limitOnly) return;
+      videoMinutes = minutes;
       const extra = Math.ceil(minutes / 5) * 2 - charge.credits;
       if (extra > 0 && !unlimited) {
         const more = await spendCredits(req.user.id, extra, `${label} (${minutes} min)`);
