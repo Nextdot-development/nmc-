@@ -4,6 +4,7 @@ import { useAuth } from '../App.jsx';
 import { FORMAT_NAMES, creditHint } from '../billing.js';
 import { api } from '../api.js';
 import AuditResult from '../components/AuditResult.jsx';
+import LivePanel from '../components/LivePanel.jsx';
 import { BannerArt } from '../components/Graphics.jsx';
 import { COUNTRY } from '../country.js';
 import {
@@ -27,7 +28,6 @@ const RULE_PACKS = [
 
 const MAX_TEXT = 60000;
 const MAX_MB = 100;
-const STEPS = ['Reading content', 'Checking NMC rules', 'Writing fixes'];
 
 const formatBytes = (n) => (n > 1024 * 1024 ? `${(n / 1024 / 1024).toFixed(1)} MB` : `${Math.max(1, Math.round(n / 1024))} KB`);
 
@@ -39,10 +39,11 @@ export default function Auditor() {
   const [file, setFile] = useState(null);
   const [dragging, setDragging] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [step, setStep] = useState(0);
   const [error, setError] = useState('');
   const [upsell, setUpsell] = useState(false);
   const [result, setResult] = useState(null);
+  const [live, setLive] = useState(null);
+  const liveRef = useRef(null);
   const { account, setBalance, refreshAccount } = useAuth();
   const fileInput = useRef(null);
   const resultRef = useRef(null);
@@ -66,16 +67,17 @@ export default function Auditor() {
   const allowed = (id) => !account || account.features.formats.includes(id);
   const locked = !allowed(format);
 
-  useEffect(() => {
-    if (!busy) return undefined;
-    setStep(0);
-    const timer = setInterval(() => setStep((s) => Math.min(s + 1, STEPS.length - 1)), 6000);
-    return () => clearInterval(timer);
-  }, [busy]);
-
-  useEffect(() => {
-    if (result) resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }, [result]);
+  // Live progress events from the server
+  const onLiveEvent = (ev) => setLive((l) => {
+    if (!l) return l;
+    if (ev.type === 'stage') {
+      if (ev.message === l.stage) return l;
+      return { ...l, done: l.started ? [...l.done, l.stage] : l.done, stage: ev.message, started: true };
+    }
+    if (ev.type === 'source') return { ...l, source: ev.text || '' };
+    if (ev.type === 'finding') return { ...l, findings: [...l.findings, ev.finding] };
+    return l;
+  });
 
   const chooseFormat = (id) => {
     setFormat(id);
@@ -104,17 +106,28 @@ export default function Auditor() {
     setUpsell(false);
     setResult(null);
     setBusy(true);
+    setLive({ stage: 'Starting…', started: false, done: [], source: '', findings: [], url: format === 'url' ? url.trim() : '' });
+    setTimeout(() => liveRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
+    const params = {
+      category: pack,
+      text: format === 'text' ? text.trim() : undefined,
+      url: format === 'url' ? url.trim() : undefined,
+      file: isFile ? file : undefined,
+      fresh,
+    };
     try {
-      const res = await api.audit({
-        category: pack,
-        text: format === 'text' ? text.trim() : undefined,
-        url: format === 'url' ? url.trim() : undefined,
-        file: isFile ? file : undefined,
-        fresh,
-      });
+      let res;
+      try {
+        res = await api.auditStream(params, onLiveEvent);
+      } catch (err) {
+        // Older server without the live endpoint
+        if (err.status !== 404) throw err;
+        res = await api.audit(params);
+      }
       setResult(res);
       if (res?.billing) setBalance(res.billing.balance);
     } catch (err) {
+      setLive(null);
       setError(err.message);
       if (['INSUFFICIENT_CREDITS', 'FORMAT_NOT_IN_PLAN', 'MEDIA_TOO_LONG'].includes(err.code)) {
         setUpsell(true);
@@ -127,6 +140,7 @@ export default function Auditor() {
 
   const reset = () => {
     setResult(null);
+    setLive(null);
     setText('');
     setUrl('');
     setFile(null);
@@ -243,15 +257,7 @@ export default function Auditor() {
           </p>
         )}
 
-        {busy && (
-          <div className="progress" aria-live="polite">
-            <div className="progress__bar"><span /></div>
-            <ol>{STEPS.map((s, i) => <li key={s} className={i < step ? 'done' : i === step ? 'active' : ''}>{s}</li>)}</ol>
-            {(format === 'video' || format === 'audio' || /youtu\.?be/i.test(url)) && (
-              <p className="muted small">Videos take 2–4 minutes — we transcribe the full video first.</p>
-            )}
-          </div>
-        )}
+        {busy && <div className="progress__bar" aria-hidden="true"><span /></div>}
         {error && (
           <p className="alert" role="alert">
             {error} {upsell && <Link to="/billing" className="alert__link">View plans →</Link>}
@@ -259,8 +265,12 @@ export default function Auditor() {
         )}
       </form>
 
+      <div ref={liveRef} className="live-anchor">
+        <LivePanel live={live} result={result} format={format} />
+      </div>
+
       <div ref={resultRef}>
-        {result && <AuditResult result={result} onReset={reset} onFresh={() => submit(null, { fresh: true })} />}
+        {result && <AuditResult result={result} onReset={reset} onFresh={() => submit(null, { fresh: true })} hideSource={Boolean(live)} />}
       </div>
     </div>
   );

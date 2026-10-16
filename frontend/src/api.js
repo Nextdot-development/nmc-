@@ -83,6 +83,58 @@ export const api = {
     return request('/api/audit', { method: 'POST', form });
   },
 
+  // Live audit: calls onEvent for each progress event and resolves with the final result
+  auditStream: async ({ text, url, file, category, fresh = false }, onEvent) => {
+    const form = new FormData();
+    form.append('country', 'India');
+    form.append('category', category);
+    form.append('analysisMode', 'Standard');
+    if (text) form.append('text', text);
+    if (url) form.append('url', url);
+    if (file) form.append('file', file);
+    if (fresh) form.append('fresh', 'true');
+
+    let response;
+    try {
+      response = await fetch(`${API_URL}/api/audit/stream`, {
+        method: 'POST',
+        headers: session.token() ? { Authorization: `Bearer ${session.token()}` } : {},
+        body: form,
+      });
+    } catch {
+      throw new ApiError('Server se connect nahi ho paya. Internet check karke dobara try karein.', 0);
+    }
+    if (!response.ok || !response.body) {
+      let data = null;
+      try { data = await response.json(); } catch { /* empty */ }
+      if (response.status === 401) { session.clear(); window.dispatchEvent(new Event('nc-logout')); }
+      throw new ApiError(data?.error || `Request failed (${response.status})`, response.status, data);
+    }
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+    let final = null;
+    for (;;) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      let nl;
+      while ((nl = buffer.indexOf('\n')) >= 0) {
+        const line = buffer.slice(0, nl).trim();
+        buffer = buffer.slice(nl + 1);
+        if (!line) continue;
+        let event;
+        try { event = JSON.parse(line); } catch { continue; }
+        if (event.type === 'result') final = event;
+        else if (event.type !== 'ping') onEvent?.(event);
+      }
+    }
+    if (!final) throw new ApiError('The connection was interrupted. Your audit may still finish — check Audit History in a minute.', 0);
+    if (final.status >= 400) throw new ApiError(final.body?.error || 'Audit failed', final.status, final.body);
+    return final.body;
+  },
+
   history: () => request('/api/audit/history?limit=50'),
   auditById: (id) => request(`/api/audit/${id}`),
   rulePack: () => request('/api/rules/pack?country=india', { auth: false }),

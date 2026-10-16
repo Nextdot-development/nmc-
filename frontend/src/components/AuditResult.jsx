@@ -103,7 +103,7 @@ const Violation = ({ v, index, L }) => {
   );
 };
 
-const SOURCE_LABEL = {
+export const SOURCE_LABEL = {
   video: 'VIDEO TRANSCRIPT',
   audio: 'AUDIO TRANSCRIPT',
   image: 'TEXT FOUND IN IMAGE',
@@ -137,7 +137,7 @@ const findRanges = (text, violations) => {
 };
 
 // Split text at range boundaries; each piece lists the issues covering it
-const HighlightedText = ({ text, violations }) => {
+export const HighlightedText = ({ text, violations, anchor = 'issue' }) => {
   const ranges = findRanges(text, violations);
   const cuts = [...new Set([0, text.length, ...ranges.flatMap((r) => [r.start, r.end])])].sort((a, b) => a - b);
   const out = [];
@@ -150,7 +150,7 @@ const HighlightedText = ({ text, violations }) => {
     const nums = [...new Set(covering.map((r) => r.num))].sort((x, y) => x - y);
     const ending = [...new Set(covering.filter((r) => r.end === b).map((r) => r.num))].sort((x, y) => x - y);
     out.push(
-      <a key={k} href={`#issue-${nums[0]}`} className={`hl hl--${sev}`} title={`Issue ${nums.join(', ')}`}>
+      <a key={k} href={`#${anchor}-${nums[0]}`} className={`hl hl--${sev}`} title={`Issue ${nums.join(', ')}`}>
         {piece}{ending.length > 0 && <sup>{ending.join(',')}</sup>}
       </a>
     );
@@ -158,7 +158,7 @@ const HighlightedText = ({ text, violations }) => {
   return { nodes: out, count: ranges.length };
 };
 
-const SourceText = ({ data, violations = [] }) => {
+export const SourceText = ({ data, violations = [] }) => {
   const [copied, setCopied] = useState(false);
   const navigate = useNavigate();
   const label = SOURCE_LABEL[data.type] || 'AUDITED TEXT';
@@ -208,7 +208,7 @@ const SourceText = ({ data, violations = [] }) => {
   );
 };
 
-export default function AuditResult({ result, onReset, onFresh, meta }) {
+export default function AuditResult({ result, onReset, onFresh, meta, hideSource = false }) {
   const [showText, setShowText] = useState(false);
   const { account } = useAuth() || {};
   const canPdf = !account || account.features.pdf;
@@ -306,7 +306,7 @@ export default function AuditResult({ result, onReset, onFresh, meta }) {
         </Link>
       )}
 
-      {source && <SourceText data={source} violations={violations} />}
+      {source && !hideSource && <SourceText data={source} violations={violations} />}
 
       {!source && result?.transcription && (
         <div className="panel transcript">
