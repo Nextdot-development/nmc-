@@ -6,7 +6,7 @@ export const inr = (n) => `₹${Number(n).toLocaleString('en-IN')}`;
 
 // What one audit of each format costs, for display next to the Run button
 export const creditHint = (format, url = '') => {
-  if (format === 'url') return /youtu\.?be|vimeo|instagram\.com\/reel|\.(mp4|webm|mov|mp3|wav|m4a)(\?|$)/i.test(url) ? '4 credits' : '2 credits';
+  if (format === 'url') return /youtu\.?be|vimeo|instagram\.com\/reel|\.(mp4|webm|mov|mp3|wav|m4a)(\?|$)/i.test(url) ? '2 credits per 5 min' : '2 credits';
   if (format === 'video' || format === 'audio') return '2 credits per 5 min';
   return '1 credit';
 };

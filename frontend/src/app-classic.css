@@ -213,3 +213,11 @@
 .issues__item details li { margin-top: 4px; word-break: break-word; }
 .issues__item .ghost-btn { align-self: flex-start; }
 @media (max-width: 860px) { .issue__tips, .issue__contact, .issue__sent { padding-left: 0; } }
+
+/* limits shown before an audit */
+.limits { display: flex; flex-direction: column; gap: 4px; padding: 10px 14px; border-radius: 10px; background: #f7f4ee; border: 1px solid var(--line); font-size: 13.5px; color: var(--text-2); }
+.limits__rule { color: var(--text-2); }
+.limits__file b { color: var(--navy); }
+.limits--bad { background: #fff4f3; border-color: #f6cfcb; }
+.limits__warn { color: var(--bad); font-weight: 600; }
+.limits__warn a { color: var(--navy); text-decoration: underline; }

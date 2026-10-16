@@ -387,9 +387,12 @@ export const transcribeYouTubeWithGemini = async (videoUrl, attempt = 0) => {
     .join('')
     .trim();
   const finishReason = candidate?.finishReason || result?.response?.promptFeedback?.blockReason || '';
-  console.log('[Gemini] YouTube transcription', JSON.stringify({ attempt, chars: text.length, finishReason, usage: result?.response?.usageMetadata?.totalTokenCount }));
+  // Gemini counts audio at 25 tokens per second, which gives the video length
+  const audioTokens = (result?.response?.usageMetadata?.promptTokensDetails || []).find((d) => d.modality === 'AUDIO')?.tokenCount;
+  const seconds = audioTokens ? Math.round(audioTokens / 25) : null;
+  console.log('[Gemini] YouTube transcription', JSON.stringify({ attempt, chars: text.length, finishReason, seconds, usage: result?.response?.usageMetadata?.totalTokenCount }));
   if (!text) throw new Error(`Gemini returned an empty transcript (${finishReason || 'no reason'})`);
-  return text;
+  return { text, seconds };
 };
 
 // Transcribe an uploaded audio file (MP3 bytes) - backup when OpenAI cannot

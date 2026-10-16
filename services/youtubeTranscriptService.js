@@ -461,7 +461,7 @@ const hedgedGeminiTranscript = (url, title = '', offset = 0) => new Promise((res
   let settled = false;
   let started = 0;
   let finished = 0;
-  let best = '';
+  let best = null;
   let lastError = null;
   const timers = [];
   const finish = (fn, value) => {
@@ -478,13 +478,14 @@ const hedgedGeminiTranscript = (url, title = '', offset = 0) => new Promise((res
       stage('Still listening to the video — trying again in parallel…');
     }
     transcribeYouTubeWithGemini(url, offset + n - 1)
-      .then((text) => {
+      .then((res) => {
+        const { text } = res;
         // A transcript with almost no speech usually means the audio was skipped: ask again,
         // and keep the fullest one in case the video really has no voice-over
-        if (hasRealSpeech(text, title)) return finish(resolve, text);
+        if (hasRealSpeech(text, title)) return finish(resolve, res);
         console.warn(`[YouTube Transcript] Gemini request ${n} returned no real speech (${spokenPart(text).length} chars)`);
         note('Gemini transcript', `no real speech (${spokenPart(text).length} chars)`);
-        if (text.length > best.length) best = text;
+        if (text.length > (best?.text?.length || 0)) best = res;
       })
       .catch((error) => {
         lastError = error;
@@ -509,7 +510,7 @@ const transcriptFromYoutube = async (normalized) => {
   try {
     const transcriptItems = await retryWithBackoff(() => YoutubeTranscript.fetchTranscript(normalized), MAX_RETRIES, 'Captions fetch');
     const transcript = transcriptItems.map((item) => item.text).join(' ').replace(/\s+/g, ' ').trim();
-    if (transcript) return transcript;
+    if (transcript) return { text: transcript, seconds: null };
   } catch (error) {
     console.warn('[YouTube Transcript] Captions failed:', error.message);
     note('YouTube captions', error);
@@ -517,7 +518,7 @@ const transcriptFromYoutube = async (normalized) => {
 
   try {
     const subtitles = await fetchSubtitlesWithYtDlp(normalized);
-    if (subtitles) return subtitles;
+    if (subtitles) return { text: subtitles, seconds: null };
   } catch (error) {
     console.warn('[YouTube Transcript] yt-dlp subtitles failed:', error.message);
     note('YouTube subtitles', error);
@@ -531,7 +532,8 @@ const transcriptFromYoutube = async (normalized) => {
       const text = await transcribeAudioWithOpenAI(tempFile);
       // A clipped download gives a few words; do not let it beat a full Gemini transcript
       if (text.trim().length < MIN_SPOKEN_CHARS) throw new Error(`OpenAI transcript too short (${text.trim().length} chars)`);
-      return text;
+      const seconds = await getAudioDurationSeconds(tempFile).catch(() => null);
+      return { text, seconds: seconds ? Math.round(seconds) : null };
     } catch (error) {
       console.warn('[YouTube Transcript] Audio + OpenAI transcription failed:', error.message.slice(0, 200));
       note('YouTube audio download', error);
@@ -553,7 +555,8 @@ const firstSuccess = (promises) => new Promise((resolve, reject) => {
   }));
 });
 
-export const getYoutubeTranscript = async (videoUrl) => {
+// Transcript plus the video length in seconds (null when unknown)
+export const getYoutubeTranscriptWithLength = async (videoUrl) => {
   const normalized = normalizeUrl(videoUrl);
 
   // A missing, private or removed video cannot be read by any route: say so at once
@@ -561,7 +564,7 @@ export const getYoutubeTranscript = async (videoUrl) => {
   if (lookup.missing) {
     console.warn('[YouTube Transcript] Video not available:', normalized);
     note('YouTube video', 'Video unavailable: private, removed or restricted');
-    return `YouTube transcript unavailable. Video URL: ${normalized}.`;
+    return { text: `YouTube transcript unavailable. Video URL: ${normalized}.`, seconds: null };
   }
   stage('Getting the video transcript — checking captions and listening to the video…');
 
@@ -602,7 +605,7 @@ export const getYoutubeTranscript = async (videoUrl) => {
     const metadata = await retryWithBackoff(() => fetchYtDlpMetadata(normalized), MAX_RETRIES, 'yt-dlp metadata');
     const title = metadata?.title || 'Unknown';
     const description = metadata?.description || 'Description unavailable.';
-    return `YouTube video transcript unavailable. Title: ${title}. Description: ${description}. URL: ${normalized}`;
+    return { text: `YouTube video transcript unavailable. Title: ${title}. Description: ${description}. URL: ${normalized}`, seconds: null };
   } catch (error) {
     console.warn('[YouTube Transcript] yt-dlp metadata failed:', error.message);
   }
@@ -613,14 +616,17 @@ export const getYoutubeTranscript = async (videoUrl) => {
       const data = await response.json();
       const title = data?.title || 'Unknown';
       const channel = data?.author_name || 'Unknown';
-      return `YouTube video transcript unavailable. Title: ${title}. Channel: ${channel}. URL: ${normalized}`;
+      return { text: `YouTube video transcript unavailable. Title: ${title}. Channel: ${channel}. URL: ${normalized}`, seconds: null };
     }
   } catch (error) {
     console.warn('[YouTube Transcript] oEmbed metadata failed:', error.message);
   }
 
-  return `YouTube transcript unavailable. Video URL: ${normalized}. Please provide a summary or upload a file.`;
+  return { text: `YouTube transcript unavailable. Video URL: ${normalized}. Please provide a summary or upload a file.`, seconds: null };
 };
+
+// Transcript text only (older callers)
+export const getYoutubeTranscript = async (videoUrl) => (await getYoutubeTranscriptWithLength(videoUrl)).text;
 
 export default {
   downloadYoutubeAudio,

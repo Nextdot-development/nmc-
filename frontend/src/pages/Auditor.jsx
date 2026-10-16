@@ -47,6 +47,19 @@ const auditSecondsFor = (chars) => Math.round(30 + Math.min(60, chars / 150));
 // youtube.com/watch?v=…, youtu.be/…, /shorts/…, /live/…
 const isYoutubeVideo = (u) => /youtu\.be\/[\w-]+|youtube\.com\/(watch\?(.*&)?v=|shorts\/|live\/|embed\/)[\w-]+/i.test(u);
 
+// Length of a local audio/video file in minutes (read by the browser, nothing is uploaded)
+const readMinutes = (file) => new Promise((resolve) => {
+  const el = document.createElement(file.type.startsWith('audio') ? 'audio' : 'video');
+  const src = URL.createObjectURL(file);
+  const done = (value) => { URL.revokeObjectURL(src); resolve(value); };
+  el.preload = 'metadata';
+  el.onloadedmetadata = () => done(Number.isFinite(el.duration) && el.duration > 0 ? Math.max(1, Math.ceil(el.duration / 60)) : null);
+  el.onerror = () => done(null);
+  setTimeout(() => done(null), 8000);
+  el.src = src;
+});
+const creditsForMinutes = (m) => Math.ceil(m / 5) * 2;
+
 const formatBytes = (n) => (n > 1024 * 1024 ? `${(n / 1024 / 1024).toFixed(1)} MB` : `${Math.max(1, Math.round(n / 1024))} KB`);
 
 export default function Auditor() {
@@ -55,6 +68,7 @@ export default function Auditor() {
   const [text, setText] = useState('');
   const [url, setUrl] = useState('');
   const [file, setFile] = useState(null);
+  const [fileMinutes, setFileMinutes] = useState(null);
   const [dragging, setDragging] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -105,23 +119,43 @@ export default function Auditor() {
   const chooseFormat = (id) => {
     setFormat(id);
     setFile(null);
+    setFileMinutes(null);
     setError('');
   };
 
   const pickFile = (f) => {
     setError('');
+    setFileMinutes(null);
     if (!f) return;
     if (f.size > MAX_MB * 1024 * 1024) {
-      setError(`File ${MAX_MB} MB se badi hai.`);
+      setError(`This file is ${formatBytes(f.size)}. The limit is ${MAX_MB} MB — upload a shorter or smaller file.`);
       return;
     }
     setFile(f);
+    if (format === 'video' || format === 'audio') readMinutes(f).then(setFileMinutes);
   };
+
+  // Limits for the chosen format and plan, shown before the audit runs
+  const maxMinutes = account?.features?.maxMediaMinutes || 0;
+  const isYoutube = format === 'url' && /youtu\.?be/i.test(url);
+  const mediaTooLong = isFile && fileMinutes && maxMinutes && fileMinutes > maxMinutes;
+  const neededCredits = (format === 'video' || format === 'audio') && fileMinutes ? creditsForMinutes(fileMinutes) : null;
+  const notEnough = neededCredits && account && !account.unlimited && neededCredits > account.credits;
+  const limitText = {
+    text: `Up to ${MAX_TEXT.toLocaleString('en-IN')} characters · 1 credit`,
+    image: `JPG, PNG, WEBP or GIF up to ${MAX_MB} MB · 1 credit`,
+    document: `PDF or Word up to ${MAX_MB} MB · the first 60,000 characters are checked · 1 credit`,
+    video: `MP4, WEBM or MOV up to ${MAX_MB} MB · up to ${maxMinutes || '—'} min on your plan · 2 credits per 5 min`,
+    audio: `MP3, WAV, OGG or WEBM up to ${MAX_MB} MB · up to ${maxMinutes || '—'} min on your plan · 2 credits per 5 min`,
+    url: isYoutube
+      ? `YouTube video up to ${maxMinutes || '—'} min on your plan · 2 credits per 5 min, charged by the real length`
+      : 'One web page · 2 credits · YouTube: 2 credits per 5 min',
+  }[format];
 
   const youtubeNotVideo = format === 'url' && /youtu\.?be/i.test(url) && !isYoutubeVideo(url.trim());
   const ready = !locked && ((format === 'text' && text.trim().length > 10)
     || (format === 'url' && /^https?:\/\/\S+\.\S+/.test(url.trim()) && !youtubeNotVideo)
-    || (isFile && file));
+    || (isFile && file && !mediaTooLong && !notEnough));
 
   const submit = async (e, { fresh = false } = {}) => {
     e?.preventDefault();
@@ -278,6 +312,25 @@ export default function Auditor() {
           </div>
         )}
 
+        {!locked && (
+          <div className={`limits ${mediaTooLong || notEnough ? 'limits--bad' : ''}`}>
+            <span className="limits__rule">{limitText}</span>
+            {isFile && file && (format === 'video' || format === 'audio') && (
+              <span className="limits__file">
+                {fileMinutes
+                  ? <>This file is about <b>{fileMinutes} min</b> → <b>{neededCredits} credits</b></>
+                  : 'Reading the file length…'}
+              </span>
+            )}
+            {mediaTooLong && (
+              <span className="limits__warn">Your plan audits up to {maxMinutes} min. Trim the file, or <Link to="/billing">upgrade your plan</Link>.</span>
+            )}
+            {!mediaTooLong && notEnough && (
+              <span className="limits__warn">You have {account.credits} credits. <Link to="/billing">Buy a top-up or upgrade</Link> to audit this file.</span>
+            )}
+          </div>
+        )}
+
         <button className="run-btn" disabled={!ready || busy}>
           <SparkIcon width={20} height={20} /> {busy ? 'Auditing…' : 'Run audit'} {!busy && <ArrowRightIcon width={20} height={20} />}
         </button>
@@ -285,7 +338,7 @@ export default function Auditor() {
           <p className="run-cost">
             {account.unlimited
               ? <>Testing account · <b>no credits charged</b></>
-              : <>Uses <b>{creditHint(format, url)}</b> · {account.credits} credit{account.credits === 1 ? '' : 's'} left · same content again is free</>}
+              : <>Uses <b>{neededCredits ? `${neededCredits} credits` : creditHint(format, url)}</b> · {account.credits} credit{account.credits === 1 ? '' : 's'} left · same content again is free</>}
           </p>
         )}
 

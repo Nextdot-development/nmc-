@@ -14,7 +14,7 @@ const COSTS = [
   ['Text, PDF / Word or image', '1 credit'],
   ['Website page', '2 credits'],
   ['Video or audio file', '2 credits per 5 min'],
-  ['YouTube video (about 10 min)', '4 credits'],
+  ['YouTube video', '2 credits per 5 min'],
   ['Same content audited again', 'Free'],
 ];
 

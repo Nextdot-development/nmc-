@@ -205,7 +205,7 @@ const STEPS = [
 ];
 
 const FAQ = [
-  ['What is a credit?', 'Credits pay for audits. A text, PDF or image audit uses 1 credit, a website page 2, a video or audio file 2 per 5 minutes, and a YouTube video 4. Checking the exact same content again is free.'],
+  ['What is a credit?', 'Credits pay for audits. A text, PDF or image audit uses 1 credit, a website page 2, video, audio and YouTube 2 per 5 minutes. Checking the exact same content again is free.'],
   ['Which languages does it understand?', 'Any language your ad is written in: English, Hindi, Hinglish, Marathi, Bengali, Tamil, Telugu, Kannada, Malayalam, Gujarati, Punjabi, Odia, Urdu and more. The whole report — findings, explanations and line fixes — comes back in that same language and script.'],
   ['Which rules do you check against?', `160 rules built from all 1,014 notices on the ${COUNTRY.regulator} website: the Ethical Advertising Guidelines 2026, IMC Professional Conduct Regulations 2002, Telemedicine Practice Guidelines 2020, clinical advisories and registration rules.`],
   ['Do plans renew automatically?', 'No. Starter and Premium are prepaid for 30 days. Renew whenever you like — unused Premium credits carry over one month.'],

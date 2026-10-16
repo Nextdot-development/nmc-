@@ -75,6 +75,24 @@ const runAuditRequest = async (req) => {
       ? { credits: 0, planUsed: 0, extraUsed: 0, balance: account.planCredits + account.extraCredits }
       : await spendCredits(req.user.id, quote.credits, label);
 
+    // Video links: once the length is known, enforce the plan's minutes and charge the rest
+    let videoMinutes = null;
+    const mediaGuard = quote.videoLink ? async (minutes) => {
+      videoMinutes = minutes;
+      const plan = getPlan(planId);
+      if (plan.maxMediaMinutes && minutes > plan.maxMediaMinutes) {
+        throw new BillingError(`This video is about ${minutes} minutes. The ${plan.name} plan audits videos up to ${plan.maxMediaMinutes} minutes. No credits were used.`, 403, 'MEDIA_TOO_LONG', { minutes, limit: plan.maxMediaMinutes });
+      }
+      const extra = Math.ceil(minutes / 5) * 2 - charge.credits;
+      if (extra > 0 && !unlimited) {
+        const more = await spendCredits(req.user.id, extra, `${label} (${minutes} min)`);
+        charge.credits += more.credits;
+        charge.planUsed += more.planUsed;
+        charge.extraUsed += more.extraUsed;
+        charge.balance = more.balance;
+      }
+    } : null;
+
     let auditResult;
     let notes = [];
     try {
@@ -84,10 +102,18 @@ const runAuditRequest = async (req) => {
         category,
         analysisMode,
         country,
-        region
+        region,
+        mediaGuard
       })));
     } catch (error) {
       await refundCredits(req.user.id, charge, `${label} failed`);
+      // Too long for the plan, or not enough credits for the full length: say so plainly
+      if (error instanceof BillingError) {
+        const msg = error.code === 'INSUFFICIENT_CREDITS'
+          ? `This video is about ${videoMinutes} minutes and needs ${Math.ceil(videoMinutes / 5) * 2} credits. ${error.message.replace(/^This audit needs[^.]*\.\s*/, '')} No credits were used.`
+          : error.message;
+        return reply(error.status, { error: msg, code: error.code, ...error.extra });
+      }
       // Audit Doctor: name the cause and give the user a ticket to send to the team
       const issue = await fileIssue({ user: req.user, input, contentType: quote.format, notes: [...(error.diagnosisNotes || []), { where: 'Audit', code: 'OTHER', message: String(error.message || '').slice(0, 300), at: new Date() }] });
       console.error('[Audit Controller] Error:', error);
@@ -110,7 +136,7 @@ const runAuditRequest = async (req) => {
       charged = 0;
     }
 
-    return reply(201, { ...gateResult(auditResult, planId), billing: { charged, balance, minutes: quote.minutes, unlimited } });
+    return reply(201, { ...gateResult(auditResult, planId), billing: { charged, balance, minutes: quote.minutes ?? videoMinutes, unlimited } });
   } catch (error) {
     if (error instanceof BillingError) {
       return reply(error.status, { error: error.message, code: error.code, ...error.extra });

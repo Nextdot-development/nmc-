@@ -133,8 +133,9 @@ export const quoteAudit = async (input, contentType, planId) => {
   }
 
   if (format === 'url') {
+    // Video links pay for the first 5 minutes now; the rest once the length is known
     return VIDEO_URL.test(input.url || '')
-      ? { format, credits: CREDIT_COST.videoUrl, minutes: null }
+      ? { format, credits: CREDIT_COST.mediaPer5Min, minutes: null, videoLink: true }
       : { format, credits: CREDIT_COST.url, minutes: null };
   }
 

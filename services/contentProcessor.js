@@ -9,7 +9,7 @@ import { YoutubeTranscript } from 'youtube-transcript';
 import OpenAI from 'openai';
 import { analyzeCompliance, extractClaims } from './aiProvider.js';
 import { extractTextFromDocument } from './documentService.js';
-import { getYoutubeTranscript, isTranscriptUnavailable } from './youtubeTranscriptService.js';
+import { getYoutubeTranscriptWithLength, isTranscriptUnavailable } from './youtubeTranscriptService.js';
 import { getRulesForSelection } from './rulesService.js';
 import AuditRecord from '../models/AuditRecord.js';
 import { extractTextFromImage } from './ocrService.js';
@@ -455,14 +455,15 @@ const processImageBuffer = async ({ buffer, extractedText: preRead = '', origina
   };
 };
 
-const processUrl = async ({ url, category, analysisMode, country, region, rules }) => {
+const processUrl = async ({ url, category, analysisMode, country, region, rules, mediaGuard }) => {
   const urlType = detectUrlContentType(url);
 
   if (isYouTubeUrl(url)) {
     let transcriptText = '';
+    let videoSeconds = null;
     try {
       console.log('[YouTube] Fetching transcript...');
-      transcriptText = await getYoutubeTranscript(url);
+      ({ text: transcriptText, seconds: videoSeconds } = await getYoutubeTranscriptWithLength(url));
     } catch (error) {
       console.warn('[YouTube] Fallback to metadata:', error.message);
       transcriptText = await fetchYouTubeFallbackText(url, error.message);
@@ -471,6 +472,13 @@ const processUrl = async ({ url, category, analysisMode, country, region, rules 
     const truncatedTranscript = truncateForAI(transcriptText);
     const hasTranscript = Boolean(transcriptText) && !isTranscriptUnavailable(transcriptText)
       && !/transcript unavailable/i.test(transcriptText.slice(0, 80));
+
+    // Plan length limit and per-minute credits, now that the video length is known
+    // (when it is not, estimate ~750 characters of speech per minute)
+    if (hasTranscript && mediaGuard) {
+      const minutes = Math.max(1, Math.ceil(videoSeconds ? videoSeconds / 60 : transcriptText.length / 750));
+      await mediaGuard(minutes);
+    }
 
     // Without a transcript there is nothing real to audit: skip the AI and explain instead
     // (the Audit Doctor names the cause; credits are refunded by the controller)
@@ -773,7 +781,7 @@ const fingerprintContent = (input, contentType, { category, rules, context, imag
 
 export const processContent = async (input, options = {}) => {
   // context: optional note on who publishes the text and where (guest try only)
-  const { userId, category, analysisMode, country, region, fresh = false, reuseOnly = false, context = '' } = options;
+  const { userId, category, analysisMode, country, region, fresh = false, reuseOnly = false, context = '', mediaGuard = null } = options;
 
   if (!userId) {
     throw new Error('Authentication required');
@@ -826,7 +834,7 @@ export const processContent = async (input, options = {}) => {
   if (contentType === 'text') {
     processingResult = await processText({ text: input.text, category, analysisMode, country, region, rules, contentContext: context });
   } else if (contentType === 'url') {
-    processingResult = await processUrl({ url: input.url, category, analysisMode, country, region, rules });
+    processingResult = await processUrl({ url: input.url, category, analysisMode, country, region, rules, mediaGuard });
   } else if (contentType === 'video' || contentType === 'audio') {
     processingResult = await processMediaBuffer({
       buffer: input.file.buffer,
