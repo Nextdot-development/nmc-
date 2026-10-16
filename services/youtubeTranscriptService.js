@@ -72,7 +72,7 @@ const retryWithBackoff = async (fn, attempts, label) => {
 
 const fetchYtDlpMetadata = async (videoUrl) => {
   return await withTimeout(new Promise((resolve, reject) => {
-    const args = ['--dump-json', '--skip-download', videoUrl];
+    const args = [...proxyArgs(), '--dump-json', '--skip-download', videoUrl];
     const process = spawn(getYtDlpCommand(), args);
 
     let stdout = '';
@@ -124,6 +124,11 @@ const normalizeUrl = (videoUrl) => {
 };
 
 const getYtDlpCommand = () => process.env.YTDL_PATH || 'yt-dlp';
+// YouTube blocks cloud servers; a rotating residential proxy (a new IP per request)
+// lets yt-dlp read captions and audio. Some IPs are blocked too, so callers retry.
+const proxyArgs = () => (process.env.YTDL_PROXY ? ['--proxy', process.env.YTDL_PROXY] : []);
+const PROXY_ATTEMPTS = () => (process.env.YTDL_PROXY ? Number(process.env.YTDL_PROXY_ATTEMPTS) || 3 : 1);
+const isBotBlock = (message = '') => /not a bot|Unable to download API page|HTTP Error 403|429|Sign in to confirm/i.test(message);
 const getYtDlpJsRuntime = () => process.env.YTDL_JS_RUNTIME || 'node';
 const resolveFfmpegLocation = () => {
   const rawPath = process.env.FFMPEG_PATH || '';
@@ -168,6 +173,7 @@ const downloadWithYtDlp = async (videoUrl, outputPath) => {
   await withTimeout(new Promise((resolve, reject) => {
     const ffmpegLocation = ensureFfmpegAvailable();
     const args = [
+      ...proxyArgs(),
       '--js-runtimes',
       getYtDlpJsRuntime(),
       '--ffmpeg-location',
@@ -290,7 +296,16 @@ export const downloadYoutubeAudio = async (videoUrl, outputPath) => {
     // ytdl-core is unmaintained (often 410); yt-dlp validates the video itself
     console.warn('[YouTube Transcript] ytdl-core validation skipped:', error.message);
   }
-  await downloadWithYtDlp(videoUrl, outputPath);
+  // Each attempt goes out through a fresh proxy IP
+  for (let attempt = 1; ; attempt++) {
+    try {
+      await downloadWithYtDlp(videoUrl, outputPath);
+      break;
+    } catch (error) {
+      if (attempt >= PROXY_ATTEMPTS() || !isBotBlock(error.message)) throw error;
+      console.warn(`[YouTube Transcript] Audio download blocked (attempt ${attempt}), retrying through a new IP`);
+    }
+  }
   await validateDownloadedAudio(outputPath);
 };
 
@@ -356,10 +371,22 @@ export const vttToText = (vtt = '') => {
 
 // Subtitles via yt-dlp: manual subs first, then auto-captions in the video's own language
 const fetchSubtitlesWithYtDlp = async (videoUrl) => {
+  for (let attempt = 1; ; attempt++) {
+    try {
+      return await fetchSubtitlesOnce(videoUrl);
+    } catch (error) {
+      if (attempt >= PROXY_ATTEMPTS() || !isBotBlock(error.message)) throw error;
+      console.warn(`[YouTube Transcript] Subtitles blocked (attempt ${attempt}), retrying through a new IP`);
+    }
+  }
+};
+
+const fetchSubtitlesOnce = async (videoUrl) => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'yt-subs-'));
   try {
-    await withTimeout(new Promise((resolve, reject) => {
+    const stderr = await withTimeout(new Promise((resolve, reject) => {
       const proc = spawn(getYtDlpCommand(), [
+        ...proxyArgs(),
         '--skip-download', '--write-subs', '--write-auto-subs',
         '--sub-langs', 'en,hi,en-orig,hi-orig,.*-orig',
         '--sub-format', 'vtt', '--no-playlist', '--ignore-errors', '--js-runtimes', 'node',
@@ -372,6 +399,8 @@ const fetchSubtitlesWithYtDlp = async (videoUrl) => {
     }), AUDIO_TIMEOUT_MS, 'yt-dlp subtitles timed out');
 
     const files = fs.readdirSync(dir).filter((f) => f.endsWith('.vtt'));
+    // Blocked before anything was saved: let the caller retry through another IP
+    if (!files.length && isBotBlock(String(stderr))) throw new Error(String(stderr).trim().split('\n').pop());
     // The "-orig" auto-caption track tells us the language actually spoken. Use that
     // language's track (never an auto-translation, e.g. English captions of a Hindi video).
     const langOf = (f) => (f.match(/^sub\.([a-zA-Z-]+?)(-orig)?\.vtt$/) || [])[1] || '';
