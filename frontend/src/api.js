@@ -116,7 +116,13 @@ export const api = {
     let buffer = '';
     let final = null;
     for (;;) {
-      const { value, done } = await reader.read();
+      let chunk;
+      try {
+        chunk = await reader.read();
+      } catch {
+        throw new ApiError('The connection dropped during the audit. Please run it again — if it had finished, it will appear in Audit History.', 0);
+      }
+      const { value, done } = chunk;
       if (done) break;
       buffer += decoder.decode(value, { stream: true });
       let nl;
