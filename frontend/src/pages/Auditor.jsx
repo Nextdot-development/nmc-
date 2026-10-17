@@ -123,7 +123,7 @@ export default function Auditor() {
     setError('');
   };
 
-  const pickFile = (f) => {
+  const pickFile = (f, target = format) => {
     setError('');
     setFileMinutes(null);
     if (!f) return;
@@ -132,7 +132,61 @@ export default function Auditor() {
       return;
     }
     setFile(f);
-    if (format === 'video' || format === 'audio') readMinutes(f).then(setFileMinutes);
+    if (target === 'video' || target === 'audio') readMinutes(f).then(setFileMinutes);
+  };
+
+  // Which format a file belongs to (for pasted files)
+  const formatForFile = (f) => {
+    const t = f.type || '';
+    if (t.startsWith('image/')) return 'image';
+    if (t.startsWith('video/')) return 'video';
+    if (t.startsWith('audio/')) return 'audio';
+    if (t === 'application/pdf' || /word|officedocument/.test(t) || /\.(pdf|docx?)$/i.test(f.name || '')) return 'document';
+    return null;
+  };
+
+  // A copied image or file pasted anywhere on the page (Ctrl+V) is picked up directly
+  const takePasted = (raw) => {
+    const target = formatForFile(raw);
+    if (!target) {
+      setError('This kind of file cannot be audited. Paste an image, PDF, Word, video or audio file.');
+      return;
+    }
+    const ext = (raw.type.split('/')[1] || 'bin').replace('jpeg', 'jpg').replace('quicktime', 'mov');
+    const f = raw.name && raw.name !== 'image.png' ? raw : new File([raw], `pasted-${target}-${Date.now()}.${ext}`, { type: raw.type });
+    setFormat(target);
+    setResult(null);
+    pickFile(f, target);
+  };
+
+  useEffect(() => {
+    const onPaste = (e) => {
+      const files = [...(e.clipboardData?.files || [])];
+      if (!files.length || busy) return; // plain text pastes work as usual
+      e.preventDefault();
+      takePasted(files[0]);
+    };
+    document.addEventListener('paste', onPaste);
+    return () => document.removeEventListener('paste', onPaste);
+  });
+
+  // Button version for browsers/touch devices where Ctrl+V is not handy
+  const pasteFromClipboard = async (ev) => {
+    ev?.stopPropagation();
+    setError('');
+    try {
+      const items = await navigator.clipboard.read();
+      for (const item of items) {
+        const type = item.types.find((t) => /^(image|video|audio)\//.test(t) || t === 'application/pdf');
+        if (type) {
+          takePasted(new File([await item.getType(type)], '', { type }));
+          return;
+        }
+      }
+      setError('No image or file found on the clipboard. Copy an image first (for example a screenshot), then paste.');
+    } catch {
+      setError('Your browser blocked clipboard access. Click the upload box and press Ctrl+V instead.');
+    }
   };
 
   // Limits for the chosen format and plan, shown before the audit runs
@@ -305,8 +359,9 @@ export default function Auditor() {
             ) : (
               <>
                 <UploadIcon width={26} height={26} />
-                <strong>Drop or click to upload</strong>
+                <strong>Drop, click to upload, or press Ctrl+V to paste</strong>
                 <span>{fmt.hint} · {MAX_MB} MB max</span>
+                <button type="button" className="chip-btn dropzone__paste" onClick={pasteFromClipboard}>Paste from clipboard</button>
               </>
             )}
           </div>

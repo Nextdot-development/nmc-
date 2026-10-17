@@ -209,6 +209,7 @@ kbd { padding: 2px 7px; border-radius: 6px; border: 1px solid var(--line-2); bac
 .dropzone__file { display: flex; align-items: center; gap: 14px; text-align: left; }
 .dropzone__file svg { color: var(--green); }
 .dropzone__file div { display: flex; flex-direction: column; }
+.dropzone__paste { margin-top: 6px; }
 .progress__bar { height: 4px; border-radius: 4px; background: var(--line); overflow: hidden; margin-bottom: 10px; }
 .progress__bar span { display: block; height: 100%; width: 40%; border-radius: 4px; background: linear-gradient(90deg, var(--saffron), #fff, var(--green)); animation: slide 1.4s ease-in-out infinite; }
 @keyframes slide { from { transform: translateX(-100%); } to { transform: translateX(260%); } }
