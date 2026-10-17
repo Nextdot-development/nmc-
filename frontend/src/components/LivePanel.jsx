@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { HighlightedText, SOURCE_LABEL, SourceText } from './AuditResult.jsx';
+import { CopyButton, HighlightedText, SOURCE_LABEL, SourceText } from './AuditResult.jsx';
 import { CheckCircleIcon, LockIcon } from './Icons.jsx';
 
 const SEVERITY_ORDER = ['Critical', 'High', 'Medium', 'Low'];
@@ -98,7 +98,7 @@ export default function LivePanel({ live, result, format }) {
                 <p className="live__bad">✕ “{f.originalLine || f.problematicContent}”</p>
                 {f.locked
                   ? <p className="live__locked"><LockIcon width={14} height={14} /> Compliant rewrite available on a paid plan</p>
-                  : f.compliantLine && <p className="live__good">✓ “{f.compliantLine}”</p>}
+                  : f.compliantLine && <p className="live__good">✓ “{f.compliantLine}” <CopyButton text={f.compliantLine} /></p>}
               </li>
             );
           })}

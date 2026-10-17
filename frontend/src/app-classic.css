@@ -221,3 +221,11 @@
 .limits--bad { background: #fff4f3; border-color: #f6cfcb; }
 .limits__warn { color: var(--bad); font-weight: 600; }
 .limits__warn a { color: var(--navy); text-decoration: underline; }
+
+/* copy buttons across the report */
+.linefix__row--bad { padding-right: 90px; }
+.violation__head .ghost-btn { margin-left: auto; }
+.result__headline > .ghost-btn { align-self: flex-start; }
+.stat .ghost-btn { margin-top: 10px; }
+.live__good .ghost-btn { margin-left: 6px; vertical-align: middle; }
+@media (max-width: 860px) { .linefix__row--bad { padding-right: 14px; } }

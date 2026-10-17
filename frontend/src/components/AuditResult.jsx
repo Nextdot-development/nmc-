@@ -31,7 +31,26 @@ const toPoints = (text = '') => {
   return parts.length ? parts : [String(text)];
 };
 
-const CopyButton = ({ text, label = 'Copy', doneLabel = 'Copied ✓' }) => {
+// Plain-text versions of an issue and of the whole report, for pasting into email or chat
+const issueText = (v, i) => [
+  `${i + 1}. [${v.severity}] ${v.regulation}`,
+  v.description,
+  (v.originalLine || v.problematicContent) && `✕ This line: "${v.originalLine || v.problematicContent}"`,
+  v.compliantLine && !v.locked && `✓ Replace with: "${v.compliantLine}"`,
+  v.suggestion && `Why it fails: ${v.suggestion}`,
+  v.solution && !v.locked && `How to fix: ${v.solution}`,
+  v.ruleSource && `Source: ${v.ruleSource}`,
+].filter(Boolean).join('\n');
+
+const reportText = (result, violations) => [
+  `NMC compliance audit — ${result?.status || ''}${result?.score != null ? ` · score ${Math.round(result.score)}/100` : ''}`,
+  result?.summary,
+  result?.financialPenalty?.description && `Penalty risk (${result.financialPenalty.riskLevel}): ${result.financialPenalty.description}`,
+  violations.length ? `\nIssues (${violations.length}):\n\n${violations.map(issueText).join('\n\n')}` : '',
+  result?.compliantVersion && `\nCorrected version:\n${result.compliantVersion}`,
+].filter(Boolean).join('\n');
+
+export const CopyButton = ({ text, label = 'Copy', doneLabel = 'Copied ✓' }) => {
   const [done, setDone] = useState(false);
   const copy = async () => {
     try {
@@ -54,6 +73,7 @@ const Violation = ({ v, index, L }) => {
         <span className="violation__num">{String(index + 1).padStart(2, '0')}</span>
         <span className={`sev sev--${sev.toLowerCase()}`}>{sev}</span>
         <h4>{v.regulation}</h4>
+        <CopyButton text={issueText({ ...v, severity: sev }, index)} label={L.copyIssue || 'Copy issue'} />
       </header>
       {(v.ruleId || v.ruleSource) && (
         <p className="violation__rule">
@@ -69,6 +89,7 @@ const Violation = ({ v, index, L }) => {
             <span className="linefix__tag">{L.thisLine}</span>
             <p>“{original}”</p>
             {translation && <small>{L.english}: {translation}</small>}
+            <CopyButton text={original} label={L.copy} />
           </div>
           {v.locked && (
             <Link to="/billing" className="linefix__row linefix__row--locked">
@@ -232,6 +253,7 @@ export default function AuditResult({ result, onReset, onFresh, meta, hideSource
           {meta && <p className="result__meta">{meta}</p>}
           {result?.language && <span className="lang-badge">{L.language}: {result.language}</span>}
           <p className="result__summary">{result?.summary}</p>
+          {result?.summary && <CopyButton text={result.summary} label={L.copySummary || 'Copy summary'} />}
           {result?.reused && (
             <p className="reused">
               This exact content was audited on {new Date(result.reused.auditedAt).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })} — showing the same result so it stays consistent.
@@ -257,6 +279,7 @@ export default function AuditResult({ result, onReset, onFresh, meta, hideSource
           </div>
         </div>
         <div className="result__actions no-print">
+          <CopyButton text={reportText(result, violations)} label={L.copyReport || 'Copy full report'} />
           {canPdf
             ? <button type="button" className="ghost-btn" onClick={() => window.print()}><PrintIcon width={18} height={18} /> Save as PDF</button>
             : <Link to="/billing" className="ghost-btn" title="PDF reports come with Starter and above"><LockIcon width={16} height={16} /> Save as PDF</Link>}
@@ -271,11 +294,13 @@ export default function AuditResult({ result, onReset, onFresh, meta, hideSource
           <h3 className="kicker">{L.penalty}</h3>
           <span className={`status status--${{ High: 'bad', Medium: 'warn', Low: 'ok', None: 'ok' }[risk] || 'warn'}`}>{risk || '—'}</span>
           <p>{result?.financialPenalty?.description}</p>
+          {result?.financialPenalty?.description && <CopyButton text={result.financialPenalty.description} label={L.copy} />}
         </div>
         <div className="panel stat">
           <h3 className="kicker">{L.ethical}</h3>
           <span className={`status status--${scoreTone(result?.ethicalMarketing?.score ?? 0)}`}>{result?.ethicalMarketing?.score ?? '—'} / 100</span>
           <p>{result?.ethicalMarketing?.assessment}</p>
+          {result?.ethicalMarketing?.assessment && <CopyButton text={result.ethicalMarketing.assessment} label={L.copy} />}
         </div>
       </div>}
 

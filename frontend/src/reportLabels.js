@@ -16,6 +16,9 @@ const EN = {
   sorted: 'Sorted by severity. Each issue cites the NMC / IMC clause it breaks.',
   compliantVersion: 'COMPLIANT VERSION — READY TO USE',
   copy: 'Copy',
+  copyIssue: 'Copy issue',
+  copySummary: 'Copy summary',
+  copyReport: 'Copy full report',
   copyFull: 'Copy full text',
   english: 'English',
 };
@@ -36,6 +39,9 @@ const HI = {
   sorted: 'गंभीरता के क्रम में। हर समस्या के साथ NMC / IMC नियम दिया गया है।',
   compliantVersion: 'सही संस्करण — उपयोग के लिए तैयार',
   copy: 'कॉपी',
+  copyIssue: 'समस्या कॉपी करें',
+  copySummary: 'सारांश कॉपी करें',
+  copyReport: 'पूरी रिपोर्ट कॉपी करें',
   copyFull: 'पूरा टेक्स्ट कॉपी करें',
   english: 'English',
 };
@@ -56,6 +62,9 @@ const HINGLISH = {
   sorted: 'Gambhirta ke hisaab se. Har galti ke saath NMC / IMC ka niyam diya gaya hai.',
   compliantVersion: 'SAHI VERSION — USE KE LIYE TAIYAR',
   copy: 'Copy',
+  copyIssue: 'Copy issue',
+  copySummary: 'Copy summary',
+  copyReport: 'Copy full report',
   copyFull: 'Poora text copy karein',
   english: 'English',
 };

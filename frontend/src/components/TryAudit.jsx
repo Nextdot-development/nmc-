@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../api.js';
+import { CopyButton } from './AuditResult.jsx';
 import { ArrowRightIcon, CheckCircleIcon, LockIcon, SparkIcon } from './Icons.jsx';
 
 const MAX = 2000;
@@ -53,7 +54,7 @@ const TryResult = ({ result, signupHref }) => {
             {v.locked ? (
               <Link to={signupHref} className="tissue__locked"><LockIcon width={15} height={15} /> Sign up free to see the compliant rewrite</Link>
             ) : v.compliantLine ? (
-              <p className="tissue__good"><b>✓ Replace with</b> “{v.compliantLine}”</p>
+              <p className="tissue__good"><b>✓ Replace with</b> “{v.compliantLine}” <CopyButton text={v.compliantLine} /></p>
             ) : null}
           </li>
         ))}
